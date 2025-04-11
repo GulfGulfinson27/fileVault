@@ -59,6 +59,7 @@
                     <include>**/*.fxml</include>
                     <include>**/*.png</include>
                 </includes>
+                <filtering>false</filtering>
             </resource>
         </resources>
         <plugins>
@@ -77,6 +78,20 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.filevault.FileVaultApp</mainClass>
+                    <options>
+                        <option>--add-modules</option>
+                        <option>javafx.controls,javafx.fxml</option>
+                    </options>
+                    <resources>
+                        <resource>
+                            <directory>src/main/resources</directory>
+                            <includes>
+                                <include>**/*.css</include>
+                                <include>**/*.fxml</include>
+                                <include>**/*.png</include>
+                            </includes>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
             <plugin>
@@ -98,6 +113,18 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>css</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>fxml</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>png</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

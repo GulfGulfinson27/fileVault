@@ -30,19 +30,8 @@ public class MainGUI extends Application {
         // Create scene
         Scene scene = new Scene(mainContainer, 800, 600);
         
-        // Load CSS after scene is created
-        try {
-            String cssPath = getClass().getResource("/com/filevault/css/styles.css").toExternalForm();
-            System.out.println("Loading CSS from: " + cssPath);
-            scene.getStylesheets().add(cssPath);
-            System.out.println("CSS loaded successfully");
-        } catch (Exception e) {
-            System.out.println("Error loading CSS: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        // Set up styles
-        setupStyles();
+        // Apply styles directly
+        applyStyles();
         
         // Set up event handlers
         setupEventHandlers();
@@ -97,39 +86,37 @@ public class MainGUI extends Application {
         mainContainer.getChildren().addAll(buttonBar, splitPane, statusBar);
     }
 
-    private void setupStyles() {
-        // Set dark theme colors
-        String darkBackground = "#1a1a1a";
-        String darkSurface = "#2d2d2d";
-        String darkText = "#e0e0e0";
-        String darkAccent = "#4a90e2";
-        String darkHover = "#3a3a3a";
-        String darkSelected = "#4a4a4a";
-        String darkHeader = "#252525";
-        String darkBorder = "#404040";
-
-        // Apply styles to the main container
-        mainContainer.setStyle("-fx-background-color: " + darkBackground + ";");
-        mainContainer.setSpacing(10);
-        mainContainer.setPadding(new Insets(10));
-
-        // Style buttons with CSS classes
-        importButton.getStyleClass().add("button");
-        exportButton.getStyleClass().add("button");
-        createFolderButton.getStyleClass().add("button");
-        deleteButton.getStyleClass().add("button");
-
-        // Style the folder tree
-        folderTree.getStyleClass().add("tree-view");
-
-        // Style the file table
-        fileTable.getStyleClass().add("table-view");
-
-        // Style the split pane
-        splitPane.getStyleClass().add("split-pane");
-
-        // Style the status bar
-        statusBar.getStyleClass().add("status-bar");
+    private void applyStyles() {
+        // Table styles
+        fileTable.setStyle("-fx-background-color: #2d2d2d; -fx-border-color: #404040; -fx-border-width: 1;");
+        
+        // Table header styles
+        fileTable.lookup(".column-header").setStyle("-fx-background-color: #2e7d32;");
+        fileTable.lookup(".column-header-background").setStyle("-fx-background-color: #2e7d32;");
+        fileTable.lookup(".column-header .label").setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        
+        // Table row styles
+        fileTable.setStyle("-fx-background-color: #2d2d2d;");
+        fileTable.lookup(".table-row-cell").setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #ffffff;");
+        fileTable.lookup(".table-row-cell:odd").setStyle("-fx-background-color: #252525;");
+        fileTable.lookup(".table-row-cell:selected").setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff;");
+        
+        // Button styles
+        importButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        exportButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        createFolderButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        deleteButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
+        
+        // Tree view styles
+        folderTree.setStyle("-fx-background-color: #2d2d2d; -fx-border-color: #404040; -fx-border-width: 1;");
+        folderTree.lookup(".tree-cell").setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #ffffff;");
+        
+        // Split pane styles
+        splitPane.setStyle("-fx-background-color: #1a1a1a;");
+        splitPane.lookup(".split-pane-divider").setStyle("-fx-background-color: #404040;");
+        
+        // Status bar styles
+        statusBar.setStyle("-fx-background-color: #252525; -fx-text-fill: #ffffff; -fx-padding: 5 10;");
     }
 
     private void setupEventHandlers() {
