@@ -1,0 +1,46 @@
+# Compiled class files
+*.class
+
+# Maven output directory
+target/
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# NetBeans project files
+nbproject/
+nbactions.xml
+nb-configuration.xml
+
+# Mac OS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Package Files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Log files
+*.log
+
+# User-specific files
+.filevault/
+
+# Exception for build required jar files
+!lib/*.jar 
