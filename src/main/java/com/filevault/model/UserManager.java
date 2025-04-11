@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Manages user authentication and user-related operations.
+ * Verwaltet die Benutzerauthentifizierung und benutzerbezogene Operationen.
  */
 public class UserManager {
 
@@ -19,9 +19,13 @@ public class UserManager {
     private byte[] masterKey = null;
     
     private UserManager() {
-        // Private constructor for singleton pattern
+        // Privater Konstruktor für Singleton-Pattern
     }
     
+    /**
+     * Gibt die einzige Instanz des UserManagers zurück.
+     * @return Die Singleton-Instanz des UserManagers
+     */
     public static synchronized UserManager getInstance() {
         if (instance == null) {
             instance = new UserManager();
@@ -30,8 +34,8 @@ public class UserManager {
     }
     
     /**
-     * Checks if any user exists in the database
-     * @return true if a user is registered, false otherwise
+     * Überprüft, ob ein Benutzer in der Datenbank existiert.
+     * @return true, wenn ein Benutzer registriert ist, sonst false
      */
     public boolean userExists() {
         try (Connection conn = DatabaseManager.getConnection();
@@ -44,32 +48,35 @@ public class UserManager {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error checking if user exists: " + e.getMessage());
+            System.err.println("Fehler beim Überprüfen des Benutzers: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Creates a new user with the given master password
-     * @param masterPassword The user's master password
-     * @return true if the user was created successfully
+     * Erstellt einen neuen Benutzer mit dem angegebenen Master-Passwort.
+     * @param masterPassword Das Master-Passwort des Benutzers
+     * @return true, wenn der Benutzer erfolgreich erstellt wurde
      */
     public boolean createUser(String masterPassword) {
         if (masterPassword == null || masterPassword.isEmpty()) {
             return false;
         }
         
-        // Generate a password hash
-        String passwordHash = BCrypt.hashpw(masterPassword, BCrypt.gensalt());
+        // Überprüfen, ob bereits ein Benutzer existiert
+        if (userExists()) {
+            System.err.println("Ein Benutzer existiert bereits");
+            return false;
+        }
         
-        // Generate a master key from the password
+        String passwordHash = BCrypt.hashpw(masterPassword, BCrypt.gensalt());
         masterKey = PasswordUtils.generateKeyFromPassword(masterPassword);
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)")) {
             
-            stmt.setString(1, "master"); // Only one user in this system
+            stmt.setString(1, "master");
             stmt.setString(2, passwordHash);
             int affected = stmt.executeUpdate();
             
@@ -80,15 +87,15 @@ public class UserManager {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error creating user: " + e.getMessage());
+            System.err.println("Fehler beim Erstellen des Benutzers: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Authenticates a user with the provided password
-     * @param password The master password to check
-     * @return true if authentication is successful
+     * Authentifiziert einen Benutzer mit dem angegebenen Passwort.
+     * @param password Das zu überprüfende Master-Passwort
+     * @return true, wenn die Authentifizierung erfolgreich war
      */
     public boolean authenticate(String password) {
         if (password == null || password.isEmpty()) {
@@ -119,16 +126,16 @@ public class UserManager {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error authenticating user: " + e.getMessage());
+            System.err.println("Fehler bei der Authentifizierung: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Changes the user's master password
-     * @param oldPassword The current master password
-     * @param newPassword The new master password
-     * @return true if the password was changed successfully
+     * Ändert das Master-Passwort des Benutzers.
+     * @param oldPassword Das aktuelle Master-Passwort
+     * @param newPassword Das neue Master-Passwort
+     * @return true, wenn die Passwortänderung erfolgreich war
      */
     public boolean changePassword(String oldPassword, String newPassword) {
         if (!authenticate(oldPassword)) {
@@ -155,32 +162,53 @@ public class UserManager {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error changing password: " + e.getMessage());
+            System.err.println("Fehler beim Ändern des Passworts: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Get the current authenticated user
-     * @return The username of the authenticated user, or null if no user is authenticated
+     * Gibt den aktuell authentifizierten Benutzer zurück.
+     * @return Der Benutzername des authentifizierten Benutzers oder null, wenn kein Benutzer authentifiziert ist
      */
     public String getCurrentUser() {
         return currentUser;
     }
     
     /**
-     * Get the master encryption key
-     * @return The master encryption key, or null if no user is authenticated
+     * Gibt den Master-Verschlüsselungsschlüssel zurück.
+     * @return Der Master-Verschlüsselungsschlüssel oder null, wenn kein Benutzer authentifiziert ist
      */
     public byte[] getMasterKey() {
         return masterKey;
     }
     
     /**
-     * Logs out the current user
+     * Meldet den aktuellen Benutzer ab.
      */
     public void logout() {
         currentUser = null;
         masterKey = null;
+    }
+    
+    /**
+     * Löscht den aktuellen Benutzer aus der Datenbank.
+     * @return true, wenn der Benutzer erfolgreich gelöscht wurde
+     */
+    public boolean deleteUser() {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM users")) {
+            
+            int affected = stmt.executeUpdate();
+            if (affected > 0) {
+                currentUser = null;
+                masterKey = null;
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            System.err.println("Fehler beim Löschen des Benutzers: " + e.getMessage());
+            return false;
+        }
     }
 } 

@@ -10,65 +10,77 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Manages the SQLite database connection and schema.
+ * Verwaltet die SQLite-Datenbankverbindung und das Schema.
  */
 public class DatabaseManager {
 
     private static final String DB_PATH = System.getProperty("user.home") + File.separator + ".filevault" + File.separator + "vault.db";
-    private static final String DB_URL = "jdbc:sqlite:" + DB_PATH;
+    private static final String TEST_DB_PATH = System.getProperty("user.home") + File.separator + ".filevault" + File.separator + "test_vault.db";
+    private static String currentDbPath = DB_PATH;
+    private static final String DB_URL_PREFIX = "jdbc:sqlite:";
     
     private static Connection connection;
     
     /**
-     * Initializes the database, creating tables if they don't exist.
+     * Initialisiert die Datenbank, erstellt Tabellen falls sie nicht existieren.
      */
     public static void initDatabase() {
+        initDatabase(false);
+    }
+    
+    /**
+     * Initialisiert die Datenbank für Tests oder Produktion.
+     * @param isTest true für Testdatenbank, false für Produktionsdatenbank
+     */
+    public static void initDatabase(boolean isTest) {
         try {
-            // Ensure parent directory exists
-            Path parentDir = Paths.get(DB_PATH).getParent();
+            currentDbPath = isTest ? TEST_DB_PATH : DB_PATH;
+            
+            // Sicherstellen, dass das übergeordnete Verzeichnis existiert
+            Path parentDir = Paths.get(currentDbPath).getParent();
             if (parentDir != null) {
                 Files.createDirectories(parentDir);
             }
             
-            // Connect to the database (creates it if it doesn't exist)
+            // Verbindung zur Datenbank herstellen (erstellt sie, falls sie nicht existiert)
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection(DB_URL);
+            connection = DriverManager.getConnection(DB_URL_PREFIX + currentDbPath);
             
-            // Enable foreign keys
+            // Fremdschlüssel aktivieren
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
             
-            // Create tables if they don't exist
+            // Tabellen erstellen, falls sie nicht existieren
             createTables();
             
-            System.out.println("Database initialized successfully.");
+            System.out.println("Datenbank erfolgreich initialisiert: " + currentDbPath);
         } catch (Exception e) {
-            System.err.println("Error initializing database: " + e.getMessage());
+            System.err.println("Fehler beim Initialisieren der Datenbank: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
     /**
-     * Creates the necessary database tables
+     * Erstellt die notwendigen Datenbanktabellen.
      */
     private static void createTables() throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            // Users table
+            // Benutzertabelle
             stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
                          "username TEXT PRIMARY KEY, " +
                          "password_hash TEXT NOT NULL, " +
                          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
                          "last_login TIMESTAMP)");
             
-            // Folders table
+            // Ordnertabelle
             stmt.execute("CREATE TABLE IF NOT EXISTS folders (" +
                          "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                          "name TEXT NOT NULL, " +
                          "description TEXT, " +
                          "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
             
-            // Files table
+            // Dateitabelle
             stmt.execute("CREATE TABLE IF NOT EXISTS files (" +
                          "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                          "folder_id INTEGER, " +
@@ -80,7 +92,7 @@ public class DatabaseManager {
                          "last_access TIMESTAMP, " +
                          "FOREIGN KEY (folder_id) REFERENCES folders(id))");
             
-            // Settings table
+            // Einstellungstabelle
             stmt.execute("CREATE TABLE IF NOT EXISTS settings (" +
                          "key TEXT PRIMARY KEY, " +
                          "value TEXT, " +
@@ -89,13 +101,13 @@ public class DatabaseManager {
     }
     
     /**
-     * Gets a connection to the database
-     * @return A connection to the database
-     * @throws SQLException if a database error occurs
+     * Gibt eine Verbindung zur Datenbank zurück.
+     * @return Eine Verbindung zur Datenbank
+     * @throws SQLException wenn ein Datenbankfehler auftritt
      */
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(DB_URL);
+            connection = DriverManager.getConnection(DB_URL_PREFIX + currentDbPath);
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
@@ -104,16 +116,27 @@ public class DatabaseManager {
     }
     
     /**
-     * Closes all database connections
+     * Schließt alle Datenbankverbindungen.
      */
     public static void closeConnections() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                connection = null;
             }
         } catch (SQLException e) {
-            System.err.println("Error closing database connection: " + e.getMessage());
+            System.err.println("Fehler beim Schließen der Datenbankverbindung: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Löscht die Testdatenbank.
+     */
+    public static void deleteTestDatabase() {
+        try {
+            closeConnections();
+            Files.deleteIfExists(Paths.get(TEST_DB_PATH));
+        } catch (Exception e) {
+            System.err.println("Fehler beim Löschen der Testdatenbank: " + e.getMessage());
         }
     }
 } 

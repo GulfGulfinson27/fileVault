@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages virtual folders in the application.
+ * Verwaltet virtuelle Ordner in der Anwendung.
+ * Bietet Funktionen zum Erstellen, Umbenennen und Löschen von Ordnern.
  */
 public class FolderManager {
     
@@ -24,9 +25,13 @@ public class FolderManager {
     private VirtualFolder currentFolder = null;
     
     private FolderManager() {
-        // Private constructor for singleton pattern
+        // Privater Konstruktor für Singleton-Pattern
     }
     
+    /**
+     * Gibt die einzige Instanz des FolderManagers zurück.
+     * @return Die Singleton-Instanz des FolderManagers
+     */
     public static synchronized FolderManager getInstance() {
         if (instance == null) {
             instance = new FolderManager();
@@ -35,57 +40,56 @@ public class FolderManager {
     }
     
     /**
-     * Initializes the folders by loading them from the database
+     * Initialisiert die Ordner durch Laden aus der Datenbank.
+     * Setzt den aktuellen Ordner auf den ersten verfügbaren Ordner.
+     * Erstellt das Datenverzeichnis, falls es nicht existiert.
      */
     public void initialize() {
         folders.clear();
         loadFoldersFromDatabase();
         
-        // Set the current folder to the first folder if available
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);
         }
         
-        // Ensure the data directory exists
         createDataDirectory();
     }
     
     /**
-     * Creates the initial folder structure for a new user
+     * Erstellt die grundlegende Ordnerstruktur für einen neuen Benutzer.
+     * Erstellt Standardordner für verschiedene Dateitypen.
      */
     public void createBaseStructure() {
         folders.clear();
         
-        // Create the default folders
         createFolder("Documents");
         createFolder("Images");
         createFolder("Videos");
         createFolder("Music");
         createFolder("Others");
         
-        // Set the current folder to the first folder
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);
         }
         
-        // Ensure the data directory exists
         createDataDirectory();
     }
     
     /**
-     * Creates the data directory where encrypted files will be stored
+     * Erstellt das Datenverzeichnis, in dem verschlüsselte Dateien gespeichert werden.
      */
     private void createDataDirectory() {
         Path dataDir = Paths.get(System.getProperty("user.home"), ".filevault", "data");
         try {
             Files.createDirectories(dataDir);
         } catch (Exception e) {
-            System.err.println("Error creating data directory: " + e.getMessage());
+            System.err.println("Fehler beim Erstellen des Datenverzeichnisses: " + e.getMessage());
         }
     }
     
     /**
-     * Loads folders from the database
+     * Lädt Ordner aus der Datenbank.
+     * Stellt die Ordnerliste wieder her.
      */
     private void loadFoldersFromDatabase() {
         try (Connection conn = DatabaseManager.getConnection();
@@ -100,26 +104,25 @@ public class FolderManager {
                 );
                 folders.add(folder);
             }
-            
         } catch (SQLException e) {
-            System.err.println("Error loading folders: " + e.getMessage());
+            System.err.println("Fehler beim Laden der Ordner aus der Datenbank: " + e.getMessage());
         }
     }
     
     /**
-     * Creates a new folder
-     * @param name The name of the folder
-     * @return The created folder, or null if creation failed
+     * Erstellt einen neuen Ordner mit dem angegebenen Namen.
+     * @param name Der Name des neuen Ordners
+     * @return Der erstellte Ordner oder null bei Fehler
      */
     public VirtualFolder createFolder(String name) {
         return createFolder(name, "");
     }
     
     /**
-     * Creates a new folder with a description
-     * @param name The name of the folder
-     * @param description The description of the folder
-     * @return The created folder, or null if creation failed
+     * Erstellt einen neuen Ordner mit Namen und Beschreibung.
+     * @param name Der Name des neuen Ordners
+     * @param description Die Beschreibung des Ordners
+     * @return Der erstellte Ordner oder null bei Fehler
      */
     public VirtualFolder createFolder(String name, String description) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -129,31 +132,26 @@ public class FolderManager {
             
             stmt.setString(1, name);
             stmt.setString(2, description);
-            int affected = stmt.executeUpdate();
+            stmt.executeUpdate();
             
-            if (affected > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int id = generatedKeys.getInt(1);
-                        VirtualFolder folder = new VirtualFolder(id, name, description);
-                        folders.add(folder);
-                        return folder;
-                    }
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    VirtualFolder folder = new VirtualFolder(rs.getInt(1), name, description);
+                    folders.add(folder);
+                    return folder;
                 }
             }
-            
-            return null;
         } catch (SQLException e) {
-            System.err.println("Error creating folder: " + e.getMessage());
-            return null;
+            System.err.println("Fehler beim Erstellen des Ordners: " + e.getMessage());
         }
+        return null;
     }
     
     /**
-     * Renames a folder
-     * @param folder The folder to rename
-     * @param newName The new name for the folder
-     * @return true if the folder was renamed successfully
+     * Benennt einen Ordner um.
+     * @param folder Der umzubenennende Ordner
+     * @param newName Der neue Name des Ordners
+     * @return true, wenn die Umbenennung erfolgreich war
      */
     public boolean renameFolder(VirtualFolder folder, String newName) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -168,74 +166,61 @@ public class FolderManager {
                 folder.setName(newName);
                 return true;
             }
-            
-            return false;
         } catch (SQLException e) {
-            System.err.println("Error renaming folder: " + e.getMessage());
-            return false;
+            System.err.println("Fehler beim Umbenennen des Ordners: " + e.getMessage());
         }
+        return false;
     }
     
     /**
-     * Deletes a folder
-     * @param folder The folder to delete
-     * @return true if the folder was deleted successfully
+     * Löscht einen Ordner.
+     * @param folder Der zu löschende Ordner
+     * @return true, wenn der Ordner erfolgreich gelöscht wurde
      */
     public boolean deleteFolder(VirtualFolder folder) {
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement deleteFilesStmt = conn.prepareStatement(
-                     "DELETE FROM files WHERE folder_id = ?");
-             PreparedStatement deleteFolderStmt = conn.prepareStatement(
-                     "DELETE FROM folders WHERE id = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM folders WHERE id = ?")) {
             
-            // First delete all files in the folder
-            deleteFilesStmt.setInt(1, folder.getId());
-            deleteFilesStmt.executeUpdate();
-            
-            // Then delete the folder
-            deleteFolderStmt.setInt(1, folder.getId());
-            int affected = deleteFolderStmt.executeUpdate();
+            stmt.setInt(1, folder.getId());
+            int affected = stmt.executeUpdate();
             
             if (affected > 0) {
                 folders.remove(folder);
-                
-                // If the current folder was deleted, select another folder
-                if (currentFolder != null && currentFolder.getId() == folder.getId()) {
+                if (currentFolder == folder) {
                     currentFolder = folders.isEmpty() ? null : folders.get(0);
                 }
-                
                 return true;
             }
-            
-            return false;
         } catch (SQLException e) {
-            System.err.println("Error deleting folder: " + e.getMessage());
-            return false;
+            System.err.println("Fehler beim Löschen des Ordners: " + e.getMessage());
         }
+        return false;
     }
     
     /**
-     * Gets all folders
-     * @return A list of all folders
+     * Gibt die Liste aller Ordner zurück.
+     * @return Die Liste der Ordner
      */
     public List<VirtualFolder> getFolders() {
         return new ArrayList<>(folders);
     }
     
     /**
-     * Gets the current folder
-     * @return The current folder, or null if no folder is selected
+     * Gibt den aktuell ausgewählten Ordner zurück.
+     * @return Der aktuelle Ordner oder null, wenn kein Ordner ausgewählt ist
      */
     public VirtualFolder getCurrentFolder() {
         return currentFolder;
     }
     
     /**
-     * Sets the current folder
-     * @param folder The folder to set as current
+     * Setzt den aktuellen Ordner.
+     * @param folder Der neue aktuelle Ordner
      */
     public void setCurrentFolder(VirtualFolder folder) {
-        this.currentFolder = folder;
+        if (folders.contains(folder)) {
+            currentFolder = folder;
+        }
     }
     
     /**
