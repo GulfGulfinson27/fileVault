@@ -24,7 +24,7 @@ public class FileVaultApp extends Application {
         scene = new Scene(loadFXML("login"), 400, 600);
         scene.getStylesheets().add(getClass().getResource("/com/filevault/css/dark-theme.css").toExternalForm());
         stage.setScene(scene);
-        stage.setTitle("FileVault");
+        stage.setTitle("FileVault - Sicherer Dateispeicher");
         try {
             stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/app-icon.png"))));
         } catch (Exception e) {

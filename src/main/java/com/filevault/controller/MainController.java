@@ -95,7 +95,7 @@ public class MainController {
             currentFolderLabel.setText(selectedFolder.getName());
         } else {
             fileTableView.setItems(FXCollections.emptyObservableList());
-            currentFolderLabel.setText("[No Folder Selected]");
+            currentFolderLabel.setText("[Kein Ordner ausgewählt]");
         }
     }
     
@@ -128,29 +128,29 @@ public class MainController {
     public void handleImportFile() {
         VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
         if (currentFolder == null) {
-            showAlert(Alert.AlertType.WARNING, "No Folder Selected", "Please select a folder first.");
+            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie zuerst einen Ordner aus.");
             return;
         }
         
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select File to Import");
+        fileChooser.setTitle("Datei zum Importieren auswählen");
         
         File file = fileChooser.showOpenDialog(FileVaultApp.getPrimaryStage());
         if (file != null) {
             try {
-                statusLabel.setText("Importing file...");
+                statusLabel.setText("Datei wird importiert...");
                 
                 EncryptedFile encryptedFile = FileStorage.getInstance().importFile(file, currentFolder);
                 
                 if (encryptedFile != null) {
                     refreshFileList();
-                    statusLabel.setText("File imported successfully.");
+                    statusLabel.setText("Datei erfolgreich importiert.");
                 } else {
-                    statusLabel.setText("Failed to import file.");
+                    statusLabel.setText("Import der Datei fehlgeschlagen.");
                 }
             } catch (Exception e) {
-                statusLabel.setText("Error importing file: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Import Error", "Failed to import file: " + e.getMessage());
+                statusLabel.setText("Fehler beim Importieren: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren der Datei: " + e.getMessage());
             }
         }
     }
@@ -162,21 +162,20 @@ public class MainController {
     public void handleExportFile() {
         EncryptedFile selectedFile = fileTableView.getSelectionModel().getSelectedItem();
         if (selectedFile == null) {
-            showAlert(Alert.AlertType.WARNING, "No File Selected", "Please select a file to export.");
+            showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Exportieren aus.");
             return;
         }
         
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Select Export Location");
+        directoryChooser.setTitle("Exportziel auswählen");
         
         File directory = directoryChooser.showDialog(FileVaultApp.getPrimaryStage());
         if (directory != null) {
             File outputFile = new File(directory, selectedFile.getOriginalName());
             
-            // Check if file already exists
             if (outputFile.exists()) {
-                boolean overwrite = showConfirmationDialog("File Exists", 
-                        "A file with the same name already exists. Do you want to overwrite it?");
+                boolean overwrite = showConfirmationDialog("Datei existiert bereits", 
+                        "Eine Datei mit dem gleichen Namen existiert bereits. Möchten Sie sie überschreiben?");
                 
                 if (!overwrite) {
                     return;
@@ -184,18 +183,18 @@ public class MainController {
             }
             
             try {
-                statusLabel.setText("Exporting file...");
+                statusLabel.setText("Datei wird exportiert...");
                 
                 boolean success = FileStorage.getInstance().exportFile(selectedFile, outputFile);
                 
                 if (success) {
-                    statusLabel.setText("File exported successfully.");
+                    statusLabel.setText("Datei erfolgreich exportiert.");
                 } else {
-                    statusLabel.setText("Failed to export file.");
+                    statusLabel.setText("Export der Datei fehlgeschlagen.");
                 }
             } catch (Exception e) {
-                statusLabel.setText("Error exporting file: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Export Error", "Failed to export file: " + e.getMessage());
+                statusLabel.setText("Fehler beim Exportieren: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Exportfehler", "Fehler beim Exportieren der Datei: " + e.getMessage());
             }
         }
     }
@@ -251,7 +250,7 @@ public class MainController {
         }
         
         boolean confirm = showConfirmationDialog("Delete File", 
-                "Are you sure you want to delete \"" + selectedFile.getOriginalName() + "\"?");
+                "Bist du sicher, dass du \"" + selectedFile.getOriginalName() + "\"loeschen moechtest?");
         
         if (confirm) {
             try {
@@ -358,7 +357,7 @@ public class MainController {
         }
         
         boolean confirm = showConfirmationDialog("Delete Folder", 
-                "Are you sure you want to delete the folder \"" + selectedFolder.getName() + "\" and all its contents?");
+                "Bist du sicher, dass du den Ordner \"" + selectedFolder.getName() + "\" und seine Inhalte loeschen moechtest?");
         
         if (confirm) {
             try {
@@ -490,7 +489,7 @@ public class MainController {
      */
     @FXML
     public void handleSettings() {
-        showAlert(Alert.AlertType.INFORMATION, "Settings", "Settings functionality not implemented yet.");
+        showAlert(Alert.AlertType.INFORMATION, "Settings", "Settings wurden noch nicht implementiert. TODO");
     }
     
     /**
@@ -499,12 +498,10 @@ public class MainController {
     @FXML
     public void handleAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About FileVault");
+        alert.setTitle("Über FileVault");
         alert.setHeaderText("FileVault");
-        alert.setContentText("A secure file organization and encryption system.\n" +
-                             "Version 1.0\n\n" +
-                             "© 2023 FileVault");
-        
+        alert.setContentText("Version 1.0\n" +
+                "© 2025 Phillip Schneider - Projekt FileVault");
         alert.showAndWait();
     }
     
@@ -513,8 +510,7 @@ public class MainController {
      */
     @FXML
     public void handleExit() {
-        boolean confirm = showConfirmationDialog("Exit", "Are you sure you want to exit FileVault?");
-        
+        boolean confirm = showConfirmationDialog("Beenden", "Möchten Sie FileVault wirklich beenden?");
         if (confirm) {
             Platform.exit();
         }

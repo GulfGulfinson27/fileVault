@@ -56,7 +56,7 @@ public class AuthController {
         String password = passwordField.getText();
         
         if (password.isEmpty()) {
-            showMessage("Please enter your master password", true);
+            showMessage("Bitte geben Sie Ihr Hauptpasswort ein", true);
             return;
         }
         
@@ -64,28 +64,25 @@ public class AuthController {
         
         if (authenticated) {
             try {
-                // Initialize folders and files after successful login
                 FolderManager.getInstance().initialize();
                 
-                // Show success message briefly before transition
-                showMessage("Login successful!", false);
+                showMessage("Anmeldung erfolgreich!", false);
                 
-                // Delay the transition to main screen for a short period
                 PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                 pause.setOnFinished(event -> {
                     try {
                         FileVaultApp.showMainView();
                     } catch (IOException e) {
-                        showMessage("Error loading main view: " + e.getMessage(), true);
+                        showMessage("Fehler beim Laden der Hauptansicht: " + e.getMessage(), true);
                     }
                 });
                 pause.play();
                 
             } catch (Exception e) {
-                showMessage("Error initializing application: " + e.getMessage(), true);
+                showMessage("Fehler beim Initialisieren der Anwendung: " + e.getMessage(), true);
             }
         } else {
-            showMessage("Invalid master password", true);
+            showMessage("Ungültiges Hauptpasswort", true);
         }
     }
     
@@ -95,37 +92,33 @@ public class AuthController {
         String confirmPassword = confirmPasswordField.getText();
         
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showMessage("Please enter and confirm your master password", true);
+            showMessage("Bitte geben Sie Ihr Hauptpasswort ein und bestätigen Sie es", true);
             return;
         }
         
         if (!newPassword.equals(confirmPassword)) {
-            showMessage("Passwords do not match", true);
+            showMessage("Die Passwörter stimmen nicht überein", true);
             return;
         }
         
         if (newPassword.length() < 8) {
-            showMessage("Password must be at least 8 characters long", true);
+            showMessage("Das Passwort muss mindestens 8 Zeichen lang sein", true);
             return;
         }
         
         try {
-            // Create a new user
             UserManager.getInstance().createUser(newPassword);
             
-            // Initialize app structure
             FolderManager.getInstance().createBaseStructure();
             
-            // Show success message
-            showMessage("Account created successfully!", false);
+            showMessage("Konto erfolgreich erstellt!", false);
             
-            // Switch back to login form after a short delay
             PauseTransition pause = new PauseTransition(Duration.seconds(1));
             pause.setOnFinished(event -> toggleForm());
             pause.play();
             
         } catch (Exception e) {
-            showMessage("Error creating account: " + e.getMessage(), true);
+            showMessage("Fehler beim Erstellen des Kontos: " + e.getMessage(), true);
         }
     }
     
@@ -136,17 +129,15 @@ public class AuthController {
         if (isLoginView) {
             loginForm.setVisible(true);
             registerForm.setVisible(false);
-            toggleFormButton.setText("Create Account");
+            toggleFormButton.setText("Konto erstellen");
         } else {
             loginForm.setVisible(false);
             registerForm.setVisible(true);
-            toggleFormButton.setText("Back to Login");
+            toggleFormButton.setText("Zurück zur Anmeldung");
         }
         
-        // Clear any error messages
         messageLabel.setVisible(false);
         
-        // Clear password fields
         passwordField.clear();
         newPasswordField.clear();
         confirmPasswordField.clear();

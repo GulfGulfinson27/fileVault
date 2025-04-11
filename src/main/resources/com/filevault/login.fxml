@@ -21,7 +21,7 @@
                   <Font name="System Bold" size="32.0" />
                </font>
             </Label>
-            <Label text="Secure File Storage" textAlignment="CENTER">
+            <Label text="Sicherer Dateispeicher" textAlignment="CENTER">
                <font>
                   <Font size="18.0" />
                </font>
@@ -31,22 +31,22 @@
                   <Label fx:id="messageLabel" textAlignment="CENTER" textFill="#ff6b68" visible="false" />
                   <VBox fx:id="loginForm" alignment="CENTER" spacing="10.0">
                      <children>
-                        <Label text="Master Password" />
-                        <PasswordField fx:id="passwordField" promptText="Enter your master password" />
-                        <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLogin" prefWidth="200.0" text="Login" />
+                        <Label text="Hauptpasswort" />
+                        <PasswordField fx:id="passwordField" promptText="Geben Sie Ihr Hauptpasswort ein" />
+                        <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLogin" prefWidth="200.0" text="Anmelden" />
                      </children>
                   </VBox>
                   <VBox fx:id="registerForm" alignment="CENTER" spacing="10.0" visible="false">
                      <children>
-                        <Label text="Create Master Password" />
-                        <PasswordField fx:id="newPasswordField" promptText="Enter master password" />
-                        <PasswordField fx:id="confirmPasswordField" promptText="Confirm master password" />
-                        <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegister" prefWidth="200.0" text="Create Account" />
+                        <Label text="Hauptpasswort erstellen" />
+                        <PasswordField fx:id="newPasswordField" promptText="Hauptpasswort eingeben" />
+                        <PasswordField fx:id="confirmPasswordField" promptText="Hauptpasswort bestätigen" />
+                        <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegister" prefWidth="200.0" text="Konto erstellen" />
                      </children>
                   </VBox>
                   <HBox alignment="CENTER" spacing="10.0">
                      <children>
-                        <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#toggleForm" text="Create Account" />
+                        <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#toggleForm" text="Konto erstellen" />
                      </children>
                   </HBox>
                </children>
@@ -58,7 +58,7 @@
       </VBox>
    </center>
    <bottom>
-      <Label text="© 2023 FileVault" BorderPane.alignment="CENTER">
+      <Label text="© 2025 Phillip Schneider - Projekt FileVault" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets bottom="10.0" />
          </BorderPane.margin>

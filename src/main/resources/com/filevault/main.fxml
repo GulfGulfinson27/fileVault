@@ -25,57 +25,57 @@
          <children>
             <MenuBar>
               <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" text="Datei">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#handleImportFile" text="Import File..." />
-                    <MenuItem mnemonicParsing="false" onAction="#handleExportFile" text="Export File..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleImportFile" text="Datei importieren..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleExportFile" text="Datei exportieren..." />
                     <SeparatorMenuItem mnemonicParsing="false" />
-                    <MenuItem mnemonicParsing="false" onAction="#handleRenameFile" text="Rename" />
-                    <MenuItem mnemonicParsing="false" onAction="#handleDeleteFile" text="Delete" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleRenameFile" text="Umbenennen" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleDeleteFile" text="Löschen" />
                     <SeparatorMenuItem mnemonicParsing="false" />
-                    <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Beenden" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Folder">
+                <Menu mnemonicParsing="false" text="Ordner">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#handleNewFolder" text="New Folder..." />
-                    <MenuItem mnemonicParsing="false" onAction="#handleRenameFolder" text="Rename Folder..." />
-                    <MenuItem mnemonicParsing="false" onAction="#handleDeleteFolder" text="Delete Folder" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleNewFolder" text="Neuer Ordner..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleRenameFolder" text="Ordner umbenennen..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleDeleteFolder" text="Ordner löschen" />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Settings">
+                <Menu mnemonicParsing="false" text="Einstellungen">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#handleChangePassword" text="Change Master Password..." />
-                    <MenuItem mnemonicParsing="false" onAction="#handleSettings" text="Preferences..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleChangePassword" text="Hauptpasswort ändern..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleSettings" text="Einstellungen..." />
                   </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Help">
+                <Menu mnemonicParsing="false" text="Hilfe">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="About" />
+                    <MenuItem mnemonicParsing="false" onAction="#handleAbout" text="Über" />
                   </items>
                 </Menu>
               </menus>
             </MenuBar>
             <ToolBar>
               <items>
-                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Import File">
+                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Datei importieren">
                   <tooltip>
-                    <Tooltip text="Import a file into the vault" />
+                    <Tooltip text="Eine Datei in den Tresor importieren" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleExportFile" text="Export">
+                <Button mnemonicParsing="false" onAction="#handleExportFile" text="Exportieren">
                   <tooltip>
-                    <Tooltip text="Export the selected file" />
+                    <Tooltip text="Die ausgewählte Datei exportieren" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleDeleteFile" text="Delete">
+                <Button mnemonicParsing="false" onAction="#handleDeleteFile" text="Löschen">
                   <tooltip>
-                    <Tooltip text="Delete the selected file" />
+                    <Tooltip text="Die ausgewählte Datei löschen" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleNewFolder" text="New Folder">
+                <Button mnemonicParsing="false" onAction="#handleNewFolder" text="Neuer Ordner">
                   <tooltip>
-                    <Tooltip text="Create a new folder" />
+                    <Tooltip text="Einen neuen Ordner erstellen" />
                   </tooltip>
                 </Button>
               </items>
@@ -88,7 +88,7 @@
         <items>
           <BorderPane>
             <top>
-              <Label text="Folders" BorderPane.alignment="CENTER">
+              <Label text="Ordner" BorderPane.alignment="CENTER">
                 <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                 </padding>
@@ -106,20 +106,20 @@
               <TableView fx:id="fileTableView" onMouseClicked="#handleFileSelection" BorderPane.alignment="CENTER">
                 <columns>
                   <TableColumn fx:id="fileNameColumn" prefWidth="250.0" text="Name" />
-                  <TableColumn fx:id="fileSizeColumn" prefWidth="100.0" text="Size" />
-                  <TableColumn fx:id="fileDateColumn" prefWidth="150.0" text="Date Added" />
+                  <TableColumn fx:id="fileSizeColumn" prefWidth="100.0" text="Größe" />
+                  <TableColumn fx:id="fileDateColumn" prefWidth="150.0" text="Hinzugefügt am" />
                 </columns>
               </TableView>
             </center>
             <top>
               <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
                 <children>
-                  <Label text="Current Folder:">
+                  <Label text="Aktueller Ordner:">
                     <font>
                       <Font name="System Bold" size="12.0" />
                     </font>
                   </Label>
-                  <Label fx:id="currentFolderLabel" text="[No Folder Selected]" />
+                  <Label fx:id="currentFolderLabel" text="[Kein Ordner ausgewählt]" />
                 </children>
                 <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -133,7 +133,7 @@
    <bottom>
       <HBox alignment="CENTER_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="statusLabel" text="Ready" />
+            <Label fx:id="statusLabel" text="Bereit" />
          </children>
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
