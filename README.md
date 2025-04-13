@@ -1,50 +1,59 @@
-# FileVault
+# Projekt für Java-II: FileVault
 
-A secure file organization and encryption system with a modern JavaFX interface.
+Dieses Projekt ist eine Anwendung zur sicheren Verwaltung und Verschluesselung von Dateien. Die Anwendung basiert auf Java (mit etwas CSS) und bietet Oberfläche für dieVerwaltung verschlüsselter Dateien in virtuellen Ordnern. Dieses Projekt ist im Rahmen des Kurses "Objektorientierte Programmierung II: Datenstrukturen und Java-Klassenbibliothek" entstanden.
+Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über zur Einbindung einer Datenbank bis hin zum Anlegen eines Frontends durchlaufen.
+--Phillip Schneider
 
-## Features
 
-- User authentication with master password
-- AES file encryption for secure storage
-- Virtual folder organization
-- Import, export, rename, and delete files
-- Modern dark-mode UI with JavaFX
+## 1. Hauptfunktionen
 
-## Requirements
+- Sichere Verschlüsselung von Dateien mit AES-256-GCM
+- Organisierte Dateiverwaltung in virtuellen Ordnern
+- Plattformübergreifende Kompatibilität
+- Benutzerfreundliche grafische Oberfläche mit JavaFx
+- Sichere Passwort-basierte Authentifizierung
 
-- Java 17 or higher
-- Maven for building
+## 2. Technische Details
 
-## Building the Project
+### 2.1 Verschlüsselung
+- Algorithmus: AES-256-GCM (Galois/Counter Mode)
+- Schlüsselableitung: PBKDF2 mit HMAC-SHA256
+- Schlüssellänge: 256 Bit
+- Iterationen: 65.536
+- IV-Länge: 96 Bit
+- Authentifizierungs-Tag: 128 Bit
 
-```bash
-mvn clean package
-```
+### 2.2 Datenspeicherung
+- Verschlüsselte Dateien: `~/.filevault/data/`
+- Datenbank: `~/.filevault/vault.db`
+- Die Pfade werden automatisch an das jeweilige Betriebssystem angepasst
 
-## Running the Application
+### 2.3 Sicherheitsmerkmale
+- Sichere Zufallszahlengenerierung für IVs und Salts
+- Integritätsschutz durch GCM-Modus
+- Passwort-basierte Authentifizierung
+- Sichere Schlüsselableitung
+- Keine Speicherung von Klartextpasswörtern
 
-```bash
-java -jar target/FileVault-1.0-SNAPSHOT.jar
-```
+## 3. Installation
+1. Java 11 oder höher (am Besten 17 oder 21)
+2. Maven installieren
+3. bash: mvn clean package
+4. bash: mvn javafx:run
+5. Bei der ersten Ausführung wird ein neuer Benutzer angelegt
+(6. Für einen neuen User muss die Datenbank gelöscht werden)
 
-Alternatively, you can use Maven to run the application:
+## 4. Verwendung
+1. Anmeldung mit Passwort
+2. Erstellen von virtuellen Ordnern
+3. Importieren von Dateien in die Ordner
+4. Dateien können jederzeit exportiert und entschlüsselt werden
 
-```bash
-mvn javafx:run
-```
+## 5. Projekt Struktur
 
-## Security Features
-
-- AES encryption for all stored files
-- Password hashing with BCrypt
-- Secure key derivation with PBKDF2
-- No plaintext files stored on disk
-
-## Project Structure
-
-- `controller`: Application controllers
-- `model`: Data models
-- `view`: JavaFX view components
-- `security`: Encryption and password handling
-- `storage`: File storage and database management
-- `util`: Utility classes 
+- `controller`: Anwendungs-Controller
+- `model`: Daten Modelle
+- `view`: JavaFX Komponenten
+- `security`: Verschlüsselung und Passwort
+- `storage`: Datenspeicherung und Datenbank
+- `util`: Utility Klassen

@@ -31,19 +31,11 @@
         <configuration>
           <mainClass>com.filevault.FileVaultApp</mainClass>
           <options>
+            <option>--module-path</option>
+            <option>${project.basedir}/lib/javafx-sdk-17.0.14/lib</option>
             <option>--add-modules</option>
             <option>javafx.controls,javafx.fxml</option>
           </options>
-          <resources>
-            <resource>
-              <directory>src/main/resources</directory>
-              <includes>
-                <include>**/*.css</include>
-                <include>**/*.fxml</include>
-                <include>**/*.png</include>
-              </includes>
-            </resource>
-          </resources>
         </configuration>
       </plugin>
       <plugin>
@@ -61,6 +53,19 @@
                   <mainClass>com.filevault.FileVaultApp</mainClass>
                 </transformer>
               </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <finalName>FileVault-shaded</finalName>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>shaded</shadedClassifierName>
             </configuration>
           </execution>
         </executions>
@@ -74,6 +79,16 @@
             <nonFilteredFileExtension>fxml</nonFilteredFileExtension>
             <nonFilteredFileExtension>png</nonFilteredFileExtension>
           </nonFilteredFileExtensions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+          </includes>
         </configuration>
       </plugin>
     </plugins>
@@ -132,6 +147,6 @@
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javafx.version>21.0.2</javafx.version>
+    <javafx.version>17.0.14</javafx.version>
   </properties>
 </project>
