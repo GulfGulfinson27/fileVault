@@ -38,10 +38,10 @@ Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über
 ## 3. Installation
 1. Java 11 oder höher (am Besten 17 oder 21)
 2. Maven installieren
-3. bash: mvn clean package
-4. bash: mvn javafx:run
-5. Bei der ersten Ausführung wird ein neuer Benutzer angelegt
-(6. Für einen neuen User muss die Datenbank gelöscht werden)
+3. Einmalig: mvn clean package
+4. Projekt bauen: .bat/.sh ausführen oder bash: "mvn javafx:run"
+! Bei der ersten Ausführung wird ein neuer Benutzer angelegt
+(Für einen neuen User muss die Datenbank gelöscht werden)
 
 ## 4. Verwendung
 1. Anmeldung mit Passwort

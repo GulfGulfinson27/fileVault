@@ -29,7 +29,8 @@ ehthumbs.db
 Desktop.ini
 
 # Package Files
-*.jar
+FileVault-1.0-SNAPSHOT.jar
+FileVault-shaded.jar
 *.war
 *.ear
 *.tar.gz
@@ -40,6 +41,3 @@ Desktop.ini
 
 # User-specific files
 .filevault/
-
-# Exception for build required jar files
-!lib/*.jar 

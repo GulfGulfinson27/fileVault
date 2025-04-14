@@ -45,7 +45,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Einstellungen">
                   <items>
-                    <MenuItem mnemonicParsing="false" onAction="#handleChangePassword" text="Hauptpasswort ändern..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleChangePassword" text="Passwort ändern..." />
                     <MenuItem mnemonicParsing="false" onAction="#handleSettings" text="Einstellungen..." />
                   </items>
                 </Menu>

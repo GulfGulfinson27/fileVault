@@ -56,7 +56,7 @@ public class AuthController {
         String password = passwordField.getText();
         
         if (password.isEmpty()) {
-            showMessage("Bitte geben Sie Ihr Hauptpasswort ein", true);
+            showMessage("Bitte geben Sie Ihr Passwort ein", true);
             return;
         }
         
@@ -82,7 +82,7 @@ public class AuthController {
                 showMessage("Fehler beim Initialisieren der Anwendung: " + e.getMessage(), true);
             }
         } else {
-            showMessage("Ungültiges Hauptpasswort", true);
+            showMessage("Ungültiges Passwort", true);
         }
     }
     
@@ -92,7 +92,7 @@ public class AuthController {
         String confirmPassword = confirmPasswordField.getText();
         
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showMessage("Bitte geben Sie Ihr Hauptpasswort ein und bestätigen Sie es", true);
+            showMessage("Bitte geben Sie Ihr Passwort ein und bestätigen Sie es", true);
             return;
         }
         

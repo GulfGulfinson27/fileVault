@@ -31,16 +31,16 @@
                   <Label fx:id="messageLabel" textAlignment="CENTER" textFill="#ff6b68" visible="false" />
                   <VBox fx:id="loginForm" alignment="CENTER" spacing="10.0">
                      <children>
-                        <Label text="Hauptpasswort" />
-                        <PasswordField fx:id="passwordField" promptText="Geben Sie Ihr Hauptpasswort ein" />
+                        <Label text="Passwort" />
+                        <PasswordField fx:id="passwordField" promptText="Geben Sie Ihr Passwort ein" />
                         <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLogin" prefWidth="200.0" text="Anmelden" />
                      </children>
                   </VBox>
                   <VBox fx:id="registerForm" alignment="CENTER" spacing="10.0" visible="false">
                      <children>
-                        <Label text="Hauptpasswort erstellen" />
-                        <PasswordField fx:id="newPasswordField" promptText="Hauptpasswort eingeben" />
-                        <PasswordField fx:id="confirmPasswordField" promptText="Hauptpasswort bestätigen" />
+                        <Label text="Passwort erstellen" />
+                        <PasswordField fx:id="newPasswordField" promptText="Passwort eingeben" />
+                        <PasswordField fx:id="confirmPasswordField" promptText="Passwort bestätigen" />
                         <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegister" prefWidth="200.0" text="Konto erstellen" />
                      </children>
                   </VBox>
