@@ -13,20 +13,33 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
- * Handles encryption and decryption of files using AES-GCM.
+ * Verarbeitet die Verschlüsselung und Entschlüsselung von Dateien mit AES-GCM.
  */
 public class EncryptionService {
 
+    /** Der verwendete Verschlüsselungsalgorithmus */
     private static final String ALGORITHM = "AES/GCM/NoPadding";
-    private static final int GCM_IV_LENGTH = 12; // 96 bits
-    private static final int GCM_TAG_LENGTH = 128; // 16 bytes
     
+    /** Länge des Initialisierungsvektors in Bytes (96 Bits) */
+    private static final int GCM_IV_LENGTH = 12;
+    
+    /** Länge des Authentifizierungs-Tags in Bits (16 Bytes) */
+    private static final int GCM_TAG_LENGTH = 128;
+    
+    /** Die einzige Instanz des EncryptionService */
     private static EncryptionService instance;
     
+    /**
+     * Privater Konstruktor für das Singleton-Pattern.
+     */
     private EncryptionService() {
-        // Private constructor for singleton pattern
     }
     
+    /**
+     * Gibt die einzige Instanz des EncryptionService zurück.
+     * 
+     * @return Die Singleton-Instanz des EncryptionService
+     */
     public static synchronized EncryptionService getInstance() {
         if (instance == null) {
             instance = new EncryptionService();
@@ -35,25 +48,25 @@ public class EncryptionService {
     }
     
     /**
-     * Encrypts a file using the master key derived from the user's password.
+     * Verschlüsselt eine Datei mit dem Master-Schlüssel, der aus dem Benutzerpasswort abgeleitet wurde.
      * 
-     * @param inputFile The file to encrypt
-     * @param outputFile The encrypted output file
-     * @return true if encryption was successful
-     * @throws Exception if an error occurs during encryption
+     * @param inputFile Die zu verschlüsselnde Datei
+     * @param outputFile Die verschlüsselte Ausgabedatei
+     * @return true, wenn die Verschlüsselung erfolgreich war
+     * @throws Exception wenn ein Fehler während der Verschlüsselung auftritt
      */
     public boolean encryptFile(File inputFile, File outputFile) throws Exception {
         byte[] keyBytes = UserManager.getInstance().getMasterKey();
         if (keyBytes == null) {
-            throw new IllegalStateException("No master key available. User must be authenticated.");
+            throw new IllegalStateException("Kein Master-Schlüssel verfügbar. Benutzer muss authentifiziert sein.");
         }
         
-        // Generate a random IV
+        // Generiere einen zufälligen Initialisierungsvektor
         byte[] iv = new byte[GCM_IV_LENGTH];
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(iv);
         
-        // Create the cipher
+        // Erstelle den Cipher
         SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
@@ -62,10 +75,10 @@ public class EncryptionService {
         try (FileInputStream inputStream = new FileInputStream(inputFile);
              FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             
-            // Write the IV to the output file first
+            // Schreibe den Initialisierungsvektor zuerst in die Ausgabedatei
             outputStream.write(iv);
             
-            // Then encrypt the file content
+            // Verschlüssele dann den Dateiinhalt
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher)) {
                 byte[] buffer = new byte[8192];
                 int bytesRead;
@@ -79,36 +92,36 @@ public class EncryptionService {
     }
     
     /**
-     * Decrypts a file using the master key derived from the user's password.
+     * Entschlüsselt eine Datei mit dem Master-Schlüssel, der aus dem Benutzerpasswort abgeleitet wurde.
      * 
-     * @param inputFile The encrypted file
-     * @param outputFile The decrypted output file
-     * @return true if decryption was successful
-     * @throws Exception if an error occurs during decryption
+     * @param inputFile Die verschlüsselte Datei
+     * @param outputFile Die entschlüsselte Ausgabedatei
+     * @return true, wenn die Entschlüsselung erfolgreich war
+     * @throws Exception wenn ein Fehler während der Entschlüsselung auftritt
      */
     public boolean decryptFile(File inputFile, File outputFile) throws Exception {
         byte[] keyBytes = UserManager.getInstance().getMasterKey();
         if (keyBytes == null) {
-            throw new IllegalStateException("No master key available. User must be authenticated.");
+            throw new IllegalStateException("Kein Master-Schlüssel verfügbar. Benutzer muss authentifiziert sein.");
         }
         
         try (FileInputStream inputStream = new FileInputStream(inputFile);
              FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             
-            // Read the IV from the input file
+            // Lese den Initialisierungsvektor aus der Eingabedatei
             byte[] iv = new byte[GCM_IV_LENGTH];
             int bytesRead = inputStream.read(iv);
             if (bytesRead < GCM_IV_LENGTH) {
-                throw new IOException("Input file too short or corrupt");
+                throw new IOException("Eingabedatei zu kurz oder beschädigt");
             }
             
-            // Create the cipher
+            // Erstelle den Cipher
             SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
             
-            // Decrypt the file content
+            // Entschlüssele den Dateiinhalt
             try (CipherInputStream cipherInputStream = new CipherInputStream(inputStream, cipher)) {
                 byte[] buffer = new byte[8192];
                 while ((bytesRead = cipherInputStream.read(buffer)) != -1) {

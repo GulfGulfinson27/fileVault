@@ -15,42 +15,61 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 
+/**
+ * Controller für die Authentifizierung und Registrierung von Benutzern.
+ * Diese Klasse verwaltet den Login- und Registrierungsprozess der Anwendung.
+ */
 public class AuthController {
 
+    /** Label für Statusmeldungen */
     @FXML
     private Label messageLabel;
     
+    /** Container für das Login-Formular */
     @FXML
     private VBox loginForm;
     
+    /** Container für das Registrierungsformular */
     @FXML
     private VBox registerForm;
     
+    /** Passwortfeld für die Anmeldung */
     @FXML
     private PasswordField passwordField;
     
+    /** Passwortfeld für die Registrierung */
     @FXML
     private PasswordField newPasswordField;
     
+    /** Passwortfeld zur Bestätigung bei der Registrierung */
     @FXML
     private PasswordField confirmPasswordField;
     
+    /** Button zum Wechseln zwischen Login und Registrierung */
     @FXML
     private Button toggleFormButton;
     
+    /** Flag, das angibt, ob die Login-Ansicht aktiv ist */
     private boolean isLoginView = true;
     
+    /**
+     * Initialisiert den Controller und prüft, ob bereits ein Benutzer existiert.
+     * Falls kein Benutzer existiert, wird das Registrierungsformular angezeigt.
+     */
     @FXML
     public void initialize() {
-        // Check if user exists
         boolean userExists = UserManager.getInstance().userExists();
         
-        // If no user exists, show the registration form
         if (!userExists) {
             toggleForm();
         }
     }
     
+    /**
+     * Verarbeitet den Login-Vorgang.
+     * Prüft das eingegebene Passwort und leitet bei erfolgreicher Authentifizierung
+     * zur Hauptansicht weiter.
+     */
     @FXML
     public void handleLogin() {
         String password = passwordField.getText();
@@ -86,6 +105,11 @@ public class AuthController {
         }
     }
     
+    /**
+     * Verarbeitet den Registrierungsvorgang.
+     * Prüft die eingegebenen Passwörter auf Gültigkeit und erstellt bei Erfolg
+     * einen neuen Benutzer.
+     */
     @FXML
     public void handleRegister() {
         String newPassword = newPasswordField.getText();
@@ -122,6 +146,10 @@ public class AuthController {
         }
     }
     
+    /**
+     * Wechselt zwischen Login- und Registrierungsformular.
+     * Aktualisiert die Sichtbarkeit der Formulare und den Text des Toggle-Buttons.
+     */
     @FXML
     public void toggleForm() {
         isLoginView = !isLoginView;
@@ -143,6 +171,12 @@ public class AuthController {
         confirmPasswordField.clear();
     }
     
+    /**
+     * Zeigt eine Nachricht im Message-Label an.
+     * 
+     * @param message Die anzuzeigende Nachricht
+     * @param isError Gibt an, ob es sich um eine Fehlermeldung handelt
+     */
     private void showMessage(String message, boolean isError) {
         messageLabel.setText(message);
         messageLabel.setVisible(true);

@@ -17,16 +17,24 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Manages storage and retrieval of encrypted files.
+ * Verwaltet die Speicherung und den Abruf verschlüsselter Dateien.
  */
 public class FileStorage {
     
+    /** Die einzige Instanz des FileStorage */
     private static FileStorage instance;
     
+    /**
+     * Privater Konstruktor für das Singleton-Pattern.
+     */
     private FileStorage() {
-        // Private constructor for singleton pattern
     }
     
+    /**
+     * Gibt die einzige Instanz des FileStorage zurück.
+     * 
+     * @return Die Singleton-Instanz des FileStorage
+     */
     public static synchronized FileStorage getInstance() {
         if (instance == null) {
             instance = new FileStorage();
@@ -35,33 +43,33 @@ public class FileStorage {
     }
     
     /**
-     * Imports a file into the vault.
+     * Importiert eine Datei in den Tresor.
      * 
-     * @param sourceFile The file to import
-     * @param folder The folder to import the file into
-     * @return The imported file, or null if import failed
-     * @throws Exception if an error occurs during import
+     * @param sourceFile Die zu importierende Datei
+     * @param folder Der Ordner, in den die Datei importiert werden soll
+     * @return Die importierte Datei oder null, wenn der Import fehlgeschlagen ist
+     * @throws Exception wenn ein Fehler während des Imports auftritt
      */
     public EncryptedFile importFile(File sourceFile, VirtualFolder folder) throws Exception {
         if (!sourceFile.exists() || !sourceFile.isFile() || !sourceFile.canRead()) {
-            throw new IOException("Cannot read source file: " + sourceFile.getAbsolutePath());
+            throw new IOException("Quelldatei kann nicht gelesen werden: " + sourceFile.getAbsolutePath());
         }
         
-        // Generate a unique encrypted file name
+        // Generiere einen eindeutigen verschlüsselten Dateinamen
         String encryptedFileName = UUID.randomUUID().toString();
         String encryptedFilePath = Paths.get(FolderManager.getInstance().getDataDirectoryPath(), encryptedFileName).toString();
         File encryptedFile = new File(encryptedFilePath);
         
-        // Encrypt the file
+        // Verschlüssele die Datei
         EncryptionService.getInstance().encryptFile(sourceFile, encryptedFile);
         
-        // Detect MIME type
+        // Erkenne den MIME-Typ
         String mimeType = Files.probeContentType(sourceFile.toPath());
         if (mimeType == null) {
             mimeType = "application/octet-stream";
         }
         
-        // Save file metadata to database
+        // Speichere die Dateimetadaten in der Datenbank
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
@@ -81,7 +89,7 @@ public class FileStorage {
                     if (generatedKeys.next()) {
                         int id = generatedKeys.getInt(1);
                         
-                        // Create and return the encrypted file object
+                        // Erstelle und gib das verschlüsselte Dateiobjekt zurück
                         return new EncryptedFile(
                                 id,
                                 folder.getId(),
@@ -96,31 +104,31 @@ public class FileStorage {
                 }
             }
             
-            // If we get here, something went wrong with the database
+            // Wenn wir hier ankommen, ist etwas mit der Datenbank schiefgelaufen
             encryptedFile.delete();
             return null;
         }
     }
     
     /**
-     * Exports a file from the vault.
+     * Exportiert eine Datei aus dem Tresor.
      * 
-     * @param encryptedFile The file to export
-     * @param destinationFile The destination file
-     * @return true if export was successful
-     * @throws Exception if an error occurs during export
+     * @param encryptedFile Die zu exportierende Datei
+     * @param destinationFile Die Zieldatei
+     * @return true, wenn der Export erfolgreich war
+     * @throws Exception wenn ein Fehler während des Exports auftritt
      */
     public boolean exportFile(EncryptedFile encryptedFile, File destinationFile) throws Exception {
         File sourceFile = new File(encryptedFile.getEncryptedPath());
         if (!sourceFile.exists() || !sourceFile.isFile() || !sourceFile.canRead()) {
-            throw new IOException("Cannot read encrypted file: " + sourceFile.getAbsolutePath());
+            throw new IOException("Verschlüsselte Datei kann nicht gelesen werden: " + sourceFile.getAbsolutePath());
         }
         
-        // Decrypt the file
+        // Entschlüssele die Datei
         boolean success = EncryptionService.getInstance().decryptFile(sourceFile, destinationFile);
         
         if (success) {
-            // Update last access timestamp
+            // Aktualisiere den Zeitstempel des letzten Zugriffs
             updateLastAccess(encryptedFile.getId());
         }
         
@@ -128,20 +136,20 @@ public class FileStorage {
     }
     
     /**
-     * Deletes a file from the vault.
+     * Löscht eine Datei aus dem Tresor.
      * 
-     * @param encryptedFile The file to delete
-     * @return true if deletion was successful
+     * @param encryptedFile Die zu löschende Datei
+     * @return true, wenn das Löschen erfolgreich war
      */
     public boolean deleteFile(EncryptedFile encryptedFile) {
         try {
-            // First delete the physical file
+            // Lösche zuerst die physische Datei
             File file = new File(encryptedFile.getEncryptedPath());
             if (file.exists()) {
                 file.delete();
             }
             
-            // Then delete the database record
+            // Dann lösche den Datenbankeintrag
             try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
                          "DELETE FROM files WHERE id = ?")) {
@@ -152,17 +160,17 @@ public class FileStorage {
                 return affected > 0;
             }
         } catch (Exception e) {
-            System.err.println("Error deleting file: " + e.getMessage());
+            System.err.println("Fehler beim Löschen der Datei: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Renames a file in the vault.
+     * Benennt eine Datei im Tresor um.
      * 
-     * @param encryptedFile The file to rename
-     * @param newName The new name for the file
-     * @return true if renaming was successful
+     * @param encryptedFile Die umzubenennende Datei
+     * @param newName Der neue Name für die Datei
+     * @return true, wenn das Umbenennen erfolgreich war
      */
     public boolean renameFile(EncryptedFile encryptedFile, String newName) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -180,17 +188,17 @@ public class FileStorage {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error renaming file: " + e.getMessage());
+            System.err.println("Fehler beim Umbenennen der Datei: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Moves a file to a different folder.
+     * Verschiebt eine Datei in einen anderen Ordner.
      * 
-     * @param encryptedFile The file to move
-     * @param targetFolder The target folder
-     * @return true if the file was moved successfully
+     * @param encryptedFile Die zu verschiebende Datei
+     * @param targetFolder Der Zielordner
+     * @return true, wenn die Datei erfolgreich verschoben wurde
      */
     public boolean moveFile(EncryptedFile encryptedFile, VirtualFolder targetFolder) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -208,16 +216,16 @@ public class FileStorage {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Error moving file: " + e.getMessage());
+            System.err.println("Fehler beim Verschieben der Datei: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * Gets all files in a folder.
+     * Gibt alle Dateien in einem Ordner zurück.
      * 
-     * @param folder The folder to get files from
-     * @return A list of files in the folder
+     * @param folder Der Ordner, aus dem die Dateien abgerufen werden sollen
+     * @return Eine Liste der Dateien im Ordner
      */
     public List<EncryptedFile> getFilesInFolder(VirtualFolder folder) {
         List<EncryptedFile> files = new ArrayList<>();
@@ -251,22 +259,21 @@ public class FileStorage {
                             createdAt,
                             lastAccess
                     );
-                    
                     files.add(file);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting files: " + e.getMessage());
+            System.err.println("Fehler beim Abrufen der Dateien: " + e.getMessage());
         }
         
         return files;
     }
     
     /**
-     * Gets a file by its ID.
+     * Gibt eine Datei anhand ihrer ID zurück.
      * 
-     * @param fileId The ID of the file to get
-     * @return The file, or null if not found
+     * @param fileId Die ID der Datei
+     * @return Die Datei oder null, wenn sie nicht gefunden wurde
      */
     public EncryptedFile getFileById(int fileId) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -301,16 +308,16 @@ public class FileStorage {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error getting file: " + e.getMessage());
+            System.err.println("Fehler beim Abrufen der Datei: " + e.getMessage());
         }
         
         return null;
     }
     
     /**
-     * Updates the last access timestamp for a file.
+     * Aktualisiert den Zeitstempel des letzten Zugriffs auf eine Datei.
      * 
-     * @param fileId The ID of the file to update
+     * @param fileId Die ID der Datei
      */
     private void updateLastAccess(int fileId) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -320,7 +327,7 @@ public class FileStorage {
             stmt.setInt(1, fileId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Error updating last access: " + e.getMessage());
+            System.err.println("Fehler beim Aktualisieren des letzten Zugriffs: " + e.getMessage());
         }
     }
 } 

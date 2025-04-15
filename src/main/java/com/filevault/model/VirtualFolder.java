@@ -1,19 +1,24 @@
 package com.filevault.model;
 
 /**
- * Represents a virtual folder in the application.
+ * Repräsentiert einen virtuellen Ordner in der Anwendung.
  */
 public class VirtualFolder {
+    /** Eindeutige Kennung des Ordners */
     private int id;
+    
+    /** Name des Ordners */
     private String name;
+    
+    /** Beschreibung des Ordners */
     private String description;
     
     /**
-     * Creates a new virtual folder.
+     * Erstellt einen neuen virtuellen Ordner.
      * 
-     * @param id The unique identifier of the folder
-     * @param name The name of the folder
-     * @param description The description of the folder
+     * @param id Die eindeutige Kennung des Ordners
+     * @param name Der Name des Ordners
+     * @param description Die Beschreibung des Ordners
      */
     public VirtualFolder(int id, String name, String description) {
         this.id = id;
@@ -22,55 +27,66 @@ public class VirtualFolder {
     }
     
     /**
-     * Gets the unique identifier of the folder.
+     * Gibt die eindeutige Kennung des Ordners zurück.
      * 
-     * @return The unique identifier
+     * @return Die eindeutige Kennung
      */
     public int getId() {
         return id;
     }
     
     /**
-     * Gets the name of the folder.
+     * Gibt den Namen des Ordners zurück.
      * 
-     * @return The folder name
+     * @return Der Ordnername
      */
     public String getName() {
         return name;
     }
     
     /**
-     * Sets the name of the folder.
+     * Setzt den Namen des Ordners.
      * 
-     * @param name The new folder name
+     * @param name Der neue Ordnername
      */
     public void setName(String name) {
         this.name = name;
     }
     
     /**
-     * Gets the description of the folder.
+     * Gibt die Beschreibung des Ordners zurück.
      * 
-     * @return The folder description
+     * @return Die Ordnerbeschreibung
      */
     public String getDescription() {
         return description;
     }
     
     /**
-     * Sets the description of the folder.
+     * Setzt die Beschreibung des Ordners.
      * 
-     * @param description The new folder description
+     * @param description Die neue Ordnerbeschreibung
      */
     public void setDescription(String description) {
         this.description = description;
     }
     
+    /**
+     * Gibt den Namen des Ordners zurück.
+     * 
+     * @return Der Ordnername
+     */
     @Override
     public String toString() {
         return name;
     }
     
+    /**
+     * Vergleicht diesen Ordner mit einem anderen Objekt.
+     * 
+     * @param obj Das zu vergleichende Objekt
+     * @return true, wenn die Objekte gleich sind, sonst false
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -83,6 +99,11 @@ public class VirtualFolder {
         return id == other.id;
     }
     
+    /**
+     * Gibt den Hash-Code dieses Ordners zurück.
+     * 
+     * @return Der Hash-Code
+     */
     @Override
     public int hashCode() {
         return Integer.hashCode(id);

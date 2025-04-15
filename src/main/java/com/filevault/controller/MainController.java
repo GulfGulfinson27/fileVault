@@ -24,38 +24,51 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller for the main application view.
+ * Controller für die Hauptansicht der Anwendung.
+ * Verwaltet die Interaktion mit Ordnern und Dateien im Tresor.
  */
 public class MainController {
 
+    /** ListView für die Anzeige der Ordner */
     @FXML
     private ListView<VirtualFolder> folderListView;
-    
+
+    /** TableView für die Anzeige der Dateien */
     @FXML
     private TableView<EncryptedFile> fileTableView;
-    
+
+    /** Spalte für den Dateinamen */
     @FXML
     private TableColumn<EncryptedFile, String> fileNameColumn;
-    
+
+    /** Spalte für die Dateigröße */
     @FXML
     private TableColumn<EncryptedFile, String> fileSizeColumn;
-    
+
+    /** Spalte für das Erstellungsdatum */
     @FXML
     private TableColumn<EncryptedFile, String> fileDateColumn;
-    
+
+    /** Label für den aktuellen Ordner */
     @FXML
     private Label currentFolderLabel;
-    
+
+    /** Label für Statusmeldungen */
     @FXML
     private Label statusLabel;
-    
+
+    /** Formatierer für Datumsangaben */
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    
+
+    /**
+     * Initialisiert den Controller und die Benutzeroberfläche.
+     * Richtet die Ordnerliste und Dateitabelle ein.
+     */
     @FXML
     public void initialize() {
         // Initialize folder list
         refreshFolderList();
-        
+
         // Set up file table columns
         fileNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getOriginalName()));
         fileSizeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getFormattedSize()));
@@ -66,7 +79,7 @@ public class MainController {
                 return new SimpleStringProperty("");
             }
         });
-        
+
         // Select the first folder if available
         Platform.runLater(() -> {
             if (!folderListView.getItems().isEmpty()) {
@@ -75,17 +88,17 @@ public class MainController {
             }
         });
     }
-    
+
     /**
-     * Refreshes the folder list.
+     * Aktualisiert die Liste der Ordner.
      */
     private void refreshFolderList() {
         List<VirtualFolder> folders = FolderManager.getInstance().getFolders();
         folderListView.setItems(FXCollections.observableArrayList(folders));
     }
-    
+
     /**
-     * Refreshes the file list for the current folder.
+     * Aktualisiert die Liste der Dateien im aktuellen Ordner.
      */
     private void refreshFileList() {
         VirtualFolder selectedFolder = FolderManager.getInstance().getCurrentFolder();
@@ -98,9 +111,11 @@ public class MainController {
             currentFolderLabel.setText("[Kein Ordner ausgewählt]");
         }
     }
-    
+
     /**
-     * Handles folder selection.
+     * Verarbeitet die Auswahl eines Ordners.
+     * 
+     * @param event Das auslösende Mausereignis
      */
     @FXML
     public void handleFolderSelection(MouseEvent event) {
@@ -110,9 +125,12 @@ public class MainController {
             refreshFileList();
         }
     }
-    
+
     /**
-     * Handles file selection.
+     * Verarbeitet die Auswahl einer Datei.
+     * Bei Doppelklick wird die Datei exportiert.
+     * 
+     * @param event Das auslösende Mausereignis
      */
     @FXML
     public void handleFileSelection(MouseEvent event) {
@@ -120,9 +138,10 @@ public class MainController {
             handleExportFile();
         }
     }
-    
+
     /**
-     * Imports a file into the vault.
+     * Importiert eine Datei in den Tresor.
+     * Zeigt einen Dateiauswahldialog und verarbeitet den Import.
      */
     @FXML
     public void handleImportFile() {
@@ -131,17 +150,17 @@ public class MainController {
             showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie zuerst einen Ordner aus.");
             return;
         }
-        
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Datei zum Importieren auswählen");
-        
+
         File file = fileChooser.showOpenDialog(FileVaultApp.getPrimaryStage());
         if (file != null) {
             try {
                 statusLabel.setText("Datei wird importiert...");
-                
+
                 EncryptedFile encryptedFile = FileStorage.getInstance().importFile(file, currentFolder);
-                
+
                 if (encryptedFile != null) {
                     refreshFileList();
                     statusLabel.setText("Datei erfolgreich importiert.");
@@ -154,9 +173,10 @@ public class MainController {
             }
         }
     }
-    
+
     /**
-     * Exports a file from the vault.
+     * Exportiert eine Datei aus dem Tresor.
+     * Zeigt einen Ordnerauswahldialog und verarbeitet den Export.
      */
     @FXML
     public void handleExportFile() {
@@ -165,28 +185,28 @@ public class MainController {
             showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Exportieren aus.");
             return;
         }
-        
+
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Exportziel auswählen");
-        
+
         File directory = directoryChooser.showDialog(FileVaultApp.getPrimaryStage());
         if (directory != null) {
             File outputFile = new File(directory, selectedFile.getOriginalName());
-            
+
             if (outputFile.exists()) {
-                boolean overwrite = showConfirmationDialog("Datei existiert bereits", 
+                boolean overwrite = showConfirmationDialog("Datei existiert bereits",
                         "Eine Datei mit dem gleichen Namen existiert bereits. Möchten Sie sie überschreiben?");
-                
+
                 if (!overwrite) {
                     return;
                 }
             }
-            
+
             try {
                 statusLabel.setText("Datei wird exportiert...");
-                
+
                 boolean success = FileStorage.getInstance().exportFile(selectedFile, outputFile);
-                
+
                 if (success) {
                     statusLabel.setText("Datei erfolgreich exportiert.");
                 } else {
@@ -198,22 +218,23 @@ public class MainController {
             }
         }
     }
-    
+
     /**
-     * Renames a file.
+     * Benennt eine Datei um.
+     * Zeigt einen Dialog zur Eingabe des neuen Namens.
      */
     @FXML
     public void handleRenameFile() {
         EncryptedFile selectedFile = fileTableView.getSelectionModel().getSelectedItem();
         if (selectedFile == null) {
-            showAlert(Alert.AlertType.WARNING, "No File Selected", "Please select a file to rename.");
+            showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Umbenennen aus.");
             return;
         }
         
         TextInputDialog dialog = new TextInputDialog(selectedFile.getOriginalName());
-        dialog.setTitle("Rename File");
-        dialog.setHeaderText("Enter a new name for the file");
-        dialog.setContentText("New name:");
+        dialog.setTitle("Datei umbenennen");
+        dialog.setHeaderText("Geben Sie einen neuen Namen für die Datei ein");
+        dialog.setContentText("Neuer Name:");
         
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.setAlwaysOnTop(true);
@@ -226,31 +247,32 @@ public class MainController {
                     
                     if (success) {
                         refreshFileList();
-                        statusLabel.setText("File renamed successfully.");
+                        statusLabel.setText("Datei erfolgreich umbenannt.");
                     } else {
-                        statusLabel.setText("Failed to rename file.");
+                        statusLabel.setText("Umbenennen der Datei fehlgeschlagen.");
                     }
                 } catch (Exception e) {
-                    statusLabel.setText("Error renaming file: " + e.getMessage());
-                    showAlert(Alert.AlertType.ERROR, "Rename Error", "Failed to rename file: " + e.getMessage());
+                    statusLabel.setText("Fehler beim Umbenennen: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Umbenennungsfehler", "Fehler beim Umbenennen der Datei: " + e.getMessage());
                 }
             }
         });
     }
     
     /**
-     * Deletes a file.
+     * Löscht eine Datei aus dem Tresor.
+     * Zeigt einen Bestätigungsdialog vor dem Löschen.
      */
     @FXML
     public void handleDeleteFile() {
         EncryptedFile selectedFile = fileTableView.getSelectionModel().getSelectedItem();
         if (selectedFile == null) {
-            showAlert(Alert.AlertType.WARNING, "No File Selected", "Please select a file to delete.");
+            showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Löschen aus.");
             return;
         }
         
-        boolean confirm = showConfirmationDialog("Delete File", 
-                "Bist du sicher, dass du \"" + selectedFile.getOriginalName() + "\"loeschen moechtest?");
+        boolean confirm = showConfirmationDialog("Datei löschen", 
+                "Bist du sicher, dass du \"" + selectedFile.getOriginalName() + "\" loeschen moechtest?");
         
         if (confirm) {
             try {
@@ -258,7 +280,7 @@ public class MainController {
                 
                 if (success) {
                     refreshFileList();
-                    statusLabel.setText("File deleted successfully.");
+                    statusLabel.setText("Datei erfolgreich gelöscht.");
                 } else {
                     statusLabel.setText("Failed to delete file.");
                 }
@@ -270,18 +292,19 @@ public class MainController {
     }
     
     /**
-     * Creates a new folder.
+     * Erstellt einen neuen Ordner.
+     * Zeigt einen Dialog zur Eingabe des Ordnernamens.
      */
     @FXML
     public void handleNewFolder() {
-        TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("New Folder");
-        dialog.setHeaderText("Create a new folder");
-        dialog.setContentText("Folder name:");
-        
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Neuer Ordner");
+        dialog.setHeaderText("Geben Sie einen Namen für den neuen Ordner ein");
+        dialog.setContentText("Ordnername:");
+
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.setAlwaysOnTop(true);
-        
+
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(folderName -> {
             if (!folderName.isEmpty()) {
@@ -292,37 +315,38 @@ public class MainController {
                         refreshFolderList();
                         folderListView.getSelectionModel().select(folder);
                         handleFolderSelection(null);
-                        statusLabel.setText("Folder created successfully.");
+                        statusLabel.setText("Ordner erfolgreich erstellt.");
                     } else {
-                        statusLabel.setText("Failed to create folder.");
+                        statusLabel.setText("Erstellen des Ordners fehlgeschlagen.");
                     }
                 } catch (Exception e) {
-                    statusLabel.setText("Error creating folder: " + e.getMessage());
-                    showAlert(Alert.AlertType.ERROR, "Folder Error", "Failed to create folder: " + e.getMessage());
+                    statusLabel.setText("Fehler beim Erstellen des Ordners: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Erstellungsfehler", "Fehler beim Erstellen des Ordners: " + e.getMessage());
                 }
             }
         });
     }
     
     /**
-     * Renames a folder.
+     * Benennt einen Ordner um.
+     * Zeigt einen Dialog zur Eingabe des neuen Ordnernamens.
      */
     @FXML
     public void handleRenameFolder() {
         VirtualFolder selectedFolder = folderListView.getSelectionModel().getSelectedItem();
         if (selectedFolder == null) {
-            showAlert(Alert.AlertType.WARNING, "No Folder Selected", "Please select a folder to rename.");
+            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Umbenennen aus.");
             return;
         }
-        
+
         TextInputDialog dialog = new TextInputDialog(selectedFolder.getName());
-        dialog.setTitle("Rename Folder");
-        dialog.setHeaderText("Enter a new name for the folder");
-        dialog.setContentText("New name:");
-        
+        dialog.setTitle("Ordner umbenennen");
+        dialog.setHeaderText("Geben Sie einen neuen Namen für den Ordner ein");
+        dialog.setContentText("Neuer Name:");
+
         Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
         stage.setAlwaysOnTop(true);
-        
+
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newName -> {
             if (!newName.isEmpty()) {
@@ -331,54 +355,53 @@ public class MainController {
                     
                     if (success) {
                         refreshFolderList();
-                        folderListView.getSelectionModel().select(selectedFolder);
-                        handleFolderSelection(null);
-                        statusLabel.setText("Folder renamed successfully.");
+                        statusLabel.setText("Ordner erfolgreich umbenannt.");
                     } else {
-                        statusLabel.setText("Failed to rename folder.");
+                        statusLabel.setText("Umbenennen des Ordners fehlgeschlagen.");
                     }
                 } catch (Exception e) {
-                    statusLabel.setText("Error renaming folder: " + e.getMessage());
-                    showAlert(Alert.AlertType.ERROR, "Rename Error", "Failed to rename folder: " + e.getMessage());
+                    statusLabel.setText("Fehler beim Umbenennen: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Umbenennungsfehler", "Fehler beim Umbenennen des Ordners: " + e.getMessage());
                 }
             }
         });
     }
     
     /**
-     * Deletes a folder.
+     * Löscht einen Ordner.
+     * Zeigt einen Bestätigungsdialog vor dem Löschen.
      */
     @FXML
     public void handleDeleteFolder() {
         VirtualFolder selectedFolder = folderListView.getSelectionModel().getSelectedItem();
         if (selectedFolder == null) {
-            showAlert(Alert.AlertType.WARNING, "No Folder Selected", "Please select a folder to delete.");
+            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Löschen aus.");
             return;
         }
-        
-        boolean confirm = showConfirmationDialog("Delete Folder", 
-                "Bist du sicher, dass du den Ordner \"" + selectedFolder.getName() + "\" und seine Inhalte loeschen moechtest?");
-        
+
+        boolean confirm = showConfirmationDialog("Ordner löschen", 
+                "Bist du sicher, dass du den Ordner \"" + selectedFolder.getName() + "\" löschen möchtest?");
+
         if (confirm) {
             try {
                 boolean success = FolderManager.getInstance().deleteFolder(selectedFolder);
                 
                 if (success) {
                     refreshFolderList();
-                    handleFolderSelection(null);
-                    statusLabel.setText("Folder deleted successfully.");
+                    statusLabel.setText("Ordner erfolgreich gelöscht.");
                 } else {
-                    statusLabel.setText("Failed to delete folder.");
+                    statusLabel.setText("Löschen des Ordners fehlgeschlagen.");
                 }
             } catch (Exception e) {
-                statusLabel.setText("Error deleting folder: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Delete Error", "Failed to delete folder: " + e.getMessage());
+                statusLabel.setText("Fehler beim Löschen: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Löschfehler", "Fehler beim Löschen des Ordners: " + e.getMessage());
             }
         }
     }
     
     /**
-     * Changes the master password.
+     * Ändert das Benutzerpasswort.
+     * Zeigt einen Dialog zur Eingabe des neuen Passworts.
      */
     @FXML
     public void handleChangePassword() {
@@ -485,7 +508,7 @@ public class MainController {
     }
     
     /**
-     * Shows the settings dialog.
+     * Öffnet die Einstellungen.
      */
     @FXML
     public void handleSettings() {
@@ -493,7 +516,7 @@ public class MainController {
     }
     
     /**
-     * Shows the about dialog.
+     * Zeigt Informationen über die Anwendung an.
      */
     @FXML
     public void handleAbout() {
@@ -506,7 +529,7 @@ public class MainController {
     }
     
     /**
-     * Exits the application.
+     * Beendet die Anwendung.
      */
     @FXML
     public void handleExit() {
@@ -517,30 +540,30 @@ public class MainController {
     }
     
     /**
-     * Shows an alert dialog.
+     * Zeigt eine Warnung oder Fehlermeldung an.
      * 
-     * @param type The type of alert
-     * @param title The title of the alert
-     * @param message The message to display
+     * @param type Der Typ der Meldung (WARNUNG oder FEHLER)
+     * @param title Der Titel der Meldung
+     * @param message Der Inhalt der Meldung
      */
     private void showAlert(Alert.AlertType type, String title, String message) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
-        
+
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.setAlwaysOnTop(true);
-        
+
         alert.showAndWait();
     }
     
     /**
-     * Shows a confirmation dialog.
+     * Zeigt einen Bestätigungsdialog an.
      * 
-     * @param title The title of the dialog
-     * @param message The message to display
-     * @return true if the user confirmed, false otherwise
+     * @param title Der Titel des Dialogs
+     * @param message Der Inhalt des Dialogs
+     * @return true, wenn der Benutzer bestätigt hat, sonst false
      */
     private boolean showConfirmationDialog(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -554,4 +577,4 @@ public class MainController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
-} 
+}
