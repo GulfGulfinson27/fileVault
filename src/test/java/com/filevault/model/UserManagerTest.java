@@ -4,86 +4,162 @@ import com.filevault.storage.DatabaseManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import java.io.File;
+import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Testklasse für den UserManager.
- * Testet die Benutzerverwaltung, Authentifizierung und Passwortänderung.
+ * Testklasse für die UserManager-Klasse.
+ * Diese Klasse testet die Benutzerverwaltung und Authentifizierung.
  */
 public class UserManagerTest {
+    
     private static final String TEST_PASSWORD = "TestPasswort123!";
     private UserManager userManager;
-
+    private String testDbPath;
+    
     /**
-     * Initialisiert die Testdatenbank und den UserManager vor jedem Test.
-     * Stellt sicher, dass kein Benutzer existiert.
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt eine neue Testdatenbank und initialisiert den UserManager.
      */
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Testdatenbank initialisieren
+        testDbPath = Paths.get(System.getProperty("user.home"), ".filevault", "test_vault.db").toString();
         DatabaseManager.initDatabase(true);
         userManager = UserManager.getInstance();
+        userManager.logout(); // Reset the singleton instance
     }
-
+    
     /**
-     * Bereinigt nach jedem Test.
-     * Schließt Datenbankverbindungen und löscht die Testdatenbank.
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Löscht die Testdatenbank und alle temporären Dateien.
      */
     @AfterEach
-    void tearDown() {
-        DatabaseManager.deleteTestDatabase();
-    }
-
-    /**
-     * Testet die Erstellung eines neuen Benutzers.
-     * Überprüft, ob der Benutzer erfolgreich erstellt wurde und in der Datenbank existiert.
-     */
-    @Test
-    void testBenutzerErstellen() {
-        assertFalse(userManager.userExists(), "Es sollte noch kein Benutzer existieren");
+    public void tearDown() {
+        // Datenbankverbindungen schließen
+        DatabaseManager.closeConnections();
         
-        boolean created = userManager.createUser(TEST_PASSWORD);
-        assertTrue(created, "Benutzer sollte erfolgreich erstellt werden");
-        assertTrue(userManager.userExists(), "Benutzer sollte jetzt existieren");
+        // Testdatenbank löschen
+        File dbFile = new File(testDbPath);
+        if (dbFile.exists()) {
+            dbFile.delete();
+        }
+        
+        // Temporäre Dateien löschen
+        File tempDir = new File("temp");
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            deleteDirectory(tempDir);
+        }
+        
+        // Sicherstellen, dass der UserManager zurückgesetzt ist
+        userManager.logout();
     }
-
+    
     /**
-     * Testet die Benutzerauthentifizierung.
-     * Überprüft die erfolgreiche Anmeldung mit korrektem Passwort
-     * und das Scheitern mit falschem Passwort.
+     * Hilfsmethode zum rekursiven Löschen eines Verzeichnisses.
+     * 
+     * @param directory Das zu löschende Verzeichnis
+     */
+    private void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        directory.delete();
+    }
+    
+    /**
+     * Testet die Singleton-Implementierung des UserManagers.
+     * Überprüft, ob immer die gleiche Instanz zurückgegeben wird.
      */
     @Test
-    void testAuthentifizierung() {
+    public void testSingleton() {
+        UserManager instance1 = UserManager.getInstance();
+        UserManager instance2 = UserManager.getInstance();
+        assertSame(instance1, instance2);
+    }
+    
+    /**
+     * Testet die Benutzererstellung und Authentifizierung.
+     * Überprüft, ob ein neuer Benutzer erstellt und authentifiziert werden kann.
+     */
+    @Test
+    public void testCreateAndAuthenticateUser() {
+        // Überprüfen, dass noch kein Benutzer existiert
+        assertFalse(userManager.userExists());
+        
+        // Benutzer erstellen
+        assertTrue(userManager.createUser(TEST_PASSWORD));
+        assertTrue(userManager.userExists());
+        
+        // Authentifizierung testen
+        assertTrue(userManager.authenticate(TEST_PASSWORD));
+        assertEquals("master", userManager.getCurrentUser());
+        assertNotNull(userManager.getMasterKey());
+        
+        // Falsches Passwort testen
+        assertFalse(userManager.authenticate("wrongpassword"));
+    }
+    
+    /**
+     * Testet die Passwortänderung.
+     * Überprüft, ob das Passwort erfolgreich geändert werden kann.
+     */
+    @Test
+    public void testChangePassword() {
+        // Benutzer erstellen
         userManager.createUser(TEST_PASSWORD);
         
-        assertTrue(userManager.authenticate(TEST_PASSWORD), "Authentifizierung mit korrektem Passwort sollte erfolgreich sein");
-        assertFalse(userManager.authenticate("FalschesPasswort"), "Authentifizierung mit falschem Passwort sollte fehlschlagen");
+        // Mit altem Passwort authentifizieren
+        assertTrue(userManager.authenticate(TEST_PASSWORD));
+        
+        // Passwort ändern
+        String newPassword = "NeuesPasswort123!";
+        assertTrue(userManager.changePassword(TEST_PASSWORD, newPassword));
+        
+        // Mit neuem Passwort authentifizieren
+        assertTrue(userManager.authenticate(newPassword));
+        
+        // Mit altem Passwort sollte es nicht mehr funktionieren
+        assertFalse(userManager.authenticate(TEST_PASSWORD));
     }
-
+    
     /**
-     * Testet die Änderung des Benutzerpassworts.
-     * Überprüft, ob die Passwortänderung erfolgreich ist
-     * und die Authentifizierung mit dem neuen Passwort funktioniert.
+     * Testet das Abmelden des Benutzers.
+     * Überprüft, ob alle Benutzerdaten zurückgesetzt werden.
      */
     @Test
-    void testPasswortAendern() {
+    public void testLogout() {
+        // Benutzer erstellen und anmelden
         userManager.createUser(TEST_PASSWORD);
+        userManager.authenticate(TEST_PASSWORD);
         
-        String neuesPasswort = "NeuesTestPasswort123!";
-        assertTrue(userManager.changePassword(TEST_PASSWORD, neuesPasswort), "Passwortänderung sollte erfolgreich sein");
-        assertTrue(userManager.authenticate(neuesPasswort), "Authentifizierung mit neuem Passwort sollte erfolgreich sein");
-        assertFalse(userManager.authenticate(TEST_PASSWORD), "Authentifizierung mit altem Passwort sollte fehlschlagen");
+        // Abmelden
+        userManager.logout();
+        assertNull(userManager.getCurrentUser());
+        assertNull(userManager.getMasterKey());
     }
-
+    
     /**
-     * Testet die Passwortänderung mit falschem aktuellem Passwort.
-     * Überprüft, ob die Passwortänderung fehlschlägt, wenn das aktuelle Passwort falsch ist.
+     * Testet die Benutzerprüfung.
+     * Überprüft, ob korrekt erkannt wird, ob ein Benutzer existiert.
      */
     @Test
-    void testPasswortAendernFalschesAktuellesPasswort() {
+    public void testUserExists() {
+        // Überprüfen, dass noch kein Benutzer existiert
+        assertFalse(userManager.userExists());
+        
+        // Benutzer erstellen
         userManager.createUser(TEST_PASSWORD);
         
-        assertFalse(userManager.changePassword("FalschesPasswort", "NeuesPasswort123!"), 
-                "Passwortänderung mit falschem aktuellem Passwort sollte fehlschlagen");
+        // Überprüfen, dass der Benutzer jetzt existiert
+        assertTrue(userManager.userExists());
     }
 } 

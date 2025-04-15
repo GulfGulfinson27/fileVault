@@ -103,6 +103,10 @@
                         <option>${project.basedir}/lib/javafx-sdk-17.0.14/lib</option>
                         <option>--add-modules</option>
                         <option>javafx.controls,javafx.fxml</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.lang=javafx.base</option>
+                        <option>--add-opens</option>
+                        <option>java.base/java.nio=javafx.base</option>
                     </options>
                 </configuration>
             </plugin>
@@ -136,6 +140,8 @@
                             <finalName>FileVault-shaded</finalName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>shaded</shadedClassifierName>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>false</minimizeJar>
                         </configuration>
                     </execution>
                 </executions>
