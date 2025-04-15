@@ -9,18 +9,27 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Core class that manages the file vault operations.
+ * Kernklasse, die die Operationen des Datei-Tresors verwaltet.
+ * Diese Klasse bietet Funktionen zum Importieren, Exportieren und Löschen von Dateien und Ordnern.
  */
 public class Vault {
     private static Vault instance;
     private final FileStorage fileStorage;
     private final FolderManager folderManager;
 
+    /**
+     * Privater Konstruktor, um die Singleton-Instanz zu erstellen.
+     */
     private Vault() {
         this.fileStorage = FileStorage.getInstance();
         this.folderManager = FolderManager.getInstance();
     }
 
+    /**
+     * Gibt die Singleton-Instanz des Tresors zurück.
+     *
+     * @return Die Singleton-Instanz von Vault.
+     */
     public static synchronized Vault getInstance() {
         if (instance == null) {
             instance = new Vault();
@@ -29,49 +38,52 @@ public class Vault {
     }
 
     /**
-     * Deletes a folder from the vault.
-     * @param folderName The name of the folder to delete
-     * @throws Exception if the folder cannot be deleted
+     * Löscht einen Ordner aus dem Tresor.
+     *
+     * @param folderName Der Name des zu löschenden Ordners.
+     * @throws Exception Wenn der Ordner nicht gelöscht werden kann.
      */
     public void deleteFolder(String folderName) throws Exception {
         VirtualFolder folder = folderManager.getFolderByName(folderName);
         if (folder == null) {
-            throw new Exception("Folder not found: " + folderName);
+            throw new Exception("Ordner nicht gefunden: " + folderName);
         }
 
-        // Delete all files in the folder
+        // Lösche alle Dateien im Ordner
         List<EncryptedFile> files = fileStorage.getFilesInFolder(folder);
         for (EncryptedFile file : files) {
             fileStorage.deleteFile(file);
         }
 
-        // Delete the folder from the database
+        // Lösche den Ordner aus der Datenbank
         folderManager.deleteFolder(folder);
     }
 
     /**
-     * Imports a file into the vault.
-     * @param sourceFile The file to import
-     * @param folderName The name of the folder to import into
-     * @return The imported encrypted file
-     * @throws Exception if the file cannot be imported
+     * Importiert eine Datei in den Tresor.
+     *
+     * @param sourceFile Die zu importierende Datei.
+     * @param folderName Der Name des Ordners, in den die Datei importiert werden soll.
+     * @return Die importierte verschlüsselte Datei.
+     * @throws Exception Wenn die Datei nicht importiert werden kann.
      */
     public EncryptedFile importFile(File sourceFile, String folderName) throws Exception {
         VirtualFolder folder = folderManager.getFolderByName(folderName);
         if (folder == null) {
-            throw new Exception("Folder not found: " + folderName);
+            throw new Exception("Ordner nicht gefunden: " + folderName);
         }
         return fileStorage.importFile(sourceFile, folder);
     }
 
     /**
-     * Exports a file from the vault.
-     * @param encryptedFile The encrypted file to export
-     * @param destinationFile The destination file
-     * @return true if export was successful
-     * @throws Exception if the file cannot be exported
+     * Exportiert eine Datei aus dem Tresor.
+     *
+     * @param encryptedFile   Die verschlüsselte Datei, die exportiert werden soll.
+     * @param destinationFile Die Zieldatei, in die exportiert werden soll.
+     * @return true, wenn der Export erfolgreich war.
+     * @throws Exception Wenn die Datei nicht exportiert werden kann.
      */
     public boolean exportFile(EncryptedFile encryptedFile, File destinationFile) throws Exception {
         return fileStorage.exportFile(encryptedFile, destinationFile);
     }
-} 
+}

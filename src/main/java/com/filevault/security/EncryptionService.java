@@ -10,7 +10,6 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 /**
  * Handles encryption and decryption of files using AES-GCM.

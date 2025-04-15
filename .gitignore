@@ -1,34 +1,34 @@
-# Compiled class files
+# Kompilierte Klassen
 *.class
 
-# Maven output directory
+# Maven build Dateien
 target/
 
-# Eclipse project files
+# Eclipse Dateien
 .classpath
 .project
 .settings/
 
-# IntelliJ IDEA project files
+# IntelliJ Dateien
 .idea/
 *.iml
 *.iws
 *.ipr
 
-# NetBeans project files
+# NetBeans Dateien
 nbproject/
 nbactions.xml
 nb-configuration.xml
 
-# Mac OS specific files
+# Mac OS Dateien
 .DS_Store
 
-# Windows specific files
+# Windows Dateien
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Package Files
+# Package Dateien
 FileVault-1.0-SNAPSHOT.jar
 FileVault-shaded.jar
 *.war
@@ -36,8 +36,8 @@ FileVault-shaded.jar
 *.tar.gz
 *.rar
 
-# Log files
+# Log Dateien
 *.log
 
-# User-specific files
+# User-spezifische Dateien
 .filevault/

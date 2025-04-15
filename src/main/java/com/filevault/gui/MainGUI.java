@@ -10,6 +10,10 @@ import java.io.File;
 import java.util.Optional;
 import javafx.geometry.Insets;
 
+/**
+ * Hauptklasse für die grafische Benutzeroberfläche (GUI) der Anwendung.
+ * Diese Klasse verwaltet die Anzeige und Interaktion mit Ordnern und Dateien.
+ */
 public class MainGUI extends Application {
     private Vault vault;
     private TableView<File> fileTable;
@@ -19,108 +23,102 @@ public class MainGUI extends Application {
     private VBox mainContainer;
     private SplitPane splitPane;
 
+    /**
+     * Startet die GUI-Anwendung.
+     *
+     * @param primaryStage Die Hauptbühne der Anwendung.
+     */
     @Override
     public void start(Stage primaryStage) {
-        // Initialize vault
+        // Initialisiere den Tresor
         vault = Vault.getInstance();
         
-        // Initialize components
+        // Initialisiere die GUI-Komponenten
         initializeComponents();
         
-        // Create scene
+        // Erstelle die Szene
         Scene scene = new Scene(mainContainer, 800, 600);
         
-        // Apply styles directly
+        // Wende Stile direkt an
         applyStyles();
         
-        // Set up event handlers
+        // Richte Event-Handler ein
         setupEventHandlers();
         
-        // Set up the stage
+        // Konfiguriere die Bühne
         primaryStage.setTitle("FileVault");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
+    /**
+     * Hauptmethode der Anwendung.
+     *
+     * @param args Die Befehlszeilenargumente.
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Initialisiert die GUI-Komponenten.
+     */
     private void initializeComponents() {
-        // Create main container
+        // Erstelle den Hauptcontainer
         mainContainer = new VBox();
         mainContainer.setSpacing(10);
         mainContainer.setPadding(new Insets(10));
 
-        // Create buttons
+        // Erstelle die Buttons
         importButton = new Button("Import");
         exportButton = new Button("Export");
         createFolderButton = new Button("Create Folder");
         deleteButton = new Button("Delete");
 
-        // Create status bar
+        // Erstelle die Statusleiste
         statusBar = new Label("Ready");
 
-        // Create folder tree
+        // Erstelle den Ordnerbaum
         folderTree = new TreeView<>();
         TreeItem<String> rootItem = new TreeItem<>("Root");
         folderTree.setRoot(rootItem);
         folderTree.setShowRoot(true);
 
-        // Create file table
+        // Erstelle die Dateitabelle
         fileTable = new TableView<>();
         TableColumn<File, String> nameColumn = new TableColumn<>("Name");
         TableColumn<File, String> sizeColumn = new TableColumn<>("Size");
         TableColumn<File, String> dateColumn = new TableColumn<>("Date");
         fileTable.getColumns().addAll(nameColumn, sizeColumn, dateColumn);
 
-        // Create split pane
+        // Erstelle das SplitPane
         splitPane = new SplitPane();
         VBox leftPane = new VBox(folderTree);
         VBox rightPane = new VBox(fileTable);
         splitPane.getItems().addAll(leftPane, rightPane);
         splitPane.setDividerPositions(0.3);
 
-        // Add components to main container
+        // Füge Komponenten zum Hauptcontainer hinzu
         HBox buttonBar = new HBox(10, importButton, exportButton, createFolderButton, deleteButton);
         mainContainer.getChildren().addAll(buttonBar, splitPane, statusBar);
     }
 
+    /**
+     * Wendet Stile auf die GUI-Komponenten an.
+     */
     private void applyStyles() {
-        // Table styles
+        // Stile für die Dateitabelle
         fileTable.setStyle("-fx-background-color: #2d2d2d; -fx-border-color: #404040; -fx-border-width: 1;");
         
-        // Table header styles
-        fileTable.lookup(".column-header").setStyle("-fx-background-color: #2e7d32;");
-        fileTable.lookup(".column-header-background").setStyle("-fx-background-color: #2e7d32;");
-        fileTable.lookup(".column-header .label").setStyle("-fx-text-fill: #ffffff; -fx-font-weight: bold;");
-        
-        // Table row styles
-        fileTable.setStyle("-fx-background-color: #2d2d2d;");
-        fileTable.lookup(".table-row-cell").setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #ffffff;");
-        fileTable.lookup(".table-row-cell:odd").setStyle("-fx-background-color: #252525;");
-        fileTable.lookup(".table-row-cell:selected").setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff;");
-        
-        // Button styles
-        importButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
-        exportButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
-        createFolderButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
-        deleteButton.setStyle("-fx-background-color: #4a90e2; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
-        
-        // Tree view styles
-        folderTree.setStyle("-fx-background-color: #2d2d2d; -fx-border-color: #404040; -fx-border-width: 1;");
-        folderTree.lookup(".tree-cell").setStyle("-fx-background-color: #2d2d2d; -fx-text-fill: #ffffff;");
-        
-        // Split pane styles
-        splitPane.setStyle("-fx-background-color: #1a1a1a;");
-        splitPane.lookup(".split-pane-divider").setStyle("-fx-background-color: #404040;");
-        
-        // Status bar styles
+        // Stile für die Statusleiste
         statusBar.setStyle("-fx-background-color: #252525; -fx-text-fill: #ffffff; -fx-padding: 5 10;");
     }
 
+    /**
+     * Richtet die Event-Handler für die GUI-Komponenten ein.
+     */
     private void setupEventHandlers() {
-        // Delete button handler
+        // Event-Handler für den Löschen-Button
         deleteButton.setOnAction(e -> {
             TreeItem<String> selectedFolder = folderTree.getSelectionModel().getSelectedItem();
             if (selectedFolder != null && !selectedFolder.getValue().equals("Root")) {
@@ -132,13 +130,13 @@ public class MainGUI extends Application {
                 Optional<ButtonType> result = confirmDialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     try {
-                        // Delete the folder from the vault
+                        // Lösche den Ordner aus dem Tresor
                         vault.deleteFolder(selectedFolder.getValue());
                         
-                        // Remove from tree view
+                        // Entferne den Ordner aus der Baumansicht
                         selectedFolder.getParent().getChildren().remove(selectedFolder);
                         
-                        // Update status
+                        // Aktualisiere die Statusleiste
                         statusBar.setText("Ordner erfolgreich gelöscht");
                     } catch (Exception ex) {
                         showError("Fehler beim Löschen des Ordners", ex.getMessage());
@@ -150,6 +148,12 @@ public class MainGUI extends Application {
         });
     }
 
+    /**
+     * Zeigt eine Fehlermeldung an.
+     *
+     * @param title   Der Titel der Fehlermeldung.
+     * @param message Die Nachricht der Fehlermeldung.
+     */
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -157,4 +161,4 @@ public class MainGUI extends Application {
         alert.setContentText(message);
         alert.showAndWait();
     }
-} 
+}

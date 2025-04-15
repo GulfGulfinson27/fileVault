@@ -2,8 +2,6 @@ package com.filevault.util;
 
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.DatabaseManager;
-
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
