@@ -10,11 +10,25 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Die Hauptklasse der FileVault-Anwendung.
+ * Diese Klasse erweitert die JavaFX Application-Klasse und ist für das Starten
+ * und Verwalten der Benutzeroberfläche zuständig.
+ */
 public class FileVaultApp extends Application {
 
+    /** Die aktuelle Szene der Anwendung */
     private static Scene scene;
+    
+    /** Das Hauptfenster der Anwendung */
     private static Stage primaryStage;
 
+    /**
+     * Startet die Anwendung und initialisiert die Benutzeroberfläche.
+     * 
+     * @param stage Das Hauptfenster der Anwendung
+     * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
+     */
     @Override
     public void start(Stage stage) throws IOException {
         primaryStage = stage;
@@ -25,22 +39,40 @@ public class FileVaultApp extends Application {
         try {
             stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/app-icon.png"))));
         } catch (Exception e) {
-            System.err.println("Could not load application icon: " + e.getMessage());
+            System.err.println("Anwendungs-Icon konnte nicht geladen werden: " + e.getMessage());
         }
         stage.setResizable(true);
         stage.show();
     }
 
+    /**
+     * Ändert die aktuelle Ansicht der Anwendung.
+     * 
+     * @param fxml Der Name der FXML-Datei ohne Erweiterung
+     * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
+     */
     public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
         primaryStage.sizeToScene();
     }
 
+    /**
+     * Lädt eine FXML-Datei und gibt das resultierende Parent-Objekt zurück.
+     * 
+     * @param fxml Der Name der FXML-Datei ohne Erweiterung
+     * @return Das geladene Parent-Objekt
+     * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
+     */
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FileVaultApp.class.getResource("/com/filevault/" + fxml + ".fxml"));
         return fxmlLoader.load();
     }
 
+    /**
+     * Zeigt die Hauptansicht der Anwendung an.
+     * 
+     * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
+     */
     public static void showMainView() throws IOException {
         scene.setRoot(loadFXML("main"));
         primaryStage.setWidth(1000);
@@ -48,22 +80,36 @@ public class FileVaultApp extends Application {
         primaryStage.centerOnScreen();
     }
     
+    /**
+     * Gibt das Hauptfenster der Anwendung zurück.
+     * 
+     * @return Das Hauptfenster (Stage) der Anwendung
+     */
     public static Stage getPrimaryStage() {
         return primaryStage;
     }
 
+    /**
+     * Initialisiert die Datenbank und lädt Benutzerdaten.
+     */
     @Override
     public void init() {
-        // Initialize database and load user data
         DatabaseManager.initDatabase();
     }
 
+    /**
+     * Schließt die Datenbankverbindungen, wenn die Anwendung beendet wird.
+     */
     @Override
     public void stop() {
-        // Cleanup resources when the application is closed
         DatabaseManager.closeConnections();
     }
 
+    /**
+     * Der Einstiegspunkt der Anwendung.
+     * 
+     * @param args Die Kommandozeilenargumente
+     */
     public static void main(String[] args) {
         launch();
     }

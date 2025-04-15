@@ -8,52 +8,60 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 /**
- * Utility class for password-based operations like key derivation.
+ * Hilfsklasse für passwortbasierte Operationen wie Schlüsselableitung.
  */
 public class PasswordUtils {
 
-    // Default iterations for PBKDF2
+    /** Standardanzahl der Iterationen für PBKDF2 */
     private static final int ITERATIONS = 65536;
-    // Key length in bits
+    
+    /** Schlüssellänge in Bits */
     private static final int KEY_LENGTH = 256;
-    // Salt length in bytes
+    
+    /** Länge des Salts in Bytes */
     private static final int SALT_LENGTH = 16;
 
+    /** Standard-Salt für die Schlüsselableitung */
     private static final byte[] DEFAULT_SALT = initDefaultSalt();
 
+    /**
+     * Initialisiert den Standard-Salt.
+     * 
+     * @return Der initialisierte Standard-Salt
+     */
     private static byte[] initDefaultSalt() {
-        // We use a fixed salt here for simplicity, but ideally this should be 
-        // stored separately for each user
+        // Wir verwenden hier einen festen Salt für die Einfachheit,
+        // idealerweise sollte dieser für jeden Benutzer separat gespeichert werden
         byte[] salt = new byte[SALT_LENGTH];
         try {
             SecureRandom random = SecureRandom.getInstanceStrong();
             random.nextBytes(salt);
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("Error generating salt: " + e.getMessage());
-            // Fallback to a less secure but still usable random generator
+            System.err.println("Fehler beim Generieren des Salts: " + e.getMessage());
+            // Fallback auf einen weniger sicheren, aber noch verwendbaren Zufallsgenerator
             new SecureRandom().nextBytes(salt);
         }
         return salt;
     }
 
     /**
-     * Generates a cryptographic key from a password.
-     * Uses PBKDF2 with HMAC-SHA256 for key derivation.
+     * Generiert einen kryptografischen Schlüssel aus einem Passwort.
+     * Verwendet PBKDF2 mit HMAC-SHA256 für die Schlüsselableitung.
      * 
-     * @param password The password to derive the key from
-     * @return The derived key as a byte array
+     * @param password Das Passwort, aus dem der Schlüssel abgeleitet werden soll
+     * @return Der abgeleitete Schlüssel als Byte-Array
      */
     public static byte[] generateKeyFromPassword(String password) {
         return generateKeyFromPassword(password, DEFAULT_SALT);
     }
 
     /**
-     * Generates a cryptographic key from a password with a specific salt.
-     * Uses PBKDF2 with HMAC-SHA256 for key derivation.
+     * Generiert einen kryptografischen Schlüssel aus einem Passwort mit einem spezifischen Salt.
+     * Verwendet PBKDF2 mit HMAC-SHA256 für die Schlüsselableitung.
      * 
-     * @param password The password to derive the key from
-     * @param salt The salt to use for key derivation
-     * @return The derived key as a byte array
+     * @param password Das Passwort, aus dem der Schlüssel abgeleitet werden soll
+     * @param salt Der Salt, der für die Schlüsselableitung verwendet werden soll
+     * @return Der abgeleitete Schlüssel als Byte-Array
      */
     public static byte[] generateKeyFromPassword(String password, byte[] salt) {
         try {
@@ -61,15 +69,15 @@ public class PasswordUtils {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
             return factory.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            System.err.println("Error generating key from password: " + e.getMessage());
-            throw new RuntimeException("Failed to generate key from password", e);
+            System.err.println("Fehler beim Generieren des Schlüssels aus dem Passwort: " + e.getMessage());
+            throw new RuntimeException("Fehler beim Generieren des Schlüssels aus dem Passwort", e);
         }
     }
 
     /**
-     * Generates a random salt for key derivation.
+     * Generiert einen zufälligen Salt für die Schlüsselableitung.
      * 
-     * @return A random salt as a byte array
+     * @return Ein zufälliger Salt als Byte-Array
      */
     public static byte[] generateSalt() {
         byte[] salt = new byte[SALT_LENGTH];
@@ -77,8 +85,8 @@ public class PasswordUtils {
             SecureRandom random = SecureRandom.getInstanceStrong();
             random.nextBytes(salt);
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("Error generating salt: " + e.getMessage());
-            // Fallback to a less secure but still usable random generator
+            System.err.println("Fehler beim Generieren des Salts: " + e.getMessage());
+            // Fallback auf einen weniger sicheren, aber noch verwendbaren Zufallsgenerator
             new SecureRandom().nextBytes(salt);
         }
         return salt;

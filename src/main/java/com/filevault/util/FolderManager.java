@@ -60,11 +60,11 @@ public class FolderManager {
     public void createBaseStructure() {
         folders.clear();
         
-        createFolder("Documents");
-        createFolder("Images");
+        createFolder("Dokumente");
+        createFolder("Bilder");
         createFolder("Videos");
-        createFolder("Music");
-        createFolder("Others");
+        createFolder("Musik");
+        createFolder("Andere");
         
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);

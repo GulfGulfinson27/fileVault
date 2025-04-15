@@ -10,6 +10,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,6 +50,18 @@ class FolderManagerTest {
                 .map(Path::toFile)
                 .forEach(File::delete);
             Files.deleteIfExists(testDataDir);
+        }
+
+        // Clean up all test folders
+        List<VirtualFolder> folders = folderManager.getFolders();
+        for (VirtualFolder folder : folders) {
+            if (folder.getName().equals("TestFolder") || 
+                folder.getName().equals("CurrentFolder") || 
+                folder.getName().equals("OldName") || 
+                folder.getName().equals("NewName") || 
+                folder.getName().equals("ToDelete")) {
+                folderManager.deleteFolder(folder);
+            }
         }
     }
 
