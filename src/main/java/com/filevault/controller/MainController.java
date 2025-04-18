@@ -481,12 +481,12 @@ public class MainController {
             String confirmPassword = passwords[2];
             
             if (!newPassword.equals(confirmPassword)) {
-                showAlert(Alert.AlertType.ERROR, "Password Error", "New passwords do not match.");
+                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwörter stimmen nicht überein.");
                 return;
             }
             
             if (newPassword.length() < 8) {
-                showAlert(Alert.AlertType.ERROR, "Password Error", "New password must be at least 8 characters long.");
+                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwort muss mindestens 8 Zeichen lang sein.");
                 return;
             }
             
@@ -494,15 +494,15 @@ public class MainController {
                 boolean success = UserManager.getInstance().changePassword(currentPassword, newPassword);
                 
                 if (success) {
-                    statusLabel.setText("Password changed successfully.");
-                    showAlert(Alert.AlertType.INFORMATION, "Password Changed", "Your master password has been changed successfully.");
+                    statusLabel.setText("Passwort erfolgreich geändert.");
+                    showAlert(Alert.AlertType.INFORMATION, "Passwort geändert", "Dein Passwort wurde erfolgreich geändert.");
                 } else {
-                    statusLabel.setText("Failed to change password.");
-                    showAlert(Alert.AlertType.ERROR, "Password Error", "Failed to change password. Current password may be incorrect.");
+                        statusLabel.setText("Fehler beim Ändern des Passworts.");
+                    showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts.");
                 }
             } catch (Exception e) {
-                statusLabel.setText("Error changing password: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Password Error", "Failed to change password: " + e.getMessage());
+                statusLabel.setText("Fehler beim Ändern des Passworts: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts: " + e.getMessage());
             }
         });
     }
@@ -512,7 +512,7 @@ public class MainController {
      */
     @FXML
     public void handleSettings() {
-        showAlert(Alert.AlertType.INFORMATION, "Settings", "Settings wurden noch nicht implementiert. TODO");
+        showAlert(Alert.AlertType.INFORMATION, "Einstellungen", "Einstellungen wurden noch nicht implementiert.");
     }
     
     /**
@@ -524,7 +524,7 @@ public class MainController {
         alert.setTitle("Über FileVault");
         alert.setHeaderText("FileVault");
         alert.setContentText("Version 1.0\n" +
-                "© 2025 Phillip Schneider - Projekt FileVault");
+                "2025 Phillip Schneider - Projekt FileVault- Java II");
         alert.showAndWait();
     }
     
