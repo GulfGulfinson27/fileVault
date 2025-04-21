@@ -1,6 +1,9 @@
 package com.filevault.model;
 
 import java.time.LocalDateTime;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * Repräsentiert eine verschlüsselte Datei im Tresor.
@@ -163,19 +166,28 @@ public class EncryptedFile {
     }
     
     /**
-     * Gibt die formatierte Dateigröße zurück (z.B. "1,2 MB").
+     * Gibt die Dateigröße in einem lesbaren Format zurück (z. B. "500 B", "2.0 KB", "2.0 MB" oder "3.0 GB").
      * 
-     * @return Die formatierte Dateigröße
+     * @return Die formatierte Dateigröße.
      */
     public String getFormattedSize() {
         if (sizeBytes < 1024) {
-            return sizeBytes + " B";
+            return sizeBytes + " B"; // Größen unter 1 KB in Bytes anzeigen
         } else if (sizeBytes < 1024 * 1024) {
-            return String.format("%.1f KB", sizeBytes / 1024.0);
+            double sizeInKB = sizeBytes / 1024.0;
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US); // Erzwinge Punkt als Dezimaltrennzeichen
+            DecimalFormat df = new DecimalFormat("#.0", symbols);
+            return df.format(sizeInKB) + " KB";
         } else if (sizeBytes < 1024 * 1024 * 1024) {
-            return String.format("%.1f MB", sizeBytes / (1024.0 * 1024.0));
+            double sizeInMB = sizeBytes / (1024.0 * 1024.0);
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US); // Erzwinge Punkt als Dezimaltrennzeichen
+            DecimalFormat df = new DecimalFormat("#.0", symbols);
+            return df.format(sizeInMB) + " MB";
         } else {
-            return String.format("%.1f GB", sizeBytes / (1024.0 * 1024.0 * 1024.0));
+            double sizeInGB = sizeBytes / (1024.0 * 1024.0 * 1024.0);
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US); // Erzwinge Punkt als Dezimaltrennzeichen
+            DecimalFormat df = new DecimalFormat("#.0", symbols);
+            return df.format(sizeInGB) + " GB";
         }
     }
     
@@ -229,4 +241,4 @@ public class EncryptedFile {
     public int hashCode() {
         return Integer.hashCode(id);
     }
-} 
+}
