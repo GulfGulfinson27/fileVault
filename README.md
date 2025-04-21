@@ -39,7 +39,7 @@ Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über
 1. Java 11 oder höher (am Besten 17 oder 21)
 2. Maven installieren
 3. Einmalig: mvn clean package
-4. Projekt bauen: .bat/.sh ausführen oder bash: "mvn javafx:run"
+4. Projekt bauen: .bat/.sh -Datei ausführen oder bash: "mvn javafx:run"
 ! Bei der ersten Ausführung wird ein neuer Benutzer angelegt
 (Für einen neuen User muss die Datenbank gelöscht werden)
 
@@ -53,7 +53,7 @@ Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über
 
 - `controller`: Anwendungs-Controller
 - `model`: Daten Modelle
-- `view`: JavaFX Komponenten
+- `GUI`: JavaFX-GUI-Dateien
 - `security`: Verschlüsselung und Passwort
 - `storage`: Datenspeicherung und Datenbank
 - `util`: Utility Klassen
