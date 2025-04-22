@@ -177,7 +177,7 @@ public class AuthController {
      * @param message Die anzuzeigende Nachricht
      * @param isError Gibt an, ob es sich um eine Fehlermeldung handelt
      */
-    private void showMessage(String message, boolean isError) {
+    protected void showMessage(String message, boolean isError) {
         messageLabel.setText(message);
         messageLabel.setVisible(true);
         
@@ -189,4 +189,4 @@ public class AuthController {
             messageLabel.getStyleClass().add("success-text");
         }
     }
-} 
+}
