@@ -1,7 +1,5 @@
 package com.filevault.util;
 
-import com.filevault.model.VirtualFolder;
-import com.filevault.storage.DatabaseManager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,8 +7,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.filevault.model.VirtualFolder;
+import com.filevault.storage.DatabaseManager;
 
 /**
  * Verwaltet virtuelle Ordner in der Anwendung.
@@ -21,6 +28,7 @@ public class FolderManager {
     private static FolderManager instance;
     private final List<VirtualFolder> folders = new ArrayList<>();
     private VirtualFolder currentFolder = null;
+    private static final Logger logger = LoggerFactory.getLogger(FolderManager.class);
     
     private FolderManager() {
         // Privater Konstruktor für Singleton-Pattern
@@ -46,7 +54,10 @@ public class FolderManager {
         folders.clear();
         loadFoldersFromDatabase();
         
-        if (!folders.isEmpty()) {
+        // Wenn keine Ordner existieren, erstelle die Standardordner
+        if (folders.isEmpty()) {
+            createBaseStructure();
+        } else if (!folders.isEmpty()) {
             currentFolder = folders.get(0);
         }
         
@@ -60,11 +71,11 @@ public class FolderManager {
     public void createBaseStructure() {
         folders.clear();
         
-        createFolder("Dokumente");
-        createFolder("Bilder");
-        createFolder("Videos");
-        createFolder("Musik");
-        createFolder("Andere");
+        createFolder("Dokumente", null);
+        createFolder("Bilder", null);
+        createFolder("Videos", null);
+        createFolder("Musik", null);
+        createFolder("Andere", null);
         
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);
@@ -94,55 +105,104 @@ public class FolderManager {
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM folders ORDER BY name");
              ResultSet rs = stmt.executeQuery()) {
             
+            // First, create all folders
             while (rs.next()) {
-                VirtualFolder folder = new VirtualFolder(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("description")
-                );
+                Integer parentId = null;
+                if (rs.getObject("parent_id") != null) {
+                    parentId = rs.getInt("parent_id");
+                }
+                
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+                
+                VirtualFolder folder = new VirtualFolder(id, name, description, parentId);
+                folder.setCreatedAt(createdAt);
                 folders.add(folder);
             }
+            
+            // Then, build the parent-child relationships
+            for (VirtualFolder folder : folders) {
+                if (folder.getParentId() != null) {
+                    for (VirtualFolder potentialParent : folders) {
+                        if (potentialParent.getId() == folder.getParentId()) {
+                            potentialParent.addChild(folder);
+                            break;
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Laden der Ordner aus der Datenbank: " + e.getMessage());
+            logger.error("Fehler beim Laden der Ordner aus der Datenbank", e);
+            throw new RuntimeException("Fehler beim Laden der Ordner", e);
         }
     }
     
     /**
      * Erstellt einen neuen Ordner mit dem angegebenen Namen.
      * @param name Der Name des neuen Ordners
+     * @param parentId Die ID des übergeordneten Ordners (null für Root-Ordner)
      * @return Der erstellte Ordner oder null bei Fehler
      */
-    public VirtualFolder createFolder(String name) {
-        return createFolder(name, "");
+    public VirtualFolder createFolder(String name, Integer parentId) {
+        return createFolder(name, "", parentId);
     }
     
     /**
      * Erstellt einen neuen Ordner mit Namen und Beschreibung.
      * @param name Der Name des neuen Ordners
      * @param description Die Beschreibung des Ordners
+     * @param parentId Die ID des übergeordneten Ordners (null für Root-Ordner)
      * @return Der erstellte Ordner oder null bei Fehler
+     * @throws IllegalArgumentException wenn der Name null oder leer ist
      */
-    public VirtualFolder createFolder(String name, String description) {
+    public VirtualFolder createFolder(String name, String description, Integer parentId) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Ordnername darf nicht leer sein");
+        }
+        
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO folders (name, description) VALUES (?, ?)",
-                     PreparedStatement.RETURN_GENERATED_KEYS)) {
+                     "INSERT INTO folders (name, description, parent_id, created_at) VALUES (?, ?, ?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setString(1, name);
             stmt.setString(2, description);
-            stmt.executeUpdate();
+            stmt.setObject(3, parentId);
+            stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
             
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    VirtualFolder folder = new VirtualFolder(rs.getInt(1), name, description);
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating folder failed, no rows affected.");
+            }
+            
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int id = generatedKeys.getInt(1);
+                    VirtualFolder folder = new VirtualFolder(id, name, description, parentId);
+                    folder.setCreatedAt(LocalDateTime.now());
                     folders.add(folder);
+                    
+                    // Add to parent's children if parent exists
+                    if (parentId != null) {
+                        for (VirtualFolder parent : folders) {
+                            if (parent.getId() == parentId) {
+                                parent.addChild(folder);
+                                break;
+                            }
+                        }
+                    }
+                    
                     return folder;
+                } else {
+                    throw new SQLException("Creating folder failed, no ID obtained.");
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Erstellen des Ordners: " + e.getMessage());
+            logger.error("Error creating folder", e);
+            throw new RuntimeException("Error creating folder", e);
         }
-        return null;
     }
     
     /**
@@ -154,10 +214,11 @@ public class FolderManager {
     public boolean renameFolder(VirtualFolder folder, String newName) {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                     "UPDATE folders SET name = ? WHERE id = ?")) {
+                     "UPDATE folders SET name = ?, description = ? WHERE id = ?")) {
             
             stmt.setString(1, newName);
-            stmt.setInt(2, folder.getId());
+            stmt.setString(2, folder.getDescription());
+            stmt.setInt(3, folder.getId());
             int affected = stmt.executeUpdate();
             
             if (affected > 0) {
@@ -171,28 +232,68 @@ public class FolderManager {
     }
     
     /**
-     * Löscht einen Ordner.
+     * Löscht einen Ordner und alle seine Dateien.
      * @param folder Der zu löschende Ordner
-     * @return true, wenn der Ordner erfolgreich gelöscht wurde
+     * @throws IllegalStateException wenn der Ordner Unterordner enthält
      */
-    public boolean deleteFolder(VirtualFolder folder) {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM folders WHERE id = ?")) {
-            
-            stmt.setInt(1, folder.getId());
-            int affected = stmt.executeUpdate();
-            
-            if (affected > 0) {
-                folders.remove(folder);
-                if (currentFolder == folder) {
-                    currentFolder = folders.isEmpty() ? null : folders.get(0);
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            System.err.println("Fehler beim Löschen des Ordners: " + e.getMessage());
+    public void deleteFolder(VirtualFolder folder) {
+        if (folder == null) {
+            throw new IllegalArgumentException("Ordner darf nicht null sein");
         }
-        return false;
+
+        // Prüfe auf Unterordner
+        List<VirtualFolder> subfolders = getSubfolders(folder.getId());
+        if (!subfolders.isEmpty()) {
+            throw new IllegalStateException("Ordner enthält Unterordner und kann nicht gelöscht werden");
+        }
+
+        try {
+            // Disable auto-commit mode
+            DatabaseManager.getConnection().setAutoCommit(false);
+            
+            // Lösche alle Dateien im Ordner
+            String deleteFilesSql = "DELETE FROM files WHERE folder_id = ?";
+            try (PreparedStatement deleteFilesStmt = DatabaseManager.getConnection().prepareStatement(deleteFilesSql)) {
+                deleteFilesStmt.setInt(1, folder.getId());
+                deleteFilesStmt.executeUpdate();
+            }
+
+            // Lösche den Ordner
+            String deleteFolderSql = "DELETE FROM folders WHERE id = ?";
+            try (PreparedStatement deleteFolderStmt = DatabaseManager.getConnection().prepareStatement(deleteFolderSql)) {
+                deleteFolderStmt.setInt(1, folder.getId());
+                deleteFolderStmt.executeUpdate();
+            }
+
+            // Commit the transaction
+            DatabaseManager.getConnection().commit();
+            
+            // Remove from parent's children list if it has a parent
+            if (folder.getParentId() != null) {
+                for (VirtualFolder parent : folders) {
+                    if (parent.getId() == folder.getParentId()) {
+                        parent.removeChild(folder);
+                        break;
+                    }
+                }
+            }
+            
+            // Remove from local list
+            folders.remove(folder);
+            
+            // Reset auto-commit mode
+            DatabaseManager.getConnection().setAutoCommit(true);
+            
+        } catch (SQLException e) {
+            try {
+                // Rollback in case of error
+                DatabaseManager.getConnection().rollback();
+                DatabaseManager.getConnection().setAutoCommit(true);
+            } catch (SQLException rollbackEx) {
+                logger.error("Fehler beim Rollback der Transaktion", rollbackEx);
+            }
+            throw new RuntimeException("Fehler beim Löschen des Ordners", e);
+        }
     }
     
     /**
@@ -241,5 +342,20 @@ public class FolderManager {
             }
         }
         return null;
+    }
+    
+    /**
+     * Gibt alle Unterordner eines Ordners zurück.
+     * @param folderId Die ID des übergeordneten Ordners
+     * @return Liste der Unterordner
+     */
+    public List<VirtualFolder> getSubfolders(int folderId) {
+        List<VirtualFolder> subfolders = new ArrayList<>();
+        for (VirtualFolder folder : folders) {
+            if (folder.getParentId() != null && folder.getParentId() == folderId) {
+                subfolders.add(folder);
+            }
+        }
+        return subfolders;
     }
 } 

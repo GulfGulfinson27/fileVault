@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.TreeView?>
 
 <BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17" 
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filevault.controller.MainController">
@@ -98,7 +99,7 @@
               </Label>
             </top>
             <center>
-              <ListView fx:id="folderListView" onMouseClicked="#handleFolderSelection" BorderPane.alignment="CENTER" />
+              <TreeView fx:id="folderTreeView" onMouseClicked="#handleFolderSelection" BorderPane.alignment="CENTER" />
             </center>
           </BorderPane>
           <BorderPane>

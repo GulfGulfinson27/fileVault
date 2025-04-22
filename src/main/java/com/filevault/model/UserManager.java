@@ -1,13 +1,14 @@
 package com.filevault.model;
 
-import com.filevault.security.PasswordUtils;
-import com.filevault.storage.DatabaseManager;
-import org.mindrot.jbcrypt.BCrypt;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import org.mindrot.jbcrypt.BCrypt;
+
+import com.filevault.security.PasswordUtils;
+import com.filevault.storage.DatabaseManager;
 
 /**
  * Verwaltet die Benutzerauthentifizierung und benutzerbezogene Operationen.

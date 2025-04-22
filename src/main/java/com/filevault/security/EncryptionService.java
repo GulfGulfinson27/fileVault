@@ -1,6 +1,10 @@
 package com.filevault.security;
 
-import com.filevault.model.UserManager;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -8,8 +12,8 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
-import java.security.SecureRandom;
+
+import com.filevault.model.UserManager;
 
 /**
  * Verarbeitet die Verschlüsselung und Entschlüsselung von Dateien mit AES-GCM.

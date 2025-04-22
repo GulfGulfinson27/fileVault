@@ -51,6 +51,25 @@ public class DatabaseManager {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
             
+            // Prüfen, ob die Tabellenstruktur korrekt ist
+            boolean needsRecreate = false;
+            try (Statement stmt = connection.createStatement()) {
+                // Prüfen, ob die parent_id Spalte existiert
+                stmt.execute("SELECT parent_id FROM folders LIMIT 1");
+            } catch (SQLException e) {
+                needsRecreate = true;
+            }
+            
+            if (needsRecreate) {
+                // Tabellen löschen und neu erstellen
+                try (Statement stmt = connection.createStatement()) {
+                    stmt.execute("DROP TABLE IF EXISTS files");
+                    stmt.execute("DROP TABLE IF EXISTS folders");
+                    stmt.execute("DROP TABLE IF EXISTS users");
+                    stmt.execute("DROP TABLE IF EXISTS settings");
+                }
+            }
+            
             // Tabellen erstellen, falls sie nicht existieren
             createTables();
             
@@ -78,7 +97,9 @@ public class DatabaseManager {
                          "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                          "name TEXT NOT NULL, " +
                          "description TEXT, " +
-                         "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+                         "parent_id INTEGER, " +
+                         "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                         "FOREIGN KEY (parent_id) REFERENCES folders(id))");
             
             // Dateitabelle
             stmt.execute("CREATE TABLE IF NOT EXISTS files (" +

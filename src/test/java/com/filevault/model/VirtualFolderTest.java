@@ -1,8 +1,12 @@
 package com.filevault.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Testklasse für die VirtualFolder-Klasse.
@@ -21,7 +25,8 @@ public class VirtualFolderTest {
         testFolder = new VirtualFolder(
             1,                      // id
             "Testordner",           // name
-            "Ein Testordner"        // description
+            "Ein Testordner",       // description
+            null                    // parentId
         );
     }
     
@@ -55,13 +60,16 @@ public class VirtualFolderTest {
      */
     @Test
     public void testEqualsAndHashCode() {
-        VirtualFolder sameId = new VirtualFolder(1, "Anderer Name", "Andere Beschreibung");
-        VirtualFolder differentId = new VirtualFolder(2, "Testordner", "Ein Testordner");
+        VirtualFolder sameId = new VirtualFolder(1, "Anderer Name", "Andere Beschreibung", null);
+        VirtualFolder differentId = new VirtualFolder(2, "Testordner", "Ein Testordner", null);
+        VirtualFolder differentParent = new VirtualFolder(1, "Testordner", "Ein Testordner", 5);
         
         assertTrue(testFolder.equals(sameId));
         assertFalse(testFolder.equals(differentId));
+        assertFalse(testFolder.equals(differentParent));
         assertEquals(testFolder.hashCode(), sameId.hashCode());
         assertNotEquals(testFolder.hashCode(), differentId.hashCode());
+        assertNotEquals(testFolder.hashCode(), differentParent.hashCode());
     }
     
     /**

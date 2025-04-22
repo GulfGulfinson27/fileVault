@@ -205,3 +205,21 @@
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
     -fx-text-fill: #e8e8e8;
 }
+
+.tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: #2196F3;
+}
+
+.tree-cell:expanded .tree-disclosure-node .arrow {
+    -fx-background-color: #2196F3;
+    -fx-rotate: 90;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.tree-cell:selected .tree-disclosure-node .arrow {
+    -fx-background-color: white;
+}

@@ -1,18 +1,23 @@
 package com.filevault.util;
 
-import com.filevault.model.VirtualFolder;
-import com.filevault.storage.DatabaseManager;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.filevault.model.VirtualFolder;
+import com.filevault.storage.DatabaseManager;
 
 /**
  * Testklasse für den FolderManager.
@@ -28,7 +33,7 @@ class FolderManagerTest {
      */
     @BeforeEach
     void setUp() throws Exception {
-        DatabaseManager.initDatabase();
+        DatabaseManager.initDatabase(true);  // Use test database
         
         testDataDir = Paths.get(System.getProperty("user.home"), ".filevault", "test_data");
         Files.createDirectories(testDataDir);
@@ -63,6 +68,9 @@ class FolderManagerTest {
                 folderManager.deleteFolder(folder);
             }
         }
+        
+        // Delete test database
+        DatabaseManager.deleteTestDatabase();
     }
 
     /**
@@ -70,14 +78,23 @@ class FolderManagerTest {
      * Überprüft, ob der Ordner korrekt erstellt wurde und in der Liste vorhanden ist.
      */
     @Test
-    void testOrdnerErstellen() {
-        VirtualFolder folder = folderManager.createFolder("TestFolder", "Test Description");
+    public void testOrdnerErstellen() {
+        // Teste Erstellung eines Root-Ordners
+        VirtualFolder rootFolder = folderManager.createFolder("Root", null);
+        assertNotNull(rootFolder);
+        assertEquals("Root", rootFolder.getName());
+        assertNull(rootFolder.getParentId());
         
-        assertNotNull(folder);
-        assertEquals("TestFolder", folder.getName());
-        assertEquals("Test Description", folder.getDescription());
+        // Teste Erstellung eines Unterordners
+        VirtualFolder subFolder = folderManager.createFolder("Sub", rootFolder.getId());
+        assertNotNull(subFolder);
+        assertEquals("Sub", subFolder.getName());
+        assertEquals(rootFolder.getId(), subFolder.getParentId());
         
-        assertTrue(folderManager.getFolders().contains(folder));
+        // Teste Erstellung eines Ordners mit ungültigem Namen
+        assertThrows(IllegalArgumentException.class, () -> {
+            folderManager.createFolder("", null);
+        });
     }
 
     /**
@@ -86,7 +103,8 @@ class FolderManagerTest {
      */
     @Test
     void testOrdnerUmbenennen() {
-        VirtualFolder folder = folderManager.createFolder("OldName", "Test Description");
+        VirtualFolder folder = folderManager.createFolder("OldName", null);
+        assertNotNull(folder);
         
         boolean success = folderManager.renameFolder(folder, "NewName");
         
@@ -100,11 +118,10 @@ class FolderManagerTest {
      */
     @Test
     void testOrdnerLoeschen() {
-        VirtualFolder folder = folderManager.createFolder("ToDelete", "Test Description");
+        VirtualFolder folder = folderManager.createFolder("ToDelete", null);
+        assertNotNull(folder);
         
-        boolean success = folderManager.deleteFolder(folder);
-        
-        assertTrue(success);
+        folderManager.deleteFolder(folder);
         assertFalse(folderManager.getFolders().contains(folder));
     }
 
@@ -114,10 +131,35 @@ class FolderManagerTest {
      */
     @Test
     void testAktuellerOrdner() {
-        VirtualFolder folder = folderManager.createFolder("CurrentFolder", "Test Description");
+        VirtualFolder folder = folderManager.createFolder("CurrentFolder", null);
         
         folderManager.setCurrentFolder(folder);
         
         assertEquals(folder, folderManager.getCurrentFolder());
+    }
+
+    @Test
+    public void testVerschachtelteOrdner() {
+        // Erstelle eine verschachtelte Ordnerstruktur
+        VirtualFolder root = folderManager.createFolder("Root", null);
+        assertNotNull(root);
+        VirtualFolder level1 = folderManager.createFolder("Level1", root.getId());
+        assertNotNull(level1);
+        VirtualFolder level2 = folderManager.createFolder("Level2", level1.getId());
+        assertNotNull(level2);
+        
+        // Teste die Hierarchie
+        assertEquals(root.getId(), level1.getParentId());
+        assertEquals(level1.getId(), level2.getParentId());
+        
+        // Teste das Löschen eines Ordners mit Unterordnern
+        assertThrows(IllegalStateException.class, () -> {
+            folderManager.deleteFolder(root);
+        });
+        
+        // Lösche zuerst die Unterordner
+        folderManager.deleteFolder(level2);
+        folderManager.deleteFolder(level1);
+        folderManager.deleteFolder(root);
     }
 } 

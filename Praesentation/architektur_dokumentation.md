@@ -248,7 +248,6 @@ CREATE TABLE files (
 - **UserTest**
   - Testet Benutzererstellung
   - Testet Authentifizierung
-  - Testet Berechtigungen
 
 - **FolderTest**
   - Testet Ordnererstellung
