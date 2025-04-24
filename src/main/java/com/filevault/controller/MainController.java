@@ -645,105 +645,107 @@ public class MainController {
      */
     @FXML
     public void handleChangePassword() {
-        Dialog<String[]> dialog = new Dialog<>();
-        dialog.setTitle("Change Master Password");
-        dialog.setHeaderText("Enter your current password and a new password");
-        
-        // Set the button types
-        ButtonType changeButtonType = new ButtonType("Change", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(changeButtonType, ButtonType.CANCEL);
-        
-        // Create the password fields
-        PasswordField currentPasswordField = new PasswordField();
-        currentPasswordField.setPromptText("Current password");
-        PasswordField newPasswordField = new PasswordField();
-        newPasswordField.setPromptText("New password");
-        PasswordField confirmPasswordField = new PasswordField();
-        confirmPasswordField.setPromptText("Confirm new password");
-        
-        // Enable/Disable change button depending on whether passwords are entered
-        Button changeButton = (Button) dialog.getDialogPane().lookupButton(changeButtonType);
-        changeButton.setDisable(true);
-        
-        currentPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
-            changeButton.setDisable(
-                    newValue.trim().isEmpty() || 
-                    newPasswordField.getText().trim().isEmpty() || 
-                    confirmPasswordField.getText().trim().isEmpty());
-        });
-        
-        newPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
-            changeButton.setDisable(
-                    currentPasswordField.getText().trim().isEmpty() || 
-                    newValue.trim().isEmpty() || 
-                    confirmPasswordField.getText().trim().isEmpty());
-        });
-        
-        confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
-            changeButton.setDisable(
-                    currentPasswordField.getText().trim().isEmpty() || 
-                    newPasswordField.getText().trim().isEmpty() || 
-                    newValue.trim().isEmpty());
-        });
-        
-        // Create and add the layout
-        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.add(new Label("Current password:"), 0, 0);
-        grid.add(currentPasswordField, 1, 0);
-        grid.add(new Label("New password:"), 0, 1);
-        grid.add(newPasswordField, 1, 1);
-        grid.add(new Label("Confirm new password:"), 0, 2);
-        grid.add(confirmPasswordField, 1, 2);
-        
-        dialog.getDialogPane().setContent(grid);
-        
-        Platform.runLater(currentPasswordField::requestFocus);
-        
-        // Convert the result to a password when the change button is clicked
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == changeButtonType) {
-                return new String[]{
-                        currentPasswordField.getText(),
-                        newPasswordField.getText(),
-                        confirmPasswordField.getText()
-                };
-            }
-            return null;
-        });
-        
-        Optional<String[]> result = dialog.showAndWait();
-        
-        result.ifPresent(passwords -> {
-            String currentPassword = passwords[0];
-            String newPassword = passwords[1];
-            String confirmPassword = passwords[2];
+        Platform.runLater(() -> {
+            Dialog<String[]> dialog = new Dialog<>();
+            dialog.setTitle("Change Master Password");
+            dialog.setHeaderText("Enter your current password and a new password");
             
-            if (!newPassword.equals(confirmPassword)) {
-                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwörter stimmen nicht überein.");
-                return;
-            }
+            // Set the button types
+            ButtonType changeButtonType = new ButtonType("Change", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(changeButtonType, ButtonType.CANCEL);
             
-            if (newPassword.length() < 8) {
-                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwort muss mindestens 8 Zeichen lang sein.");
-                return;
-            }
+            // Create the password fields
+            PasswordField currentPasswordField = new PasswordField();
+            currentPasswordField.setPromptText("Current password");
+            PasswordField newPasswordField = new PasswordField();
+            newPasswordField.setPromptText("New password");
+            PasswordField confirmPasswordField = new PasswordField();
+            confirmPasswordField.setPromptText("Confirm new password");
             
-            try {
-                boolean success = UserManager.getInstance().changePassword(currentPassword, newPassword);
-                
-                if (success) {
-                    statusLabel.setText("Passwort erfolgreich geändert.");
-                    showAlert(Alert.AlertType.INFORMATION, "Passwort geändert", "Dein Passwort wurde erfolgreich geändert.");
-                } else {
-                        statusLabel.setText("Fehler beim Ändern des Passworts.");
-                    showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts.");
+            // Enable/Disable change button depending on whether passwords are entered
+            Button changeButton = (Button) dialog.getDialogPane().lookupButton(changeButtonType);
+            changeButton.setDisable(true);
+            
+            currentPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+                changeButton.setDisable(
+                        newValue.trim().isEmpty() || 
+                        newPasswordField.getText().trim().isEmpty() || 
+                        confirmPasswordField.getText().trim().isEmpty());
+            });
+            
+            newPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+                changeButton.setDisable(
+                        currentPasswordField.getText().trim().isEmpty() || 
+                        newValue.trim().isEmpty() || 
+                        confirmPasswordField.getText().trim().isEmpty());
+            });
+            
+            confirmPasswordField.textProperty().addListener((observable, oldValue, newValue) -> {
+                changeButton.setDisable(
+                        currentPasswordField.getText().trim().isEmpty() || 
+                        newPasswordField.getText().trim().isEmpty() || 
+                        newValue.trim().isEmpty());
+            });
+            
+            // Create and add the layout
+            javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.add(new Label("Current password:"), 0, 0);
+            grid.add(currentPasswordField, 1, 0);
+            grid.add(new Label("New password:"), 0, 1);
+            grid.add(newPasswordField, 1, 1);
+            grid.add(new Label("Confirm new password:"), 0, 2);
+            grid.add(confirmPasswordField, 1, 2);
+            
+            dialog.getDialogPane().setContent(grid);
+            
+            Platform.runLater(currentPasswordField::requestFocus);
+            
+            // Convert the result to a password when the change button is clicked
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == changeButtonType) {
+                    return new String[]{
+                            currentPasswordField.getText(),
+                            newPasswordField.getText(),
+                            confirmPasswordField.getText()
+                    };
                 }
-            } catch (Exception e) {
-                statusLabel.setText("Fehler beim Ändern des Passworts: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts: " + e.getMessage());
-            }
+                return null;
+            });
+            
+            Optional<String[]> result = dialog.showAndWait();
+            
+            result.ifPresent(passwords -> {
+                String currentPassword = passwords[0];
+                String newPassword = passwords[1];
+                String confirmPassword = passwords[2];
+                
+                if (!newPassword.equals(confirmPassword)) {
+                    showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwörter stimmen nicht überein.");
+                    return;
+                }
+                
+                if (newPassword.length() < 8) {
+                    showAlert(Alert.AlertType.ERROR, "Passwort Error", "Passwort muss mindestens 8 Zeichen lang sein.");
+                    return;
+                }
+                
+                try {
+                    boolean success = UserManager.getInstance().changePassword(currentPassword, newPassword);
+                    
+                    if (success) {
+                        statusLabel.setText("Passwort erfolgreich geändert.");
+                        showAlert(Alert.AlertType.INFORMATION, "Passwort geändert", "Dein Passwort wurde erfolgreich geändert.");
+                    } else {
+                            statusLabel.setText("Fehler beim Ändern des Passworts.");
+                        showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts.");
+                    }
+                } catch (Exception e) {
+                    statusLabel.setText("Fehler beim Ändern des Passworts: " + e.getMessage());
+                    showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts: " + e.getMessage());
+                }
+            });
         });
     }
     

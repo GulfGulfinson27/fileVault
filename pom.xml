@@ -68,6 +68,14 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.77</version>
         </dependency>
+        
+        <!-- Mockito for mocking dependencies in tests -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.5.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
