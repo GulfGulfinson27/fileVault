@@ -817,4 +817,53 @@ public class MainController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
+
+    /**
+     * Setter for folderTreeView (for testing purposes).
+     */
+    public void setFolderTreeView(TreeView<VirtualFolder> folderTreeView) {
+        this.folderTreeView = folderTreeView;
+    }
+
+    /**
+     * Setter for fileTableView (for testing purposes).
+     */
+    public void setFileTableView(TableView<Object> fileTableView) {
+        this.fileTableView = fileTableView;
+    }
+
+    /**
+     * Setter for currentFolderLabel (for testing purposes).
+     */
+    public void setCurrentFolderLabel(Label currentFolderLabel) {
+        this.currentFolderLabel = currentFolderLabel;
+    }
+
+    /**
+     * Setter for statusLabel (for testing purposes).
+     */
+    public void setStatusLabel(Label statusLabel) {
+        this.statusLabel = statusLabel;
+    }
+
+    /**
+     * Setter for fileNameColumn (for testing purposes).
+     */
+    public void setFileNameColumn(TableColumn<Object, String> fileNameColumn) {
+        this.fileNameColumn = fileNameColumn;
+    }
+
+    /**
+     * Setter for fileSizeColumn (for testing purposes).
+     */
+    public void setFileSizeColumn(TableColumn<Object, String> fileSizeColumn) {
+        this.fileSizeColumn = fileSizeColumn;
+    }
+
+    /**
+     * Setter for fileDateColumn (for testing purposes).
+     */
+    public void setFileDateColumn(TableColumn<Object, String> fileDateColumn) {
+        this.fileDateColumn = fileDateColumn;
+    }
 }
