@@ -1,19 +1,23 @@
 package com.filevault.storage;
 
-import com.filevault.model.EncryptedFile;
-import com.filevault.model.VirtualFolder;
-import com.filevault.security.EncryptionService;
-import com.filevault.util.FolderManager;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.filevault.model.EncryptedFile;
+import com.filevault.model.VirtualFolder;
+import com.filevault.security.EncryptionService;
+import com.filevault.util.FolderManager;
 
 /**
  * Verwaltet die Speicherung und den Abruf verschlüsselter Dateien.
@@ -329,4 +333,47 @@ public class FileStorage {
             System.err.println("Fehler beim Aktualisieren des letzten Zugriffs: " + e.getMessage());
         }
     }
-} 
+
+    /**
+     * Retrieves all files from the database.
+     *
+     * @return A list of all encrypted files.
+     */
+    public List<EncryptedFile> getAllFiles() {
+        List<EncryptedFile> files = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM files ORDER BY original_name");
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Timestamp createdTimestamp = rs.getTimestamp("created_at");
+                Timestamp lastAccessTimestamp = rs.getTimestamp("last_access");
+
+                LocalDateTime createdAt = createdTimestamp != null
+                        ? createdTimestamp.toLocalDateTime()
+                        : null;
+
+                LocalDateTime lastAccess = lastAccessTimestamp != null
+                        ? lastAccessTimestamp.toLocalDateTime()
+                        : null;
+
+                EncryptedFile file = new EncryptedFile(
+                        rs.getInt("id"),
+                        rs.getInt("folder_id"),
+                        rs.getString("original_name"),
+                        rs.getString("encrypted_path"),
+                        rs.getLong("size_bytes"),
+                        rs.getString("mime_type"),
+                        createdAt,
+                        lastAccess
+                );
+                files.add(file);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving all files: " + e.getMessage());
+        }
+
+        return files;
+    }
+}

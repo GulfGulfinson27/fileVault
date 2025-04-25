@@ -73,7 +73,6 @@ public class DatabaseManager {
             // Tabellen erstellen, falls sie nicht existieren
             createTables();
             
-            System.out.println("Datenbank erfolgreich initialisiert: " + currentDbPath);
         } catch (Exception e) {
             System.err.println("Fehler beim Initialisieren der Datenbank: " + e.getMessage());
             e.printStackTrace();
@@ -160,4 +159,4 @@ public class DatabaseManager {
             System.err.println("Fehler beim Löschen der Testdatenbank: " + e.getMessage());
         }
     }
-} 
+}
