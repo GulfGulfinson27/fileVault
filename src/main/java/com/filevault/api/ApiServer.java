@@ -44,9 +44,6 @@ public class ApiServer {
         server.createContext("/api/auth", new AuthHandler());
         logger.info("Kontext /api/auth registriert.");
 
-        server.createContext("/api/info", new AuthMiddleware(new InfoHandler()));
-        logger.info("Kontext /api/info mit Authentifizierung registriert.");
-
         server.createContext("/api/folders", new AuthMiddleware(new FoldersHandler()));
         logger.info("Kontext /api/folders mit Authentifizierung registriert.");
 
@@ -152,30 +149,6 @@ public class ApiServer {
             } else {
                 logger.warning("Ungültiges oder fehlendes Token.");
                 exchange.sendResponseHeaders(401, -1); // Nicht autorisiert
-            }
-        }
-    }
-
-    /**
-     * Handler für die Verarbeitung von GET-Anfragen an /api/info.
-     */
-    static class InfoHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            Logger logger = Logger.getLogger(InfoHandler.class.getName());
-            logger.info("Verarbeite Anfrage an /api/info...");
-
-            if ("GET".equals(exchange.getRequestMethod())) {
-                String response = "Willkommen bei der FileVault API!";
-                logger.info("Antwort: " + response);
-
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
-                }
-            } else {
-                logger.warning("HTTP-Methode nicht erlaubt: " + exchange.getRequestMethod());
-                exchange.sendResponseHeaders(405, -1); // Methode nicht erlaubt
             }
         }
     }
@@ -499,6 +472,53 @@ public class ApiServer {
                         <meta charset=\"UTF-8\">
                         <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
                         <title>FileVault Web Interface</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 0;
+                                padding: 0;
+                                background-color: #f4f4f9;
+                                color: #333;
+                            }
+                            header {
+                                background-color: #6200ea;
+                                color: white;
+                                padding: 1rem;
+                                text-align: center;
+                            }
+                            main {
+                                padding: 2rem;
+                                max-width: 800px;
+                                margin: auto;
+                            }
+                            .card {
+                                background: white;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                                margin-bottom: 1rem;
+                                padding: 1rem;
+                            }
+                            button {
+                                background-color: #6200ea;
+                                color: white;
+                                border: none;
+                                padding: 0.5rem 1rem;
+                                border-radius: 4px;
+                                cursor: pointer;
+                            }
+                            button:hover {
+                                background-color: #3700b3;
+                            }
+                            input {
+                                padding: 0.5rem;
+                                margin-right: 0.5rem;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                            }
+                            .input-group {
+                                margin-bottom: 1rem;
+                            }
+                        </style>
                         <script>
                             let token = null;
 
@@ -519,38 +539,160 @@ public class ApiServer {
                                 }
                             }
 
-                            async function callEndpoint(endpoint) {
+                            async function callEndpoint(endpoint, method, body = null) {
                                 if (!token) {
                                     alert('Please authenticate first!');
                                     return;
                                 }
 
-                                const response = await fetch(endpoint, {
+                                const options = {
+                                    method,
+                                    headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                                };
+
+                                if (body) {
+                                    options.body = JSON.stringify(body);
+                                }
+
+                                const response = await fetch(endpoint, options);
+
+                                if (response.ok) {
+                                    const data = await response.text();
+                                    alert(`Response from ${endpoint}:
+${data}`);
+                                } else {
+                                    alert(`Failed to access ${endpoint}.`);
+                                }
+                            }
+
+                            function getInputValue(id) {
+                                return document.getElementById(id).value;
+                            }
+
+                            async function importFile() {
+                                const fileInput = document.getElementById('fileInput');
+                                const formData = new FormData();
+                                formData.append('file', fileInput.files[0]);
+
+                                const response = await fetch('/api/files/import', {
+                                    method: 'POST',
+                                    headers: { 'Authorization': token },
+                                    body: formData
+                                });
+
+                                if (response.ok) {
+                                    alert('File imported successfully!');
+                                } else {
+                                    alert('Failed to import file.');
+                                }
+                            }
+
+                            async function exportFile() {
+                                const fileId = getInputValue('fileId');
+                                const response = await fetch(`/api/files/export?id=${fileId}`, {
                                     method: 'GET',
                                     headers: { 'Authorization': token }
                                 });
 
                                 if (response.ok) {
-                                    const data = await response.text();
-                                    alert(`Response from ${endpoint}:\n${data}`);
+                                    const blob = await response.blob();
+                                    const contentDisposition = response.headers.get('Content-Disposition');
+                                    const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : `file_${fileId}.bin`;
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.style.display = 'none';
+                                    a.href = url;
+                                    a.download = fileName;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    window.URL.revokeObjectURL(url);
+                                    alert('File exported successfully!');
                                 } else {
-                                    alert(`Failed to access ${endpoint}.`);
+                                    alert('Failed to export file.');
+                                }
+                            }
+
+                            async function listFolders() {
+                                const response = await fetch('/api/folders', {
+                                    method: 'GET',
+                                    headers: { 'Authorization': token }
+                                });
+
+                                if (response.ok) {
+                                    const folders = await response.json();
+                                    alert(`Folders: ${JSON.stringify(folders)}`);
+                                } else {
+                                    alert('Failed to list folders.');
+                                }
+                            }
+
+                            async function createFolder() {
+                                const folderName = getInputValue('folderName');
+                                const response = await fetch('/api/folders', {
+                                    method: 'POST',
+                                    headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ name: folderName })
+                                });
+
+                                if (response.ok) {
+                                    alert('Folder created successfully!');
+                                } else {
+                                    alert('Failed to create folder.');
+                                }
+                            }
+
+                            async function deleteFolder() {
+                                const folderId = getInputValue('folderId');
+                                const response = await fetch(`/api/folders?id=${folderId}`, {
+                                    method: 'DELETE',
+                                    headers: { 'Authorization': token }
+                                });
+
+                                if (response.ok) {
+                                    alert('Folder deleted successfully!');
+                                } else {
+                                    alert('Failed to delete folder.');
                                 }
                             }
                         </script>
                     </head>
                     <body>
-                        <h1>FileVault Web Interface</h1>
-                        <div>
-                            <label for=\"password\">Password:</label>
-                            <input type=\"password\" id=\"password\" />
-                            <button onclick=\"authenticate()\">Authenticate</button>
-                        </div>
-                        <div>
-                            <button onclick=\"callEndpoint('/api/info')\">Get Info</button>
-                            <button onclick=\"callEndpoint('/api/folders')\">List Folders</button>
-                            <button onclick=\"callEndpoint('/api/files')\">List Files</button>
-                        </div>
+                        <header>
+                            <h1>FileVault Web Interface</h1>
+                        </header>
+                        <main>
+                            <div class=\"card\">
+                                <h2>Authenticate</h2>
+                                <input type=\"password\" id=\"password\" placeholder=\"Enter password\" />
+                                <button onclick=\"authenticate()\">Authenticate</button>
+                            </div>
+                            <div class=\"card\">
+                                <h2>Files</h2>
+                                <div class=\"input-group\">
+                                    <label for=\"fileInput\">Import File:</label>
+                                    <input type=\"file\" id=\"fileInput\" />
+                                    <button onclick=\"importFile()\">Import</button>
+                                </div>
+                                <div class=\"input-group\">
+                                    <input type=\"number\" id=\"fileId\" placeholder=\"File ID\" />
+                                    <button onclick=\"exportFile()\">Export</button>
+                                </div>
+                            </div>
+                            <div class=\"card\">
+                                <h2>Folders</h2>
+                                <div class=\"input-group\">
+                                    <button onclick=\"listFolders()\">List Folders</button>
+                                </div>
+                                <div class=\"input-group\">
+                                    <input type=\"text\" id=\"folderName\" placeholder=\"Folder Name\" />
+                                    <button onclick=\"createFolder()\">Create Folder</button>
+                                </div>
+                                <div class=\"input-group\">
+                                    <input type=\"number\" id=\"folderId\" placeholder=\"Folder ID\" />
+                                    <button onclick=\"deleteFolder()\">Delete Folder</button>
+                                </div>
+                            </div>
+                        </main>
                     </body>
                     </html>
                 """;
