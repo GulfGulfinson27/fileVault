@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.filevault.util.LoggingUtil;
+
 /**
  * Verwaltet die SQLite-Datenbankverbindung und das Schema.
  */
@@ -33,6 +35,7 @@ public class DatabaseManager {
      * @param isTest true für Testdatenbank, false für Produktionsdatenbank
      */
     public static void initDatabase(boolean isTest) {
+        LoggingUtil.logInfo("Initializing database. Test mode: " + isTest);
         try {
             currentDbPath = isTest ? TEST_DB_PATH : DB_PATH;
             
@@ -72,8 +75,10 @@ public class DatabaseManager {
             
             // Tabellen erstellen, falls sie nicht existieren
             createTables();
+            LoggingUtil.logInfo("Database initialized successfully.");
             
         } catch (Exception e) {
+            LoggingUtil.logSevere("Database initialization failed: " + e.getMessage());
             System.err.println("Fehler beim Initialisieren der Datenbank: " + e.getMessage());
             e.printStackTrace();
         }

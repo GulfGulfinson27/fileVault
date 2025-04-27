@@ -20,6 +20,7 @@ import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.DatabaseManager;
 import com.filevault.storage.FileStorage;
+import com.filevault.util.LoggingUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -38,24 +39,31 @@ public class ApiServer {
      * @throws IOException Wenn ein Fehler beim Starten des Servers auftritt.
      */
     public void start(int port) throws IOException {
-        Logger logger = Logger.getLogger(ApiServer.class.getName());
+        LoggingUtil.logInfo("Starting API server on port " + port);
+        try {
+            Logger logger = Logger.getLogger(ApiServer.class.getName());
 
-        server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/api/auth", new AuthHandler());
-        logger.info("Kontext /api/auth registriert.");
+            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server.createContext("/api/auth", new AuthHandler());
+            logger.info("Kontext /api/auth registriert.");
 
-        server.createContext("/api/folders", new AuthMiddleware(new FoldersHandler()));
-        logger.info("Kontext /api/folders mit Authentifizierung registriert.");
+            server.createContext("/api/folders", new AuthMiddleware(new FoldersHandler()));
+            logger.info("Kontext /api/folders mit Authentifizierung registriert.");
 
-        server.createContext("/api/files", new AuthMiddleware(new FileHandler()));
-        logger.info("Kontext /api/files mit Authentifizierung registriert.");
+            server.createContext("/api/files", new AuthMiddleware(new FileHandler()));
+            logger.info("Kontext /api/files mit Authentifizierung registriert.");
 
-        server.createContext("/", new WebInterfaceHandler());
-        logger.info("Kontext / für Web-Interface registriert.");
+            server.createContext("/", new WebInterfaceHandler());
+            logger.info("Kontext / für Web-Interface registriert.");
 
-        server.setExecutor(null); // Standard-Executor
-        server.start();
-        logger.log(Level.INFO, "API-Server gestartet auf Port {0}", port);
+            server.setExecutor(null); // Standard-Executor
+            server.start();
+            logger.log(Level.INFO, "API-Server gestartet auf Port {0}", port);
+            LoggingUtil.logInfo("API server started successfully.");
+        } catch (Exception e) {
+            LoggingUtil.logSevere("Failed to start API server: " + e.getMessage());
+            throw e;
+        }
     }
 
     /**

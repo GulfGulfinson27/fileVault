@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.filevault.storage.DatabaseManager;
+import com.filevault.util.LoggingUtil;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -33,18 +34,25 @@ public class FileVaultApp extends Application {
      */
     @Override
     public void start(Stage stage) throws IOException {
-        primaryStage = stage;
-        scene = new Scene(loadFXML("login"), 400, 600);
-        scene.getStylesheets().add(getClass().getResource("/com/filevault/css/dark-theme.css").toExternalForm());
-        stage.setScene(scene);
-        stage.setTitle("FileVault - Sicherer Dateispeicher");
+        LoggingUtil.logInfo("Starting FileVault application.");
         try {
-            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/app-icon.png"))));
+            primaryStage = stage;
+            scene = new Scene(loadFXML("login"), 400, 600);
+            scene.getStylesheets().add(getClass().getResource("/com/filevault/css/dark-theme.css").toExternalForm());
+            stage.setScene(scene);
+            stage.setTitle("FileVault - Sicherer Dateispeicher");
+            try {
+                stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/app-icon.png"))));
+            } catch (Exception e) {
+                System.err.println("Anwendungs-Icon konnte nicht geladen werden: " + e.getMessage());
+            }
+            stage.setResizable(true);
+            stage.show();
+            LoggingUtil.logInfo("FileVault application started successfully.");
         } catch (Exception e) {
-            System.err.println("Anwendungs-Icon konnte nicht geladen werden: " + e.getMessage());
+            LoggingUtil.logSevere("Failed to start FileVault application: " + e.getMessage());
+            throw e;
         }
-        stage.setResizable(true);
-        stage.show();
     }
 
     /**
@@ -115,4 +123,4 @@ public class FileVaultApp extends Application {
     public static void main(String[] args) {
         launch();
     }
-} 
+}

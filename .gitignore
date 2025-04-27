@@ -39,6 +39,7 @@ FileVault-shaded.jar
 *.rar
 
 # Log Dateien
+logs/
 *.log
 
 # User-spezifische Dateien

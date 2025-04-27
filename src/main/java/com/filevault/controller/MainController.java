@@ -12,6 +12,7 @@ import com.filevault.model.UserManager;
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.FileStorage;
 import com.filevault.util.FolderManager;
+import com.filevault.util.LoggingUtil;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -86,6 +87,7 @@ public class MainController {
      */
     @FXML
     public void initialize() {
+        LoggingUtil.logInfo("MainController initialized.");
         // Initialize folder tree
         refreshFolderTree();
         
@@ -238,6 +240,7 @@ public class MainController {
      */
     @FXML
     public void handleImportFile() {
+        LoggingUtil.logInfo("Starting file import.");
         VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
         if (currentFolder == null) {
             showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie zuerst einen Ordner aus.");
@@ -257,10 +260,12 @@ public class MainController {
                 if (encryptedFile != null) {
                     refreshFileList();
                     statusLabel.setText("Datei erfolgreich importiert.");
+                    LoggingUtil.logInfo("File imported successfully.");
                 } else {
                     statusLabel.setText("Import der Datei fehlgeschlagen.");
                 }
             } catch (Exception e) {
+                LoggingUtil.logSevere("Error importing file: " + e.getMessage());
                 statusLabel.setText("Fehler beim Importieren: " + e.getMessage());
                 showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren der Datei: " + e.getMessage());
             }

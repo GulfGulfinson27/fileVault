@@ -25,6 +25,14 @@ FileVault ist eine Java-basierte Anwendung zur sicheren Verwaltung und Verschlü
   - Einfache Navigation
   - Sichere Passwort-basierte Authentifizierung
 
+### 2.4 Logging
+- **Dateibasierte Protokollierung**:
+  - Loggt wichtige Aktionen und Fehler in einer rotierenden Logdatei
+  - Speicherort: `logs/filevault_log.log`
+  - Unterstützt verschiedene Log-Level (INFO, WARN, SEVERE)
+  - Die ältesten Logs werden überschrieben, wenn die Datei ihre maximale Größe erreicht
+  - Ermöglicht einfache Fehlerdiagnose und Überwachung
+
 ## 3. Technische Architektur
 ### 3.1 Projektstruktur
 - **Controller**: Steuert die Anwendungslogik
@@ -242,8 +250,3 @@ Das Projekt durchlief mehrere Entwicklungsphasen:
   - Speicherort: `~/.filevault/data/`
   - Verschlüsselte Inhalte
   - Metadaten
-
-- **Konfigurationsdateien**:
-  - Benutzereinstellungen
-  - Systemkonfiguration
-  - Log-Dateien 

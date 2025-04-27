@@ -1,10 +1,12 @@
 package com.filevault.controller;
 
+import java.io.IOException;
+
 import com.filevault.FileVaultApp;
 import com.filevault.model.UserManager;
-import com.filevault.security.PasswordUtils;
-import com.filevault.storage.DatabaseManager;
 import com.filevault.util.FolderManager;
+import com.filevault.util.LoggingUtil;
+
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,8 +14,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-
-import java.io.IOException;
 
 /**
  * Controller für die Authentifizierung und Registrierung von Benutzern.
@@ -72,10 +72,12 @@ public class AuthController {
      */
     @FXML
     public void handleLogin() {
+        LoggingUtil.logInfo("Login attempt started.");
         String password = passwordField.getText();
         
         if (password.isEmpty()) {
             showMessage("Bitte geben Sie Ihr Passwort ein", true);
+            LoggingUtil.logSevere("Login failed: Password field is empty.");
             return;
         }
         
@@ -86,6 +88,7 @@ public class AuthController {
                 FolderManager.getInstance().initialize();
                 
                 showMessage("Anmeldung erfolgreich!", false);
+                LoggingUtil.logInfo("Login successful.");
                 
                 PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                 pause.setOnFinished(event -> {
@@ -93,15 +96,18 @@ public class AuthController {
                         FileVaultApp.showMainView();
                     } catch (IOException e) {
                         showMessage("Fehler beim Laden der Hauptansicht: " + e.getMessage(), true);
+                        LoggingUtil.logSevere("Error loading main view: " + e.getMessage());
                     }
                 });
                 pause.play();
                 
             } catch (Exception e) {
                 showMessage("Fehler beim Initialisieren der Anwendung: " + e.getMessage(), true);
+                LoggingUtil.logSevere("Error initializing application: " + e.getMessage());
             }
         } else {
             showMessage("Ungültiges Passwort", true);
+            LoggingUtil.logSevere("Login failed: Invalid password.");
         }
     }
     
