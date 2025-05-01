@@ -1,82 +1,139 @@
 package com.filevault.util;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.LinkedList;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- * Utility-Klasse für das Logging in Dateien mit Ringpuffer-Mechanismus.
+ * Utility-Klasse für das Logging in einem benutzerdefinierten Ringpuffer.
  */
 public class LoggingUtil {
 
-    private static final int MAX_LOG_FILES = 1;
-    private static final int MAX_FILE_SIZE = 100 * 100; // 1 MB
-    private static final String LOG_DIR = "logs";
-    private static final String LOG_FILE_PREFIX = "filevault_log";
-
-    private static final Logger logger = Logger.getLogger("FileVaultLogger");
+    private static final int RING_BUFFER_CAPACITY = 100; // Kapazität des Ringpuffers
+    private static final ArrayBlockingQueue<String> ringBuffer = new ArrayBlockingQueue<>(RING_BUFFER_CAPACITY);
+    private static final LinkedList<String> fileRingBuffer = new LinkedList<>();
+    private static final String LOG_FILE_PATH = "logs/filevault_log.log";
+    private static String logFilePath = LOG_FILE_PATH;
+    private static boolean loggingEnabled = true;
 
     static {
         try {
-            Files.createDirectories(Paths.get(LOG_DIR));
-            setupLogger();
+            Path logDir = Paths.get("logs");
+            if (!Files.exists(logDir)) {
+                Files.createDirectories(logDir);
+            }
         } catch (IOException e) {
-            System.err.println("Fehler beim Initialisieren des Loggers: " + e.getMessage());
+            System.err.println("Fehler beim Erstellen des Log-Verzeichnisses: " + e.getMessage());
         }
     }
 
     /**
-     * Initialisiert den Logger mit einem Rotating-File-Handler.
+     * Sets the log file path for testing purposes.
+     *
+     * @param path The new log file path.
      */
-    private static void setupLogger() throws IOException {
-        logger.setUseParentHandlers(false);
+    public static void setLogFilePath(String path) {
+        logFilePath = path;
+    }
 
-        String logFileName = LOG_DIR + "/" + LOG_FILE_PREFIX + ".log";
+    /**
+     * Disables logging.
+     */
+    public static void disableLogging() {
+        loggingEnabled = false;
+    }
 
-        // Configure the FileHandler to use a rotating log mechanism
-        FileHandler fileHandler = new FileHandler(logFileName, MAX_FILE_SIZE, MAX_LOG_FILES, true) {
-            @Override
-            public synchronized void publish(java.util.logging.LogRecord record) {
-                super.publish(record);
-                flush(); // Ensure logs are written immediately
+    /**
+     * Enables logging.
+     */
+    public static void enableLogging() {
+        loggingEnabled = true;
+    }
+
+    /**
+     * Fügt eine Log-Nachricht zum Ringpuffer hinzu und schreibt sie in die Logdatei.
+     *
+     * @param message Die zu loggende Nachricht
+     */
+    public static void log(String message) {
+        if (!loggingEnabled) {
+            return;
+        }
+
+        if (!ringBuffer.offer(message)) {
+            ringBuffer.poll();
+            ringBuffer.offer(message);
+        }
+
+        synchronized (fileRingBuffer) {
+            fileRingBuffer.add(message);
+            if (fileRingBuffer.size() > RING_BUFFER_CAPACITY) {
+                fileRingBuffer.removeFirst();
             }
-        };
 
-        fileHandler.setFormatter(new SimpleFormatter());
-        logger.addHandler(fileHandler);
-
-        // Ensure all loggers write to the same file
-        Logger rootLogger = Logger.getLogger("");
-        rootLogger.addHandler(fileHandler);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFilePath, false))) {
+                for (String logMessage : fileRingBuffer) {
+                    writer.write(logMessage);
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                System.err.println("Error writing to log file: " + e.getMessage());
+            }
+        }
     }
 
     /**
-     * Loggt eine Nachricht auf INFO-Level.
+     * Logs an informational message.
      *
-     * @param message Die zu loggende Nachricht
+     * @param className The name of the class where the log is generated.
+     * @param message   The message to log.
      */
-    public static void logInfo(String message) {
-        logger.info(message);
+    public static void logInfo(String className, String message) {
+        log("INFO: [" + className + "] " + message);
     }
 
     /**
-     * Loggt eine Nachricht auf WARN-Level.
+     * Logs an error message.
      *
-     * @param message Die zu loggende Nachricht
+     * @param className The name of the class where the log is generated.
+     * @param message   The message to log.
      */
-    public static void logWarning(String message) {
-        logger.warning(message);
+    public static void logError(String className, String message) {
+        log("ERROR: [" + className + "] " + message);
     }
 
     /**
-     * Loggt eine Nachricht auf SEVERE-Level.
+     * Logs a severe error message.
      *
-     * @param message Die zu loggende Nachricht
+     * @param className The name of the class where the log is generated.
+     * @param message   The message to log.
      */
-    public static void logSevere(String message) {
-        logger.severe(message);
+    public static void logSevere(String className, String message) {
+        log("SEVERE: [" + className + "] " + message);
+    }
+
+    /**
+     * Logs a database-related message.
+     *
+     * @param operation The database operation (e.g., "Get", "Put").
+     * @param target    The target of the operation (e.g., "File", "Folder").
+     * @param message   The message to log.
+     */
+    public static void logDatabase(String operation, String target, String message) {
+        log("DATABASE: [" + operation + " " + target + "] " + message);
+    }
+
+    /**
+     * Gibt alle Log-Nachrichten im Ringpuffer zurück.
+     *
+     * @return Ein Array mit allen Log-Nachrichten
+     */
+    public static String[] getLogs() {
+        return ringBuffer.toArray(String[]::new);
     }
 }

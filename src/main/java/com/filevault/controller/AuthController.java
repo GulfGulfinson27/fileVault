@@ -72,12 +72,12 @@ public class AuthController {
      */
     @FXML
     public void handleLogin() {
-        LoggingUtil.logInfo("Login attempt started.");
+        LoggingUtil.logInfo("AuthController", "Login attempt started.");
         String password = passwordField.getText();
         
         if (password.isEmpty()) {
             showMessage("Bitte geben Sie Ihr Passwort ein", true);
-            LoggingUtil.logSevere("Login failed: Password field is empty.");
+            LoggingUtil.logError("AuthController", "Login failed: Password field is empty.");
             return;
         }
         
@@ -88,7 +88,7 @@ public class AuthController {
                 FolderManager.getInstance().initialize();
                 
                 showMessage("Anmeldung erfolgreich!", false);
-                LoggingUtil.logInfo("Login successful.");
+                LoggingUtil.logInfo("AuthController", "Login successful.");
                 
                 PauseTransition pause = new PauseTransition(Duration.seconds(0.5));
                 pause.setOnFinished(event -> {
@@ -96,18 +96,18 @@ public class AuthController {
                         FileVaultApp.showMainView();
                     } catch (IOException e) {
                         showMessage("Fehler beim Laden der Hauptansicht: " + e.getMessage(), true);
-                        LoggingUtil.logSevere("Error loading main view: " + e.getMessage());
+                        LoggingUtil.logError("AuthController", "Error loading main view: " + e.getMessage());
                     }
                 });
                 pause.play();
                 
             } catch (Exception e) {
                 showMessage("Fehler beim Initialisieren der Anwendung: " + e.getMessage(), true);
-                LoggingUtil.logSevere("Error initializing application: " + e.getMessage());
+                LoggingUtil.logError("AuthController", "Error initializing application: " + e.getMessage());
             }
         } else {
             showMessage("Ungültiges Passwort", true);
-            LoggingUtil.logSevere("Login failed: Invalid password.");
+            LoggingUtil.logError("AuthController", "Login failed: Invalid password.");
         }
     }
     

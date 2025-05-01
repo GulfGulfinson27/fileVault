@@ -34,7 +34,7 @@ public class FileVaultApp extends Application {
      */
     @Override
     public void start(Stage stage) throws IOException {
-        LoggingUtil.logInfo("Starting FileVault application.");
+        LoggingUtil.logInfo("FileVaultApp", "Starting FileVault application.");
         try {
             primaryStage = stage;
             scene = new Scene(loadFXML("login"), 400, 600);
@@ -48,9 +48,15 @@ public class FileVaultApp extends Application {
             }
             stage.setResizable(true);
             stage.show();
-            LoggingUtil.logInfo("FileVault application started successfully.");
+            LoggingUtil.logInfo("FileVaultApp", "FileVault application started successfully.");
+        } catch (IOException e) {
+            LoggingUtil.logSevere("FileVaultApp", "Failed to load FXML file: " + e.getMessage());
+            throw e;
+        } catch (NullPointerException e) {
+            LoggingUtil.logSevere("FileVaultApp", "A required resource was not found: " + e.getMessage());
+            throw e;
         } catch (Exception e) {
-            LoggingUtil.logSevere("Failed to start FileVault application: " + e.getMessage());
+            LoggingUtil.logSevere("FileVaultApp", "An unexpected error occurred: " + e.getMessage());
             throw e;
         }
     }

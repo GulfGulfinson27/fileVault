@@ -87,7 +87,7 @@ public class MainController {
      */
     @FXML
     public void initialize() {
-        LoggingUtil.logInfo("MainController initialized.");
+        LoggingUtil.logInfo("MainController", "MainController initialized.");
         // Initialize folder tree
         refreshFolderTree();
         
@@ -240,7 +240,7 @@ public class MainController {
      */
     @FXML
     public void handleImportFile() {
-        LoggingUtil.logInfo("Starting file import.");
+        LoggingUtil.logInfo("MainController", "Starting file import.");
         VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
         if (currentFolder == null) {
             showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie zuerst einen Ordner aus.");
@@ -260,12 +260,12 @@ public class MainController {
                 if (encryptedFile != null) {
                     refreshFileList();
                     statusLabel.setText("Datei erfolgreich importiert.");
-                    LoggingUtil.logInfo("File imported successfully.");
+                    LoggingUtil.logInfo("MainController", "File imported successfully.");
                 } else {
                     statusLabel.setText("Import der Datei fehlgeschlagen.");
                 }
             } catch (Exception e) {
-                LoggingUtil.logSevere("Error importing file: " + e.getMessage());
+                LoggingUtil.logError("MainController", "Error importing file: " + e.getMessage());
                 statusLabel.setText("Fehler beim Importieren: " + e.getMessage());
                 showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren der Datei: " + e.getMessage());
             }

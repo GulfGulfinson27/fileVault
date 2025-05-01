@@ -35,7 +35,7 @@ public class DatabaseManager {
      * @param isTest true für Testdatenbank, false für Produktionsdatenbank
      */
     public static void initDatabase(boolean isTest) {
-        LoggingUtil.logInfo("Initializing database. Test mode: " + isTest);
+        LoggingUtil.logDatabase("Initialize", "Database", "Initializing database. Test mode: " + isTest);
         try {
             currentDbPath = isTest ? TEST_DB_PATH : DB_PATH;
             
@@ -75,10 +75,10 @@ public class DatabaseManager {
             
             // Tabellen erstellen, falls sie nicht existieren
             createTables();
-            LoggingUtil.logInfo("Database initialized successfully.");
+            LoggingUtil.logDatabase("Initialize", "Database", "Database initialized successfully.");
             
         } catch (Exception e) {
-            LoggingUtil.logSevere("Database initialization failed: " + e.getMessage());
+            LoggingUtil.logDatabase("Initialize", "Database", "Database initialization failed: " + e.getMessage());
             System.err.println("Fehler beim Initialisieren der Datenbank: " + e.getMessage());
             e.printStackTrace();
         }
