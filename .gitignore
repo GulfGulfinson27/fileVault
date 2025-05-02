@@ -44,3 +44,6 @@ logs/
 
 # User-spezifische Dateien
 .filevault/
+
+# Meine Todos
+Todo.txt

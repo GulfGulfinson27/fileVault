@@ -67,11 +67,11 @@ Die FileVault API bietet eine Reihe von Endpunkten, um Dateien und Ordner zu ver
 ---
 
 ## Beispielanfragen
-
+# WICHTIG: Die folgenden Anfragen sind nur auf Linux möglich
 ### Authentifizierung
 **Anfrage:**
 ```bash
-curl -X POST -d "password=11111111" http://localhost:9090/api/auth
+curl -X POST -d "password=abc123" http://localhost:9090/api/auth
 ```
 **Antwort:**
 ```json
@@ -118,10 +118,5 @@ curl -X GET -H "Authorization: f3875e91-e8df-4b4d-9c0a-3b990f9202a5" http://loca
 
 ---
 
-## Hinweise
+## Hinweis
 - Alle Anfragen an geschützte Endpunkte erfordern ein gültiges Token im `Authorization`-Header.
-- Das Masterpasswort für die Authentifizierung lautet `11111111` (kann in der Implementierung geändert werden).
-
----
-
-Diese Dokumentation wird regelmäßig aktualisiert, um neue Funktionen und Änderungen zu berücksichtigen.

@@ -46,8 +46,9 @@ public class LoggingUtilTest {
     @Test
     void testLogRingBufferBehavior() throws IOException {
         this.setUp();
+        int ringBufferCapacity = LoggingUtil.getRingBufferCapacity();
         // Log more messages than the ring buffer capacity
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= ringBufferCapacity + 5; i++) {
             LoggingUtil.log("Test log message " + i);
         }
 
@@ -56,10 +57,10 @@ public class LoggingUtilTest {
         assertTrue(Files.exists(logFilePath), "Log file should exist");
 
         List<String> logLines = Files.readAllLines(logFilePath);
-        assertEquals(10, logLines.size(), "Log file should contain 10 most recent messages");
+        assertEquals(ringBufferCapacity, logLines.size(), "Log file should contain the most recent messages");
 
         // Verify the content of the log file
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < ringBufferCapacity; i++) {
             assertEquals("Test log message " + (i + 6), logLines.get(i), "Log file content mismatch");
         }
         this.tearDown();

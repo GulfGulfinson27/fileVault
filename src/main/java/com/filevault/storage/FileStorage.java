@@ -376,4 +376,100 @@ public class FileStorage {
 
         return files;
     }
+
+    /**
+     * Retrieves files by folder ID.
+     *
+     * @param folderId The ID of the folder.
+     * @return A list of files in the specified folder.
+     */
+    public List<EncryptedFile> getFilesByFolderId(int folderId) {
+        List<EncryptedFile> files = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT * FROM files WHERE folder_id = ? ORDER BY original_name")) {
+
+            stmt.setInt(1, folderId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Timestamp createdTimestamp = rs.getTimestamp("created_at");
+                    Timestamp lastAccessTimestamp = rs.getTimestamp("last_access");
+
+                    LocalDateTime createdAt = createdTimestamp != null
+                            ? createdTimestamp.toLocalDateTime()
+                            : null;
+
+                    LocalDateTime lastAccess = lastAccessTimestamp != null
+                            ? lastAccessTimestamp.toLocalDateTime()
+                            : null;
+
+                    EncryptedFile file = new EncryptedFile(
+                            rs.getInt("id"),
+                            rs.getInt("folder_id"),
+                            rs.getString("original_name"),
+                            rs.getString("encrypted_path"),
+                            rs.getLong("size_bytes"),
+                            rs.getString("mime_type"),
+                            createdAt,
+                            lastAccess
+                    );
+                    files.add(file);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving files by folder ID: " + e.getMessage());
+        }
+
+        return files;
+    }
+
+    /**
+     * Creates a new file record in the database.
+     *
+     * @param fileName The name of the file.
+     * @param folderId The ID of the folder where the file belongs.
+     * @return The created EncryptedFile object.
+     */
+    public EncryptedFile createFileRecord(String fileName, int folderId) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
+                             "VALUES (?, ?, '', 0, 'application/octet-stream', CURRENT_TIMESTAMP)",
+                     PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setInt(1, folderId);
+            stmt.setString(2, fileName);
+
+            int affected = stmt.executeUpdate();
+
+            if (affected > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int id = generatedKeys.getInt(1);
+
+                        return new EncryptedFile(
+                                id,
+                                folderId,
+                                fileName,
+                                "",
+                                0,
+                                "application/octet-stream",
+                                LocalDateTime.now(),
+                                null
+                        );
+                    } else {
+                        System.err.println("No generated keys returned for the new file record.");
+                    }
+                }
+            } else {
+                System.err.println("No rows were affected when attempting to insert the file record.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error creating file record: " + e.getMessage());
+        }
+
+        return null;
+    }
 }

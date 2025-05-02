@@ -136,4 +136,13 @@ public class LoggingUtil {
     public static String[] getLogs() {
         return ringBuffer.toArray(String[]::new);
     }
+
+    /**
+     * Returns the maximum capacity of the ring buffer.
+     *
+     * @return The ring buffer capacity.
+     */
+    public static int getRingBufferCapacity() {
+        return RING_BUFFER_CAPACITY;
+    }
 }

@@ -1,10 +1,8 @@
 package com.filevault.api;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.filevault.model.EncryptedFile;
-import com.filevault.model.VirtualFolder;
 import com.filevault.storage.DatabaseManager;
 import com.filevault.storage.FileStorage;
 import com.filevault.util.LoggingUtil;
@@ -207,14 +204,15 @@ public class ApiServer {
             logger.log(Level.INFO, "Liste alle Ordner auf...");
             StringBuilder response = new StringBuilder("[");
             try (Connection conn = DatabaseManager.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement("SELECT id, name FROM folders");
+                 PreparedStatement stmt = conn.prepareStatement("SELECT id, name, COALESCE(parent_id, 0) AS parent_id FROM folders");
                  ResultSet rs = stmt.executeQuery()) {
 
                 while (rs.next()) {
                     if (response.length() > 1) {
                         response.append(",");
                     }
-                    response.append(String.format("{\"id\":%d,\"name\":\"%s\"}", rs.getInt("id"), rs.getString("name")));
+                    response.append(String.format("{\"id\":%d,\"name\":\"%s\",\"parentFolderId\":%d}",
+                            rs.getInt("id"), rs.getString("name"), rs.getInt("parent_id")));
                 }
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Datenbankfehler: {0}", e.getMessage());
@@ -232,18 +230,24 @@ public class ApiServer {
 
                 // Parse JSON to extract folder details
                 String folderName = parseJson(requestBody, "name");
+                int parentFolderId = requestBody.contains("parentFolderId")
+                        ? Integer.parseInt(parseJson(requestBody, "parentFolderId"))
+                        : 0; // Default to root folder
 
                 try (Connection conn = DatabaseManager.getConnection();
-                     PreparedStatement stmt = conn.prepareStatement("INSERT INTO folders (name) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS)) {
+                     PreparedStatement stmt = conn.prepareStatement(
+                             "INSERT INTO folders (name, parent_id) VALUES (?, ?)",
+                             PreparedStatement.RETURN_GENERATED_KEYS)) {
 
                     stmt.setString(1, folderName);
+                    stmt.setInt(2, parentFolderId);
                     stmt.executeUpdate();
 
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             int folderId = generatedKeys.getInt(1);
                             logger.log(Level.INFO, "Ordner erstellt mit ID: {0}", folderId);
-                            return String.format("{\"id\":%d,\"name\":\"%s\"}", folderId, folderName);
+                            return String.format("{\"id\":%d,\"name\":\"%s\",\"parentFolderId\":%d}", folderId, folderName, parentFolderId);
                         } else {
                             throw new SQLException("Erstellen des Ordners fehlgeschlagen, keine ID erhalten.");
                         }
@@ -342,24 +346,17 @@ public class ApiServer {
 
             switch (method) {
                 case "GET" -> {
-                    response = listFiles();
+                    response = listFiles(exchange);
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                 }
-                case "POST" -> {
-                    response = uploadFile(exchange);
-                    exchange.sendResponseHeaders(201, response.getBytes().length);
-                }
-                case "PUT" -> {
-                    response = updateFile(exchange);
-                    exchange.sendResponseHeaders(200, response.getBytes().length);
-                }
-                case "DELETE" -> {
-                    response = deleteFile(exchange);
-                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                case "POST", "PUT", "DELETE" -> {
+                    response = "Diese Aktion ist nicht erlaubt.";
+                    logger.log(Level.WARNING, "Methode nicht erlaubt: {0}", method);
+                    exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
                 default -> {
-                    response = "Methode nicht erlaubt.";
-                    logger.log(Level.WARNING, "Methode nicht erlaubt: {0}", method);
+                    response = "Methode nicht unterstützt.";
+                    logger.log(Level.WARNING, "Methode nicht unterstützt: {0}", method);
                     exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
             }
@@ -369,12 +366,11 @@ public class ApiServer {
             }
         }
 
-        private String listFiles() {
+        private String listFiles(HttpExchange exchange) {
             try {
                 FileStorage fileStorage = FileStorage.getInstance();
-                logger.info("Rufe alle Dateien ab...");
+                logger.info("Rufe alle Dateien aus allen Ordnern ab...");
 
-                // Fetch all files instead of limiting to the root folder
                 List<EncryptedFile> files = fileStorage.getAllFiles();
 
                 if (files.isEmpty()) {
@@ -390,84 +386,15 @@ public class ApiServer {
                     if (response.length() > 1) {
                         response.append(",");
                     }
-                    response.append(String.format("{\"id\":%d,\"name\":\"%s\"}",
-                            file.getId(), file.getOriginalName()));
+                    response.append(String.format("{\"id\":%d,\"name\":\"%s\",\"folderId\":%d}",
+                            file.getId(), file.getOriginalName(), file.getFolderId()));
                 }
 
                 response.append("]");
                 return response.toString();
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Fehler beim Auflisten der Dateien: {0}", e.getMessage());
-                return "Fehler beim Auflisten der Dateien: " + e.getMessage();
-            }
-        }
-
-        private String uploadFile(HttpExchange exchange) {
-            try {
-                // Parse the request body to get file data (placeholder logic)
-                byte[] fileData = exchange.getRequestBody().readAllBytes();
-
-                File tempFile = File.createTempFile("upload", null);
-                Files.write(tempFile.toPath(), fileData);
-
-                FileStorage fileStorage = FileStorage.getInstance();
-                // Updated to use the correct VirtualFolder constructor
-                EncryptedFile encryptedFile = fileStorage.importFile(tempFile, new VirtualFolder(0, "Root", "Root folder", null));
-
-                String response = String.format("Datei '%s' erfolgreich hochgeladen mit ID %d.",
-                        encryptedFile.getOriginalName(), encryptedFile.getId());
-                logger.info(response);
-                return response;
-            } catch (Exception e) {
-                String errorMessage = "Fehler beim Hochladen der Datei: " + e.getMessage();
-                logger.log(Level.SEVERE, errorMessage);
-                return errorMessage;
-            }
-        }
-
-        private String updateFile(HttpExchange exchange) {
-            try {
-                String requestBody = new String(exchange.getRequestBody().readAllBytes());
-                logger.log(Level.INFO, "Empfangene Anfrage zum Aktualisieren einer Datei: {0}", requestBody);
-                // Parse JSON and update file logic here
-                return "Datei erfolgreich aktualisiert.";
-            } catch (IOException | NumberFormatException e) {
-                logger.log(Level.SEVERE, "Fehler beim Aktualisieren der Datei: {0}", e.getMessage());
-                return "Fehler beim Aktualisieren der Datei: " + e.getMessage();
-            }
-        }
-
-        private String deleteFile(HttpExchange exchange) {
-            try {
-                // Extract file ID from the query parameters (placeholder logic)
-                String query = exchange.getRequestURI().getQuery();
-                int fileId = Integer.parseInt(query.split("=")[1]);
-                logger.log(Level.INFO, "Empfangene Anfrage zum Löschen der Datei mit ID: {0}", fileId);
-
-                FileStorage fileStorage = FileStorage.getInstance();
-                EncryptedFile fileToDelete = fileStorage.getFileById(fileId);
-
-                if (fileToDelete == null) {
-                    String message = String.format("Datei mit ID %d nicht gefunden.", fileId);
-                    logger.warning(message);
-                    return message;
-                }
-
-                boolean success = fileStorage.deleteFile(fileToDelete);
-
-                if (success) {
-                    String message = String.format("Datei mit ID %d erfolgreich gelöscht.", fileId);
-                    logger.info(message);
-                    return message;
-                } else {
-                    String message = String.format("Löschen der Datei mit ID %d fehlgeschlagen.", fileId);
-                    logger.warning(message);
-                    return message;
-                }
-            } catch (Exception e) {
-                String errorMessage = "Fehler beim Löschen der Datei: " + e.getMessage();
-                logger.log(Level.SEVERE, errorMessage);
-                return errorMessage;
+                logger.log(Level.SEVERE, "Fehler beim Abrufen aller Dateien: {0}", e.getMessage());
+                return "Fehler beim Abrufen aller Dateien: " + e.getMessage();
             }
         }
     }
@@ -583,49 +510,6 @@ ${data}`);
                                 return document.getElementById(id).value;
                             }
 
-                            async function importFile() {
-                                const fileInput = document.getElementById('fileInput');
-                                const formData = new FormData();
-                                formData.append('file', fileInput.files[0]);
-
-                                const response = await fetch('/api/files/import', {
-                                    method: 'POST',
-                                    headers: { 'Authorization': token },
-                                    body: formData
-                                });
-
-                                if (response.ok) {
-                                    alert('File imported successfully!');
-                                } else {
-                                    alert('Failed to import file.');
-                                }
-                            }
-
-                            async function exportFile() {
-                                const fileId = getInputValue('fileId');
-                                const response = await fetch(`/api/files/export?id=${fileId}`, {
-                                    method: 'GET',
-                                    headers: { 'Authorization': token }
-                                });
-
-                                if (response.ok) {
-                                    const blob = await response.blob();
-                                    const contentDisposition = response.headers.get('Content-Disposition');
-                                    const fileName = contentDisposition ? contentDisposition.split('filename=')[1] : `file_${fileId}.bin`;
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.style.display = 'none';
-                                    a.href = url;
-                                    a.download = fileName;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    window.URL.revokeObjectURL(url);
-                                    alert('File exported successfully!');
-                                } else {
-                                    alert('Failed to export file.');
-                                }
-                            }
-
                             async function listFolders() {
                                 const response = await fetch('/api/folders', {
                                     method: 'GET',
@@ -675,35 +559,34 @@ ${data}`);
                             <h1>FileVault Web Interface</h1>
                         </header>
                         <main>
-                            <div class=\"card\">
+                            <div class="card">
                                 <h2>Authenticate</h2>
-                                <input type=\"password\" id=\"password\" placeholder=\"Enter password\" />
-                                <button onclick=\"authenticate()\">Authenticate</button>
+                                <input type="password" id="password" placeholder="Enter password" />
+                                <button onclick="authenticate()">Authenticate</button>
                             </div>
-                            <div class=\"card\">
+                            <div class="card">
                                 <h2>Files</h2>
-                                <div class=\"input-group\">
-                                    <label for=\"fileInput\">Import File:</label>
-                                    <input type=\"file\" id=\"fileInput\" />
-                                    <button onclick=\"importFile()\">Import</button>
-                                </div>
-                                <div class=\"input-group\">
-                                    <input type=\"number\" id=\"fileId\" placeholder=\"File ID\" />
-                                    <button onclick=\"exportFile()\">Export</button>
+                                <div class="input-group">
+                                    <button onclick="callEndpoint('/api/files', 'GET')">List Files</button>
                                 </div>
                             </div>
-                            <div class=\"card\">
+                            <div class="card">
                                 <h2>Folders</h2>
-                                <div class=\"input-group\">
-                                    <button onclick=\"listFolders()\">List Folders</button>
+                                <div class="input-group">
+                                    <button onclick="listFolders()">List Folders</button>
                                 </div>
-                                <div class=\"input-group\">
-                                    <input type=\"text\" id=\"folderName\" placeholder=\"Folder Name\" />
-                                    <button onclick=\"createFolder()\">Create Folder</button>
+                                <div class="input-group">
+                                    <input type="text" id="folderName" placeholder="Folder Name" />
+                                    <button onclick="createFolder()">Create Folder</button>
                                 </div>
-                                <div class=\"input-group\">
-                                    <input type=\"number\" id=\"folderId\" placeholder=\"Folder ID\" />
-                                    <button onclick=\"deleteFolder()\">Delete Folder</button>
+                                <div class="input-group">
+                                    <input type="number" id="folderId" placeholder="Folder ID" />
+                                    <input type="text" id="updatedFolderName" placeholder="New Folder Name" />
+                                    <button onclick="callEndpoint('/api/folders', 'PUT', { id: getInputValue('folderId'), name: getInputValue('updatedFolderName') })">Update Folder</button>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" id="folderIdToDelete" placeholder="Folder ID" />
+                                    <button onclick="callEndpoint(`/api/folders?id=${getInputValue('folderIdToDelete')}`, 'DELETE')">Delete Folder</button>
                                 </div>
                             </div>
                         </main>
