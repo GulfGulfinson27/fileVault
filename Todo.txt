@@ -12,4 +12,3 @@
 - bug: wenn man doppelclivk auf ordner macht in tabelle rechts
 - logos und icons einbauen
 - zip export
-- bug: ordner (dateien vllt auch) können nicht aus root geloescht werden ueber Loeschen button

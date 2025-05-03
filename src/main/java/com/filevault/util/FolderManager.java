@@ -74,11 +74,15 @@ public class FolderManager {
         LoggingUtil.logInfo("FolderManager", "Creating base folder structure.");
         folders.clear();
 
-        createFolder("Dokumente", null);
-        createFolder("Bilder", null);
-        createFolder("Videos", null);
-        createFolder("Musik", null);
-        createFolder("Andere", null);
+        // Create a root folder explicitly with parent_id as NULL
+        VirtualFolder rootFolder = createFolder("Tresor", null);
+
+        // Create base folders under the root folder
+        createFolder("Dokumente", rootFolder.getId());
+        createFolder("Bilder", rootFolder.getId());
+        createFolder("Videos", rootFolder.getId());
+        createFolder("Musik", rootFolder.getId());
+        createFolder("Andere", rootFolder.getId());
 
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);

@@ -174,8 +174,8 @@ public class MainController {
 
         // Select the first folder if available
         Platform.runLater(() -> {
-            if (!folderTreeView.getRoot().getChildren().isEmpty()) {
-                folderTreeView.getSelectionModel().select(0);
+            if (folderTreeView.getRoot() != null && !folderTreeView.getRoot().getChildren().isEmpty()) {
+                folderTreeView.getSelectionModel().clearSelection();
                 handleFolderSelection(null);
             }
         });
@@ -238,9 +238,14 @@ public class MainController {
      */
     private void refreshFolderTree() {
         LoggingUtil.logInfo("MainController", "Refreshing folder tree.");
-        List<VirtualFolder> folders = FolderManager.getInstance().getFolders();
-        TreeItem<VirtualFolder> rootItem = new TreeItem<>(new VirtualFolder(-1, "Root", "", null));
+        // Create a single root folder
+        VirtualFolder rootFolder = new VirtualFolder(-1, "Root", "Root folder", null);
+        TreeItem<VirtualFolder> rootItem = new TreeItem<>(rootFolder);
+        folderTreeView.setRoot(rootItem);
+        folderTreeView.setShowRoot(true);
 
+        // Populate the root folder with other folders
+        List<VirtualFolder> folders = FolderManager.getInstance().getFolders();
         for (VirtualFolder folder : folders) {
             if (folder.getParentId() == null) {
                 TreeItem<VirtualFolder> folderItem = createTreeItem(folder, folders);
@@ -248,8 +253,8 @@ public class MainController {
             }
         }
 
-        folderTreeView.setRoot(rootItem);
-        folderTreeView.setShowRoot(false);
+        // Allow root folder to be selectable
+        folderTreeView.getSelectionModel().select(rootItem);
         LoggingUtil.logInfo("MainController", "Folder tree refreshed.");
     }
     
