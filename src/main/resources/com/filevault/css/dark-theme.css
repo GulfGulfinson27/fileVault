@@ -1,29 +1,29 @@
 /* Updated Dark Theme CSS with new color palette */
 .root {
-    -fx-background-color: #0C134F; /* Dark navy */
-    -fx-text-fill: #D4ADFC; /* Light lavender */
+    -fx-background-color: #0A0F3D; /* Darker navy */
+    -fx-text-fill: #E0C3FC; /* Brighter lavender */
     -fx-font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 .label {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #E0C3FC;
 }
 
 .button {
-    -fx-background-color: #1D267D; /* Medium navy */
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #1A1F6D; /* Darker navy */
+    -fx-text-fill: #E0C3FC;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
-    -fx-border-color: #5C469C; /* Accent color */
+    -fx-border-color: #6A4BAF; /* Brighter accent */
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
 }
 
 .button:hover {
-    -fx-background-color: #5C469C; /* Lighter navy */
-    -fx-border-color: #D4ADFC; /* Brighter accent */
+    -fx-background-color: #6A4BAF; /* Brighter navy */
+    -fx-border-color: #E0C3FC; /* Brighter accent */
 }
 
 .button:pressed {
@@ -32,13 +32,13 @@
 }
 
 .text-field, .password-field {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #1A1F6D;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #E0C3FC;
     -fx-prompt-text-fill: #5C469C;
     -fx-padding: 10px;
-    -fx-border-color: #5C469C;
+    -fx-border-color: #6A4BAF;
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
 }
@@ -99,14 +99,14 @@
 }
 
 .list-cell, .tree-cell, .table-row-cell {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #1A1F6D;
+    -fx-text-fill: #E0C3FC;
     -fx-transition: all 0.3s ease;
 }
 
 .list-cell:selected, .tree-cell:selected, .table-row-cell:selected {
-    -fx-background-color: #5C469C;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #6A4BAF;
+    -fx-text-fill: #E0C3FC;
 }
 
 .list-cell:hover, .tree-cell:hover, .table-row-cell:hover {
