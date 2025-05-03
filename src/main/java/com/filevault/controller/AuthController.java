@@ -62,7 +62,9 @@ public class AuthController {
         boolean userExists = UserManager.getInstance().userExists();
         LoggingUtil.logInfo("AuthController", "User exists: " + userExists);
 
-        if (!userExists) {
+        if (userExists) {
+            toggleFormButton.setVisible(false); // Hide the "Konto erstellen" button if a user exists
+        } else {
             toggleForm();
         }
     }
@@ -147,6 +149,8 @@ public class AuthController {
             FolderManager.getInstance().createBaseStructure();
             showMessage("Konto erfolgreich erstellt!", false);
             LoggingUtil.logInfo("AuthController", "User registered successfully.");
+
+            toggleFormButton.setVisible(false); // Hide the "Konto erstellen" button after user creation
 
             PauseTransition pause = new PauseTransition(Duration.seconds(1));
             pause.setOnFinished(event -> toggleForm());

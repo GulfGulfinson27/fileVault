@@ -13,5 +13,3 @@
 - logos und icons einbauen
 - zip export
 - bug: ordner (dateien vllt auch) können nicht aus root geloescht werden ueber Loeschen button
-- bug: man kann trotz user immernoch einen neuen usererstellen
-- bug: bei jedem neuen user werden immer neue ordner erstellt
