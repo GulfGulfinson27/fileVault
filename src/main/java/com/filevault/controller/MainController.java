@@ -228,19 +228,20 @@ public class MainController {
      * Aktualisiert die Baumansicht der Ordner.
      */
     private void refreshFolderTree() {
+        LoggingUtil.logInfo("MainController", "Refreshing folder tree.");
         List<VirtualFolder> folders = FolderManager.getInstance().getFolders();
         TreeItem<VirtualFolder> rootItem = new TreeItem<>(new VirtualFolder(-1, "Root", "", null));
-        
-        // Add all root folders (folders without parent)
+
         for (VirtualFolder folder : folders) {
             if (folder.getParentId() == null) {
                 TreeItem<VirtualFolder> folderItem = createTreeItem(folder, folders);
                 rootItem.getChildren().add(folderItem);
             }
         }
-        
+
         folderTreeView.setRoot(rootItem);
         folderTreeView.setShowRoot(false);
+        LoggingUtil.logInfo("MainController", "Folder tree refreshed.");
     }
     
     /**
@@ -272,6 +273,7 @@ public class MainController {
         TreeItem<VirtualFolder> selectedItem = folderTreeView.getSelectionModel().getSelectedItem();
         if (selectedItem != null && selectedItem.getValue() != null) {
             VirtualFolder selectedFolder = selectedItem.getValue();
+            LoggingUtil.logInfo("MainController", "Folder selected: " + selectedFolder.getName());
             FolderManager.getInstance().setCurrentFolder(selectedFolder);
             refreshFileList();
         }
@@ -286,6 +288,7 @@ public class MainController {
     @FXML
     public void handleFileSelection(MouseEvent event) {
         if (event != null && event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+            LoggingUtil.logInfo("MainController", "File double-clicked for export.");
             handleExportFile();
         }
     }
@@ -457,24 +460,24 @@ public class MainController {
      * Aktualisiert die Liste der Dateien im aktuellen Ordner.
      */
     private void refreshFileList() {
+        LoggingUtil.logInfo("MainController", "Refreshing file list.");
         VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
         if (currentFolder != null) {
             currentFolderLabel.setText(currentFolder.getName());
-            
-            // Get files and subfolders
+
             List<EncryptedFile> files = FileStorage.getInstance().getFilesInFolder(currentFolder);
             List<VirtualFolder> subfolders = FolderManager.getInstance().getSubfolders(currentFolder.getId());
-            
-            // Create a list of all items
+
             List<Object> items = new ArrayList<>();
             items.addAll(subfolders);
             items.addAll(files);
-            
-            // Update the table
+
             fileTableView.setItems(FXCollections.observableArrayList(items));
+            LoggingUtil.logInfo("MainController", "File list refreshed for folder: " + currentFolder.getName());
         } else {
             currentFolderLabel.setText("[Kein Ordner ausgewählt]");
             fileTableView.setItems(FXCollections.observableArrayList());
+            LoggingUtil.logInfo("MainController", "No folder selected. File list cleared.");
         }
     }
 

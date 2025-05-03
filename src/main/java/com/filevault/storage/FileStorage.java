@@ -18,6 +18,7 @@ import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
 import com.filevault.security.EncryptionService;
 import com.filevault.util.FolderManager;
+import com.filevault.util.LoggingUtil;
 
 /**
  * Verwaltet die Speicherung und den Abruf verschlüsselter Dateien.
@@ -54,45 +55,42 @@ public class FileStorage {
      * @throws Exception wenn ein Fehler während des Imports auftritt
      */
     public EncryptedFile importFile(File sourceFile, VirtualFolder folder) throws Exception {
+        LoggingUtil.logInfo("FileStorage", "Starting file import: " + sourceFile.getAbsolutePath());
         if (!sourceFile.exists() || !sourceFile.isFile() || !sourceFile.canRead()) {
+            LoggingUtil.logError("FileStorage", "File import failed: Source file cannot be read: " + sourceFile.getAbsolutePath());
             throw new IOException("Quelldatei kann nicht gelesen werden: " + sourceFile.getAbsolutePath());
         }
-        
-        // Generiere einen eindeutigen verschlüsselten Dateinamen
+
         String encryptedFileName = UUID.randomUUID().toString();
         String encryptedFilePath = Paths.get(FolderManager.getInstance().getDataDirectoryPath(), encryptedFileName).toString();
         File encryptedFile = new File(encryptedFilePath);
-        
-        // Verschlüssele die Datei
+
         EncryptionService.getInstance().encryptFile(sourceFile, encryptedFile);
-        
-        // Erkenne den MIME-Typ
+
         String mimeType = Files.probeContentType(sourceFile.toPath());
         if (mimeType == null) {
             mimeType = "application/octet-stream";
         }
-        
-        // Speichere die Dateimetadaten in der Datenbank
+
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
                      PreparedStatement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setInt(1, folder.getId());
             stmt.setString(2, sourceFile.getName());
             stmt.setString(3, encryptedFilePath);
             stmt.setLong(4, sourceFile.length());
             stmt.setString(5, mimeType);
-            
+
             int affected = stmt.executeUpdate();
-            
+
             if (affected > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         int id = generatedKeys.getInt(1);
-                        
-                        // Erstelle und gib das verschlüsselte Dateiobjekt zurück
+                        LoggingUtil.logInfo("FileStorage", "File imported successfully: " + sourceFile.getAbsolutePath());
                         return new EncryptedFile(
                                 id,
                                 folder.getId(),
@@ -106,9 +104,9 @@ public class FileStorage {
                     }
                 }
             }
-            
-            // Wenn wir hier ankommen, ist etwas mit der Datenbank schiefgelaufen
+
             encryptedFile.delete();
+            LoggingUtil.logError("FileStorage", "File import failed: Database insertion error.");
             return null;
         }
     }
@@ -122,19 +120,22 @@ public class FileStorage {
      * @throws Exception wenn ein Fehler während des Exports auftritt
      */
     public boolean exportFile(EncryptedFile encryptedFile, File destinationFile) throws Exception {
+        LoggingUtil.logInfo("FileStorage", "Starting file export: " + encryptedFile.getOriginalName());
         File sourceFile = new File(encryptedFile.getEncryptedPath());
         if (!sourceFile.exists() || !sourceFile.isFile() || !sourceFile.canRead()) {
+            LoggingUtil.logError("FileStorage", "File export failed: Encrypted file cannot be read: " + sourceFile.getAbsolutePath());
             throw new IOException("Verschlüsselte Datei kann nicht gelesen werden: " + sourceFile.getAbsolutePath());
         }
-        
-        // Entschlüssele die Datei
+
         boolean success = EncryptionService.getInstance().decryptFile(sourceFile, destinationFile);
-        
+
         if (success) {
-            // Aktualisiere den Zeitstempel des letzten Zugriffs
             updateLastAccess(encryptedFile.getId());
+            LoggingUtil.logInfo("FileStorage", "File exported successfully: " + encryptedFile.getOriginalName());
+        } else {
+            LoggingUtil.logError("FileStorage", "File export failed: Decryption error.");
         }
-        
+
         return success;
     }
     
@@ -145,27 +146,31 @@ public class FileStorage {
      * @return true, wenn das Löschen erfolgreich war
      */
     public boolean deleteFile(EncryptedFile encryptedFile) {
+        LoggingUtil.logInfo("FileStorage", "Starting file deletion: " + encryptedFile.getOriginalName());
         try {
-            // Lösche zuerst die physische Datei
             File file = new File(encryptedFile.getEncryptedPath());
             if (file.exists()) {
                 file.delete();
             }
-            
-            // Dann lösche den Datenbankeintrag
+
             try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
                          "DELETE FROM files WHERE id = ?")) {
-                
+
                 stmt.setInt(1, encryptedFile.getId());
                 int affected = stmt.executeUpdate();
-                
-                return affected > 0;
+
+                if (affected > 0) {
+                    LoggingUtil.logInfo("FileStorage", "File deleted successfully: " + encryptedFile.getOriginalName());
+                    return true;
+                }
             }
         } catch (Exception e) {
-            System.err.println("Fehler beim Löschen der Datei: " + e.getMessage());
-            return false;
+            LoggingUtil.logError("FileStorage", "Error deleting file: " + e.getMessage());
         }
+
+        LoggingUtil.logError("FileStorage", "File deletion failed: " + encryptedFile.getOriginalName());
+        return false;
     }
     
     /**

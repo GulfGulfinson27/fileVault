@@ -58,8 +58,10 @@ public class AuthController {
      */
     @FXML
     public void initialize() {
+        LoggingUtil.logInfo("AuthController", "Initializing AuthController.");
         boolean userExists = UserManager.getInstance().userExists();
-        
+        LoggingUtil.logInfo("AuthController", "User exists: " + userExists);
+
         if (!userExists) {
             toggleForm();
         }
@@ -118,36 +120,39 @@ public class AuthController {
      */
     @FXML
     public void handleRegister() {
+        LoggingUtil.logInfo("AuthController", "Registration attempt started.");
         String newPassword = newPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
-        
+
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            LoggingUtil.logError("AuthController", "Registration failed: Empty password fields.");
             showMessage("Bitte geben Sie Ihr Passwort ein und bestätigen Sie es", true);
             return;
         }
-        
+
         if (!newPassword.equals(confirmPassword)) {
+            LoggingUtil.logError("AuthController", "Registration failed: Passwords do not match.");
             showMessage("Die Passwörter stimmen nicht überein", true);
             return;
         }
-        
+
         if (newPassword.length() < 8) {
+            LoggingUtil.logError("AuthController", "Registration failed: Password too short.");
             showMessage("Das Passwort muss mindestens 8 Zeichen lang sein", true);
             return;
         }
-        
+
         try {
             UserManager.getInstance().createUser(newPassword);
-            
             FolderManager.getInstance().createBaseStructure();
-            
             showMessage("Konto erfolgreich erstellt!", false);
-            
+            LoggingUtil.logInfo("AuthController", "User registered successfully.");
+
             PauseTransition pause = new PauseTransition(Duration.seconds(1));
             pause.setOnFinished(event -> toggleForm());
             pause.play();
-            
         } catch (Exception e) {
+            LoggingUtil.logError("AuthController", "Error during registration: " + e.getMessage());
             showMessage("Fehler beim Erstellen des Kontos: " + e.getMessage(), true);
         }
     }
@@ -158,8 +163,9 @@ public class AuthController {
      */
     @FXML
     public void toggleForm() {
+        LoggingUtil.logInfo("AuthController", "Toggling form. Current view: " + (isLoginView ? "Login" : "Register"));
         isLoginView = !isLoginView;
-        
+
         if (isLoginView) {
             loginForm.setVisible(true);
             registerForm.setVisible(false);
@@ -169,12 +175,12 @@ public class AuthController {
             registerForm.setVisible(true);
             toggleFormButton.setText("Zurück zur Anmeldung");
         }
-        
+
         messageLabel.setVisible(false);
-        
         passwordField.clear();
         newPasswordField.clear();
         confirmPasswordField.clear();
+        LoggingUtil.logInfo("AuthController", "Form toggled. New view: " + (isLoginView ? "Login" : "Register"));
     }
     
     /**

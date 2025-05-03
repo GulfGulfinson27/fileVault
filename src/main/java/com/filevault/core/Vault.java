@@ -4,6 +4,7 @@ import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.FileStorage;
 import com.filevault.util.FolderManager;
+import com.filevault.util.LoggingUtil;
 
 import java.io.File;
 import java.util.List;
@@ -44,19 +45,21 @@ public class Vault {
      * @throws Exception Wenn der Ordner nicht gelöscht werden kann.
      */
     public void deleteFolder(String folderName) throws Exception {
+        LoggingUtil.logInfo("Vault", "Attempting to delete folder: " + folderName);
         VirtualFolder folder = folderManager.getFolderByName(folderName);
         if (folder == null) {
+            LoggingUtil.logError("Vault", "Folder not found: " + folderName);
             throw new Exception("Ordner nicht gefunden: " + folderName);
         }
 
-        // Lösche alle Dateien im Ordner
         List<EncryptedFile> files = fileStorage.getFilesInFolder(folder);
         for (EncryptedFile file : files) {
             fileStorage.deleteFile(file);
+            LoggingUtil.logInfo("Vault", "Deleted file: " + file.getOriginalName());
         }
 
-        // Lösche den Ordner aus der Datenbank
         folderManager.deleteFolder(folder);
+        LoggingUtil.logInfo("Vault", "Folder deleted successfully: " + folderName);
     }
 
     /**
@@ -68,11 +71,15 @@ public class Vault {
      * @throws Exception Wenn die Datei nicht importiert werden kann.
      */
     public EncryptedFile importFile(File sourceFile, String folderName) throws Exception {
+        LoggingUtil.logInfo("Vault", "Attempting to import file: " + sourceFile.getName() + " into folder: " + folderName);
         VirtualFolder folder = folderManager.getFolderByName(folderName);
         if (folder == null) {
+            LoggingUtil.logError("Vault", "Folder not found: " + folderName);
             throw new Exception("Ordner nicht gefunden: " + folderName);
         }
-        return fileStorage.importFile(sourceFile, folder);
+        EncryptedFile importedFile = fileStorage.importFile(sourceFile, folder);
+        LoggingUtil.logInfo("Vault", "File imported successfully: " + sourceFile.getName());
+        return importedFile;
     }
 
     /**
@@ -84,6 +91,13 @@ public class Vault {
      * @throws Exception Wenn die Datei nicht exportiert werden kann.
      */
     public boolean exportFile(EncryptedFile encryptedFile, File destinationFile) throws Exception {
-        return fileStorage.exportFile(encryptedFile, destinationFile);
+        LoggingUtil.logInfo("Vault", "Attempting to export file: " + encryptedFile.getOriginalName() + " to destination: " + destinationFile.getAbsolutePath());
+        boolean success = fileStorage.exportFile(encryptedFile, destinationFile);
+        if (success) {
+            LoggingUtil.logInfo("Vault", "File exported successfully: " + encryptedFile.getOriginalName());
+        } else {
+            LoggingUtil.logError("Vault", "Failed to export file: " + encryptedFile.getOriginalName());
+        }
+        return success;
     }
 }

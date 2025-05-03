@@ -14,7 +14,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class LoggingUtil {
 
-    private static final int RING_BUFFER_CAPACITY = 100; // Kapazität des Ringpuffers
+    private static final int RING_BUFFER_CAPACITY = 500;
     private static final ArrayBlockingQueue<String> ringBuffer = new ArrayBlockingQueue<>(RING_BUFFER_CAPACITY);
     private static final LinkedList<String> fileRingBuffer = new LinkedList<>();
     private static final String LOG_FILE_PATH = "logs/filevault_log.log";
@@ -65,13 +65,14 @@ public class LoggingUtil {
             return;
         }
 
-        if (!ringBuffer.offer(message)) {
+        String timestampedMessage = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS")) + " " + message;
+        if (!ringBuffer.offer(timestampedMessage)) {
             ringBuffer.poll();
-            ringBuffer.offer(message);
+            ringBuffer.offer(timestampedMessage);
         }
 
         synchronized (fileRingBuffer) {
-            fileRingBuffer.add(message);
+            fileRingBuffer.add(timestampedMessage);
             if (fileRingBuffer.size() > RING_BUFFER_CAPACITY) {
                 fileRingBuffer.removeFirst();
             }

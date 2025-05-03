@@ -14,6 +14,7 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.filevault.model.UserManager;
+import com.filevault.util.LoggingUtil;
 
 /**
  * Verarbeitet die Verschlüsselung und Entschlüsselung von Dateien mit AES-GCM.
@@ -59,29 +60,27 @@ public class EncryptionService {
      * @throws Exception wenn ein Fehler während der Verschlüsselung auftritt
      */
     public boolean encryptFile(File inputFile, File outputFile) throws Exception {
+        LoggingUtil.logInfo("EncryptionService", "Starting encryption for file: " + inputFile.getAbsolutePath());
         byte[] keyBytes = UserManager.getInstance().getMasterKey();
         if (keyBytes == null) {
+            LoggingUtil.logError("EncryptionService", "Encryption failed: No master key available.");
             throw new IllegalStateException("Kein Master-Schlüssel verfügbar. Benutzer muss authentifiziert sein.");
         }
-        
-        // Generiere einen zufälligen Initialisierungsvektor
+
         byte[] iv = new byte[GCM_IV_LENGTH];
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(iv);
-        
-        // Erstelle den Cipher
+
         SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, gcmParameterSpec);
-        
+
         try (FileInputStream inputStream = new FileInputStream(inputFile);
              FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            
-            // Schreibe den Initialisierungsvektor zuerst in die Ausgabedatei
+
             outputStream.write(iv);
-            
-            // Verschlüssele dann den Dateiinhalt
+
             try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher)) {
                 byte[] buffer = new byte[8192];
                 int bytesRead;
@@ -89,8 +88,12 @@ public class EncryptionService {
                     cipherOutputStream.write(buffer, 0, bytesRead);
                 }
             }
+        } catch (Exception e) {
+            LoggingUtil.logError("EncryptionService", "Error during encryption: " + e.getMessage());
+            throw e;
         }
-        
+
+        LoggingUtil.logInfo("EncryptionService", "Encryption completed successfully for file: " + inputFile.getAbsolutePath());
         return true;
     }
     
@@ -103,36 +106,40 @@ public class EncryptionService {
      * @throws Exception wenn ein Fehler während der Entschlüsselung auftritt
      */
     public boolean decryptFile(File inputFile, File outputFile) throws Exception {
+        LoggingUtil.logInfo("EncryptionService", "Starting decryption for file: " + inputFile.getAbsolutePath());
         byte[] keyBytes = UserManager.getInstance().getMasterKey();
         if (keyBytes == null) {
+            LoggingUtil.logError("EncryptionService", "Decryption failed: No master key available.");
             throw new IllegalStateException("Kein Master-Schlüssel verfügbar. Benutzer muss authentifiziert sein.");
         }
-        
+
         try (FileInputStream inputStream = new FileInputStream(inputFile);
              FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            
-            // Lese den Initialisierungsvektor aus der Eingabedatei
+
             byte[] iv = new byte[GCM_IV_LENGTH];
             int bytesRead = inputStream.read(iv);
             if (bytesRead < GCM_IV_LENGTH) {
+                LoggingUtil.logError("EncryptionService", "Decryption failed: Input file too short or corrupted.");
                 throw new IOException("Eingabedatei zu kurz oder beschädigt");
             }
-            
-            // Erstelle den Cipher
+
             SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmParameterSpec);
-            
-            // Entschlüssele den Dateiinhalt
+
             try (CipherInputStream cipherInputStream = new CipherInputStream(inputStream, cipher)) {
                 byte[] buffer = new byte[8192];
                 while ((bytesRead = cipherInputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
             }
+        } catch (Exception e) {
+            LoggingUtil.logError("EncryptionService", "Error during decryption: " + e.getMessage());
+            throw e;
         }
-        
+
+        LoggingUtil.logInfo("EncryptionService", "Decryption completed successfully for file: " + inputFile.getAbsolutePath());
         return true;
     }
-} 
+}

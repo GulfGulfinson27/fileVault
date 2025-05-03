@@ -132,10 +132,12 @@ public class DatabaseManager {
      */
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
+            LoggingUtil.logDatabase("Connection", "Database", "Establishing new database connection.");
             connection = DriverManager.getConnection(DB_URL_PREFIX + currentDbPath);
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
+            LoggingUtil.logDatabase("Connection", "Database", "Database connection established.");
         }
         return connection;
     }
@@ -146,10 +148,12 @@ public class DatabaseManager {
     public static void closeConnections() {
         try {
             if (connection != null && !connection.isClosed()) {
+                LoggingUtil.logDatabase("Connection", "Database", "Closing database connection.");
                 connection.close();
+                LoggingUtil.logDatabase("Connection", "Database", "Database connection closed.");
             }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Schließen der Datenbankverbindung: " + e.getMessage());
+            LoggingUtil.logError("DatabaseManager", "Error closing database connection: " + e.getMessage());
         }
     }
     
@@ -157,11 +161,13 @@ public class DatabaseManager {
      * Löscht die Testdatenbank.
      */
     public static void deleteTestDatabase() {
+        LoggingUtil.logDatabase("Delete", "TestDatabase", "Attempting to delete test database.");
         try {
             closeConnections();
             Files.deleteIfExists(Paths.get(TEST_DB_PATH));
+            LoggingUtil.logDatabase("Delete", "TestDatabase", "Test database deleted successfully.");
         } catch (Exception e) {
-            System.err.println("Fehler beim Löschen der Testdatenbank: " + e.getMessage());
+            LoggingUtil.logError("DatabaseManager", "Error deleting test database: " + e.getMessage());
         }
     }
 }

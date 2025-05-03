@@ -1,0 +1,8 @@
+- API
+    - doku in 3 Dateien splitten: gesamt, linux, windows
+    - logs anpassen
+    - sh/bat in normale start dateien einbinden
+    - wenn nicht authorisiert, dann richtige ausgabe
+    - parentfolder im web
+- auf deutsch alle kommentare
+- gui farben lesbar machen

@@ -46,6 +46,13 @@ public class LoggingUtilTest {
     @Test
     void testLogRingBufferBehavior() throws IOException {
         this.setUp();
+
+        // Clear the log file to ensure a clean state for the test
+        Path logFilePath = Paths.get(TEST_LOG_FILE);
+        if (Files.exists(logFilePath)) {
+            Files.delete(logFilePath);
+        }
+
         int ringBufferCapacity = LoggingUtil.getRingBufferCapacity();
         // Log more messages than the ring buffer capacity
         for (int i = 1; i <= ringBufferCapacity + 5; i++) {
@@ -53,7 +60,7 @@ public class LoggingUtilTest {
         }
 
         // Verify the log file contains only the most recent messages
-        Path logFilePath = Paths.get(TEST_LOG_FILE);
+        logFilePath = Paths.get(TEST_LOG_FILE);
         assertTrue(Files.exists(logFilePath), "Log file should exist");
 
         List<String> logLines = Files.readAllLines(logFilePath);
@@ -61,7 +68,12 @@ public class LoggingUtilTest {
 
         // Verify the content of the log file
         for (int i = 0; i < ringBufferCapacity; i++) {
-            assertEquals("Test log message " + (i + 6), logLines.get(i), "Log file content mismatch");
+            String expectedMessage = "Test log message " + (i + 6);
+            String actualMessage = logLines.get(i);
+
+            // Extract the actual log message after the timestamp
+            String actualMessageContent = actualMessage.substring(actualMessage.indexOf(" ") + 1);
+            assertEquals(expectedMessage, actualMessageContent, "Log file content mismatch");
         }
         this.tearDown();
     }

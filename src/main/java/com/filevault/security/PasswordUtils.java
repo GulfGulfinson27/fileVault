@@ -7,6 +7,7 @@ import java.security.spec.KeySpec;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import com.filevault.util.LoggingUtil;
 
 /**
  * Hilfsklasse für passwortbasierte Operationen wie Schlüsselableitung.
@@ -31,17 +32,16 @@ public class PasswordUtils {
      * @return Der initialisierte Standard-Salt
      */
     private static byte[] initDefaultSalt() {
-        // Wir verwenden hier einen festen Salt für die Einfachheit,
-        // idealerweise sollte dieser für jeden Benutzer separat gespeichert werden
+        LoggingUtil.logInfo("PasswordUtils", "Initializing default salt.");
         byte[] salt = new byte[SALT_LENGTH];
         try {
             SecureRandom random = SecureRandom.getInstanceStrong();
             random.nextBytes(salt);
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("Fehler beim Generieren des Salts: " + e.getMessage());
-            // Fallback auf einen weniger sicheren, aber noch verwendbaren Zufallsgenerator
+            LoggingUtil.logError("PasswordUtils", "Error generating default salt: " + e.getMessage());
             new SecureRandom().nextBytes(salt);
         }
+        LoggingUtil.logInfo("PasswordUtils", "Default salt initialized.");
         return salt;
     }
 
@@ -53,7 +53,10 @@ public class PasswordUtils {
      * @return Der abgeleitete Schlüssel als Byte-Array
      */
     public static byte[] generateKeyFromPassword(String password) {
-        return generateKeyFromPassword(password, DEFAULT_SALT);
+        LoggingUtil.logInfo("PasswordUtils", "Generating key from password.");
+        byte[] key = generateKeyFromPassword(password, DEFAULT_SALT);
+        LoggingUtil.logInfo("PasswordUtils", "Key generation from password completed.");
+        return key;
     }
 
     /**
@@ -65,12 +68,15 @@ public class PasswordUtils {
      * @return Der abgeleitete Schlüssel als Byte-Array
      */
     public static byte[] generateKeyFromPassword(String password, byte[] salt) {
+        LoggingUtil.logInfo("PasswordUtils", "Generating key from password with custom salt.");
         try {
             KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            return factory.generateSecret(spec).getEncoded();
+            byte[] key = factory.generateSecret(spec).getEncoded();
+            LoggingUtil.logInfo("PasswordUtils", "Key generation with custom salt completed.");
+            return key;
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            System.err.println("Fehler beim Generieren des Schlüssels aus dem Passwort: " + e.getMessage());
+            LoggingUtil.logError("PasswordUtils", "Error generating key from password: " + e.getMessage());
             throw new RuntimeException("Fehler beim Generieren des Schlüssels aus dem Passwort", e);
         }
     }
@@ -81,15 +87,16 @@ public class PasswordUtils {
      * @return Ein zufälliger Salt als Byte-Array
      */
     public static byte[] generateSalt() {
+        LoggingUtil.logInfo("PasswordUtils", "Generating random salt.");
         byte[] salt = new byte[SALT_LENGTH];
         try {
             SecureRandom random = SecureRandom.getInstanceStrong();
             random.nextBytes(salt);
         } catch (NoSuchAlgorithmException e) {
-            System.err.println("Fehler beim Generieren des Salts: " + e.getMessage());
-            // Fallback auf einen weniger sicheren, aber noch verwendbaren Zufallsgenerator
+            LoggingUtil.logError("PasswordUtils", "Error generating random salt: " + e.getMessage());
             new SecureRandom().nextBytes(salt);
         }
+        LoggingUtil.logInfo("PasswordUtils", "Random salt generation completed.");
         return salt;
     }
-} 
+}

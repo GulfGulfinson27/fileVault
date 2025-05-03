@@ -51,17 +51,19 @@ public class FolderManager {
      * Erstellt das Datenverzeichnis, falls es nicht existiert.
      */
     public void initialize() {
+        LoggingUtil.logInfo("FolderManager", "Initializing folders.");
         folders.clear();
         loadFoldersFromDatabase();
-        
-        // Wenn keine Ordner existieren, erstelle die Standardordner
+
         if (folders.isEmpty()) {
+            LoggingUtil.logInfo("FolderManager", "No folders found. Creating base structure.");
             createBaseStructure();
-        } else if (!folders.isEmpty()) {
+        } else {
             currentFolder = folders.get(0);
         }
-        
+
         createDataDirectory();
+        LoggingUtil.logInfo("FolderManager", "Folder initialization completed.");
     }
     
     /**
@@ -69,19 +71,21 @@ public class FolderManager {
      * Erstellt Standardordner für verschiedene Dateitypen.
      */
     public void createBaseStructure() {
+        LoggingUtil.logInfo("FolderManager", "Creating base folder structure.");
         folders.clear();
-        
+
         createFolder("Dokumente", null);
         createFolder("Bilder", null);
         createFolder("Videos", null);
         createFolder("Musik", null);
         createFolder("Andere", null);
-        
+
         if (!folders.isEmpty()) {
             currentFolder = folders.get(0);
         }
-        
+
         createDataDirectory();
+        LoggingUtil.logInfo("FolderManager", "Base folder structure created.");
     }
     
     /**
@@ -91,8 +95,9 @@ public class FolderManager {
         Path dataDir = Paths.get(System.getProperty("user.home"), ".filevault", "data");
         try {
             Files.createDirectories(dataDir);
+            LoggingUtil.logInfo("FolderManager", "Data directory created at: " + dataDir.toString());
         } catch (Exception e) {
-            System.err.println("Fehler beim Erstellen des Datenverzeichnisses: " + e.getMessage());
+            LoggingUtil.logError("FolderManager", "Error creating data directory: " + e.getMessage());
         }
     }
     
@@ -158,33 +163,35 @@ public class FolderManager {
      * @throws IllegalArgumentException wenn der Name null oder leer ist
      */
     public VirtualFolder createFolder(String name, String description, Integer parentId) {
+        LoggingUtil.logInfo("FolderManager", "Creating folder: " + name);
         if (name == null || name.trim().isEmpty()) {
+            LoggingUtil.logError("FolderManager", "Folder creation failed: Name is empty.");
             throw new IllegalArgumentException("Ordnername darf nicht leer sein");
         }
-        
+
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO folders (name, description, parent_id, created_at) VALUES (?, ?, ?, ?)",
                      Statement.RETURN_GENERATED_KEYS)) {
-            
+
             stmt.setString(1, name);
             stmt.setString(2, description);
             stmt.setObject(3, parentId);
             stmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-            
+
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) {
+                LoggingUtil.logError("FolderManager", "Folder creation failed: No rows affected.");
                 throw new SQLException("Creating folder failed, no rows affected.");
             }
-            
+
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int id = generatedKeys.getInt(1);
                     VirtualFolder folder = new VirtualFolder(id, name, description, parentId);
                     folder.setCreatedAt(LocalDateTime.now());
                     folders.add(folder);
-                    
-                    // Add to parent's children if parent exists
+
                     if (parentId != null) {
                         for (VirtualFolder parent : folders) {
                             if (parent.getId() == parentId) {
@@ -193,14 +200,16 @@ public class FolderManager {
                             }
                         }
                     }
-                    
+
+                    LoggingUtil.logInfo("FolderManager", "Folder created successfully: " + name);
                     return folder;
                 } else {
+                    LoggingUtil.logError("FolderManager", "Folder creation failed: No ID obtained.");
                     throw new SQLException("Creating folder failed, no ID obtained.");
                 }
             }
         } catch (SQLException e) {
-            logger.error("Error creating folder", e);
+            LoggingUtil.logError("FolderManager", "Error creating folder: " + e.getMessage());
             throw new RuntimeException("Error creating folder", e);
         }
     }
@@ -237,13 +246,16 @@ public class FolderManager {
      * @throws IllegalStateException wenn der Ordner Unterordner enthält
      */
     public void deleteFolder(VirtualFolder folder) {
+        LoggingUtil.logInfo("FolderManager", "Deleting folder: " + folder.getName());
         if (folder == null) {
+            LoggingUtil.logError("FolderManager", "Folder deletion failed: Folder is null.");
             throw new IllegalArgumentException("Ordner darf nicht null sein");
         }
 
         // Prüfe auf Unterordner
         List<VirtualFolder> subfolders = getSubfolders(folder.getId());
         if (!subfolders.isEmpty()) {
+            LoggingUtil.logError("FolderManager", "Folder deletion failed: Folder contains subfolders.");
             throw new IllegalStateException("Ordner enthält Unterordner und kann nicht gelöscht werden");
         }
 
@@ -283,15 +295,16 @@ public class FolderManager {
             
             // Reset auto-commit mode
             DatabaseManager.getConnection().setAutoCommit(true);
-            
+            LoggingUtil.logInfo("FolderManager", "Folder deleted successfully: " + folder.getName());
         } catch (SQLException e) {
             try {
                 // Rollback in case of error
                 DatabaseManager.getConnection().rollback();
                 DatabaseManager.getConnection().setAutoCommit(true);
             } catch (SQLException rollbackEx) {
-                logger.error("Fehler beim Rollback der Transaktion", rollbackEx);
+                LoggingUtil.logError("FolderManager", "Error during rollback: " + rollbackEx.getMessage());
             }
+            LoggingUtil.logError("FolderManager", "Error deleting folder: " + e.getMessage());
             throw new RuntimeException("Fehler beim Löschen des Ordners", e);
         }
     }
@@ -358,4 +371,4 @@ public class FolderManager {
         }
         return subfolders;
     }
-} 
+}

@@ -68,8 +68,10 @@ public class FileVaultApp extends Application {
      * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
      */
     public static void setRoot(String fxml) throws IOException {
+        LoggingUtil.logInfo("FileVaultApp", "Changing view to: " + fxml);
         scene.setRoot(loadFXML(fxml));
         primaryStage.sizeToScene();
+        LoggingUtil.logInfo("FileVaultApp", "View changed to: " + fxml);
     }
 
     /**
@@ -90,10 +92,12 @@ public class FileVaultApp extends Application {
      * @throws IOException Wenn das Laden der FXML-Datei fehlschlägt
      */
     public static void showMainView() throws IOException {
+        LoggingUtil.logInfo("FileVaultApp", "Displaying main view.");
         scene.setRoot(loadFXML("main"));
         primaryStage.setWidth(1000);
         primaryStage.setHeight(700);
         primaryStage.centerOnScreen();
+        LoggingUtil.logInfo("FileVaultApp", "Main view displayed.");
     }
     
     /**
@@ -110,7 +114,9 @@ public class FileVaultApp extends Application {
      */
     @Override
     public void init() {
+        LoggingUtil.logInfo("FileVaultApp", "Initializing database.");
         DatabaseManager.initDatabase();
+        LoggingUtil.logInfo("FileVaultApp", "Database initialized.");
     }
 
     /**
@@ -118,7 +124,9 @@ public class FileVaultApp extends Application {
      */
     @Override
     public void stop() {
+        LoggingUtil.logInfo("FileVaultApp", "Closing database connections.");
         DatabaseManager.closeConnections();
+        LoggingUtil.logInfo("FileVaultApp", "Database connections closed.");
     }
 
     /**
