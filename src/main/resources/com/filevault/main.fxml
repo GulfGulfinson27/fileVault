@@ -79,6 +79,7 @@
                     <Tooltip text="Einen neuen Ordner erstellen" />
                   </tooltip>
                 </Button>
+                <Button fx:id="themeToggleButton" mnemonicParsing="false" text="🌙" />
               </items>
             </ToolBar>
          </children>
@@ -141,4 +142,4 @@
          </padding>
       </HBox>
    </bottom>
-</BorderPane> 
+</BorderPane>

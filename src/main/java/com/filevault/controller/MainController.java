@@ -78,6 +78,10 @@ public class MainController {
     @FXML
     private Label statusLabel;
 
+    /** Button für Theme-Toggle */
+    @FXML
+    private Button themeToggleButton;
+
     /** Formatierer für Datumsangaben */
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -166,6 +170,58 @@ public class MainController {
                 handleFolderSelection(null);
             }
         });
+
+        // Initialize theme toggle button
+        initializeThemeToggle();
+    }
+
+    /**
+     * Aktualisiert die Icons des Theme-Toggle-Buttons für bessere Sichtbarkeit.
+     */
+    @FXML
+    public void initializeThemeToggle() {
+        themeToggleButton.setStyle("-fx-background-color: transparent; -fx-padding: 5px;");
+        updateToggleButtonIcon("dark");
+        themeToggleButton.setOnAction(event -> {
+            toggleTheme();
+            String currentTheme = FileVaultApp.getPrimaryStage().getScene().getStylesheets().get(0);
+            if (currentTheme.contains("dark-theme.css")) {
+                updateToggleButtonIcon("dark");
+            } else {
+                updateToggleButtonIcon("light");
+            }
+        });
+    }
+
+    /**
+     * Aktualisiert das Icon des Theme-Toggle-Buttons basierend auf dem aktuellen Modus.
+     *
+     * @param mode Der aktuelle Modus ("dark" oder "light").
+     */
+    private void updateToggleButtonIcon(String mode) {
+        if ("dark".equals(mode)) {
+            themeToggleButton.setText("☀️"); // Sun icon for light mode
+        } else {
+            themeToggleButton.setText("🌙"); // Moon icon for dark mode
+        }
+    }
+
+    /**
+     * Wechselt zwischen Dark- und Light-Mode und aktualisiert das Icon.
+     */
+    private void toggleTheme() {
+        String currentTheme = FileVaultApp.getPrimaryStage().getScene().getStylesheets().get(0);
+        if (currentTheme.contains("dark-theme.css")) {
+            FileVaultApp.getPrimaryStage().getScene().getStylesheets().clear();
+            FileVaultApp.getPrimaryStage().getScene().getStylesheets().add(
+                getClass().getResource("/com/filevault/css/light-theme.css").toExternalForm()
+            );
+        } else {
+            FileVaultApp.getPrimaryStage().getScene().getStylesheets().clear();
+            FileVaultApp.getPrimaryStage().getScene().getStylesheets().add(
+                getClass().getResource("/com/filevault/css/dark-theme.css").toExternalForm()
+            );
+        }
     }
 
     /**
@@ -872,5 +928,14 @@ public class MainController {
      */
     public void setFileDateColumn(TableColumn<Object, String> fileDateColumn) {
         this.fileDateColumn = fileDateColumn;
+    }
+
+    /**
+     * Setter für den Theme-Toggle-Button (für Testzwecke).
+     * 
+     * @param themeToggleButton Der zu setzende Button
+     */
+    public void setThemeToggleButton(Button themeToggleButton) {
+        this.themeToggleButton = themeToggleButton;
     }
 }

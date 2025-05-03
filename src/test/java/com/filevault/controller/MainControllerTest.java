@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -34,6 +35,7 @@ class MainControllerTest {
         mainController.setFileNameColumn(new TableColumn<>());
         mainController.setFileSizeColumn(new TableColumn<>());
         mainController.setFileDateColumn(new TableColumn<>());
+        mainController.setThemeToggleButton(new Button());
     }
 
     @Test

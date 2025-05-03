@@ -1,147 +1,147 @@
-/* Updated Dark Theme CSS with new color palette */
+/* Updated Light Theme CSS with new color palette */
 .root {
-    -fx-background-color: #0C134F; /* Dark navy */
-    -fx-text-fill: #D4ADFC; /* Light lavender */
+    -fx-background-color: #F5EFFF; /* Light lavender */
+    -fx-text-fill: #A294F9; /* Medium purple */
     -fx-font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 .label {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #A294F9;
 }
 
 .button {
-    -fx-background-color: #1D267D; /* Medium navy */
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #E5D9F2; /* Light purple */
+    -fx-text-fill: #A294F9;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
-    -fx-border-color: #5C469C; /* Accent color */
+    -fx-border-color: #CDC1FF; /* Accent color */
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
 }
 
 .button:hover {
-    -fx-background-color: #5C469C; /* Lighter navy */
-    -fx-border-color: #D4ADFC; /* Brighter accent */
+    -fx-background-color: #CDC1FF; /* Lighter purple */
+    -fx-border-color: #A294F9; /* Brighter accent */
 }
 
 .button:pressed {
-    -fx-background-color: #0C134F; /* Darker navy */
-    -fx-border-color: #5C469C;
+    -fx-background-color: #F5EFFF; /* Darker lavender */
+    -fx-border-color: #CDC1FF;
 }
 
 .text-field, .password-field {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
-    -fx-text-fill: #D4ADFC;
-    -fx-prompt-text-fill: #5C469C;
+    -fx-text-fill: #A294F9;
+    -fx-prompt-text-fill: #CDC1FF;
     -fx-padding: 10px;
-    -fx-border-color: #5C469C;
+    -fx-border-color: #CDC1FF;
     -fx-border-width: 1px;
     -fx-transition: all 0.3s ease;
 }
 
 .text-field:focused, .password-field:focused {
-    -fx-border-color: #D4ADFC;
+    -fx-border-color: #A294F9;
 }
 
 .scroll-pane {
-    -fx-background-color: #0C134F;
+    -fx-background-color: #F5EFFF;
 }
 
 .scroll-bar {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
     -fx-background-radius: 8px;
     -fx-transition: all 0.3s ease;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: #D4ADFC;
+    -fx-background-color: #A294F9;
 }
 
 .list-view, .tree-view, .table-view {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
 }
 
 .table-view .column-header {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .table-view .column-header .label {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #A294F9;
     -fx-font-weight: bold;
 }
 
 .table-view .column-header-background {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .table-view .column-header .arrow {
-    -fx-background-color: #D4ADFC;
+    -fx-background-color: #A294F9;
 }
 
 .table-view .column-header .sort-order {
-    -fx-background-color: #D4ADFC;
+    -fx-background-color: #A294F9;
 }
 
 .table-view .table-cell {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #A294F9;
     -fx-alignment: CENTER-LEFT;
     -fx-padding: 5px;
 }
 
 .list-cell, .tree-cell, .table-row-cell {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #E5D9F2;
+    -fx-text-fill: #A294F9;
     -fx-transition: all 0.3s ease;
 }
 
 .list-cell:selected, .tree-cell:selected, .table-row-cell:selected {
-    -fx-background-color: #5C469C;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #CDC1FF;
+    -fx-text-fill: #A294F9;
 }
 
 .list-cell:hover, .tree-cell:hover, .table-row-cell:hover {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .text-area {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
-    -fx-border-color: #5C469C;
+    -fx-background-color: #E5D9F2;
+    -fx-text-fill: #A294F9;
+    -fx-border-color: #CDC1FF;
     -fx-border-width: 1px;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
 }
 
 .text-area .content {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .menu-bar {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .menu-bar .menu {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .menu-item {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #E5D9F2;
+    -fx-text-fill: #A294F9;
     -fx-transition: all 0.3s ease;
 }
 
 .menu-item:hover {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .split-pane {
@@ -149,31 +149,31 @@
 }
 
 .split-pane-divider {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
     -fx-padding: 1px;
 }
 
 .titled-pane {
-    -fx-text-fill: #D4ADFC;
-    -fx-background-color: #1D267D;
+    -fx-text-fill: #A294F9;
+    -fx-background-color: #E5D9F2;
 }
 
 .titled-pane > .title {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
     -fx-background-radius: 8px;
     -fx-padding: 10px;
 }
 
 .titled-pane > .content {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .progress-bar {
-    -fx-background-color: #1D267D;
+    -fx-background-color: #E5D9F2;
 }
 
 .progress-bar .bar {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .error-text {
@@ -185,39 +185,39 @@
 }
 
 .tab-pane {
-    -fx-background-color: #0C134F;
+    -fx-background-color: #F5EFFF;
 }
 
 .tab {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #E5D9F2;
+    -fx-text-fill: #A294F9;
     -fx-transition: all 0.3s ease;
 }
 
 .tab:selected {
-    -fx-background-color: #5C469C;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: #CDC1FF;
+    -fx-text-fill: #A294F9;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-label {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #A294F9;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
-    -fx-text-fill: #D4ADFC;
+    -fx-text-fill: #A294F9;
 }
 
 .tree-cell .tree-disclosure-node .arrow {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
 }
 
 .tree-cell:expanded .tree-disclosure-node .arrow {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
     -fx-rotate: 90;
 }
 
 .tree-cell:selected {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #CDC1FF;
     -fx-text-fill: white;
 }
 
