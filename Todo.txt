@@ -5,6 +5,7 @@
     - wenn nicht authorisiert, dann richtige ausgabe
     - parentfolder im web
 - auf deutsch alle kommentare
-- gui farben lesbar machen
 - in gui soll man in root ordner/dateien erstellen können
 - passwort ändern kann man leider noch wenn neues = altem passwort ist
+- gui animationen
+- gui dark/whitemode button sichtbar machen im darkmode

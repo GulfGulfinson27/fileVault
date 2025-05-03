@@ -12,12 +12,12 @@
 .button {
     -fx-background-color: #1A1F6D; /* Darker navy */
     -fx-text-fill: #E0C3FC;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-border-color: #6A4BAF; /* Brighter accent */
-    -fx-border-width: 1px;
+    -fx-border-width: 2px;
     -fx-transition: all 0.3s ease;
 }
 
@@ -33,18 +33,19 @@
 
 .text-field, .password-field {
     -fx-background-color: #1A1F6D;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
     -fx-text-fill: #E0C3FC;
     -fx-prompt-text-fill: #5C469C;
     -fx-padding: 10px;
     -fx-border-color: #6A4BAF;
-    -fx-border-width: 1px;
+    -fx-border-width: 2px;
     -fx-transition: all 0.3s ease;
 }
 
 .text-field:focused, .password-field:focused {
-    -fx-border-color: #D4ADFC;
+    -fx-border-color: #E0C3FC;
+    -fx-box-shadow: 0 0 10px #E0C3FC;
 }
 
 .scroll-pane {
@@ -101,6 +102,7 @@
 .list-cell, .tree-cell, .table-row-cell {
     -fx-background-color: #1A1F6D;
     -fx-text-fill: #E0C3FC;
+    -fx-border-radius: 8px;
     -fx-transition: all 0.3s ease;
 }
 
@@ -110,7 +112,7 @@
 }
 
 .list-cell:hover, .tree-cell:hover, .table-row-cell:hover {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #6A4BAF;
 }
 
 .text-area {
@@ -130,18 +132,48 @@
     -fx-background-color: #1D267D;
 }
 
+/* Added hover effect for the top bar menu items */
+.menu-bar .menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0C3FC; /* Brighter lavender for top bar */
+    -fx-padding: 8px 12px;
+    -fx-border-radius: 8px;
+    -fx-transition: all 0.3s ease;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #6A4BAF; /* Highlight color on hover */
+    -fx-text-fill: #FFFFFF; /* White text on hover */
+}
+
 .menu-bar .menu {
     -fx-background-color: #1D267D;
 }
 
 .menu-item {
-    -fx-background-color: #1D267D;
-    -fx-text-fill: #D4ADFC;
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0C3FC;
+    -fx-padding: 8px 12px;
+    -fx-border-radius: 8px;
     -fx-transition: all 0.3s ease;
 }
 
 .menu-item:hover {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #6A4BAF;
+}
+
+/* Adjusted dropdown menu text color for better visibility */
+.menu-bar .menu .menu-item {
+    -fx-text-fill: #E0C3FC; /* Brighter lavender for dropdown text */
+    -fx-background-color: #1A1F6D; /* Darker navy for dropdown background */
+    -fx-padding: 8px 12px;
+    -fx-border-radius: 8px;
+    -fx-transition: all 0.3s ease;
+}
+
+.menu-bar .menu .menu-item:hover {
+    -fx-background-color: #6A4BAF; /* Highlight color on hover */
+    -fx-text-fill: #FFFFFF; /* White text on hover */
 }
 
 .split-pane {
@@ -170,10 +202,14 @@
 
 .progress-bar {
     -fx-background-color: #1D267D;
+    -fx-border-radius: 8px;
+    -fx-transition: all 0.3s ease;
 }
 
 .progress-bar .bar {
-    -fx-background-color: #5C469C;
+    -fx-background-color: #6A4BAF;
+    -fx-border-radius: 8px;
+    -fx-transition: width 0.5s ease;
 }
 
 .error-text {
