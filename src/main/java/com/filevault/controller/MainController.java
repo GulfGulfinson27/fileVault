@@ -15,6 +15,7 @@ import com.filevault.util.FolderManager;
 import com.filevault.util.LoggingUtil;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -23,8 +24,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -147,20 +150,26 @@ public class MainController {
         });
 
         // Set up custom cell factory for file table
-        fileTableView.setRowFactory(tv -> new TableRow<Object>() {
-            @Override
-            protected void updateItem(Object item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setGraphic(null);
-                } else {
-                    if (item instanceof VirtualFolder) {
-                        setStyle("-fx-font-weight: bold;");
-                    } else {
-                        setStyle("");
-                    }
-                }
-            }
+        fileTableView.setRowFactory(tv -> {
+            TableRow<Object> row = new TableRow<>();
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem renameItem = new MenuItem("Rename");
+            renameItem.setOnAction(event -> handleRenameFile());
+
+            MenuItem deleteItem = new MenuItem("Delete");
+            deleteItem.setOnAction(event -> handleDeleteFile());
+
+            contextMenu.getItems().addAll(renameItem, deleteItem);
+
+            // Show context menu only for non-empty rows
+            row.contextMenuProperty().bind(
+                Bindings.when(row.emptyProperty())
+                        .then((ContextMenu) null)
+                        .otherwise(contextMenu)
+            );
+
+            return row;
         });
 
         // Select the first folder if available
