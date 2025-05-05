@@ -879,8 +879,14 @@ public class MainController {
                         statusLabel.setText("Passwort erfolgreich geändert.");
                         showAlert(Alert.AlertType.INFORMATION, "Passwort geändert", "Dein Passwort wurde erfolgreich geändert.");
                     } else {
-                            statusLabel.setText("Fehler beim Ändern des Passworts.");
-                        showAlert(Alert.AlertType.ERROR, "Passwort Error", "Fehler beim Ändern des Passworts.");
+                        String errorMessage = "Fehler beim Ändern des Passworts.";
+                        if (currentPassword.equals(newPassword)) {
+                            errorMessage = "Das neue Passwort darf nicht mit dem alten Passwort übereinstimmen.";
+                        } else if (!UserManager.getInstance().authenticate(currentPassword)) {
+                            errorMessage = "Das aktuelle Passwort ist falsch.";
+                        }
+                        statusLabel.setText(errorMessage);
+                        showAlert(Alert.AlertType.ERROR, "Passwort Error", errorMessage);
                     }
                 } catch (Exception e) {
                     statusLabel.setText("Fehler beim Ändern des Passworts: " + e.getMessage());

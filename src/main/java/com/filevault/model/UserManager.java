@@ -148,8 +148,19 @@ public class UserManager {
      */
     public boolean changePassword(String oldPassword, String newPassword) {
         LoggingUtil.logInfo("UserManager", "Attempting to change password.");
+
         if (!authenticate(oldPassword)) {
             LoggingUtil.logError("UserManager", "Password change failed: Old password is incorrect.");
+            return false;
+        }
+
+        if (oldPassword.equals(newPassword)) {
+            LoggingUtil.logError("UserManager", "Password change failed: New password cannot be the same as the old password.");
+            return false;
+        }
+
+        if (BCrypt.checkpw(newPassword, BCrypt.hashpw(oldPassword, BCrypt.gensalt()))) {
+            LoggingUtil.logError("UserManager", "Password change failed: New password cannot be the same as the old password.");
             return false;
         }
 
