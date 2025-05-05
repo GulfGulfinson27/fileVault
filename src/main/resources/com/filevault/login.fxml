@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -14,16 +16,21 @@
             prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17" 
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filevault.controller.AuthController">
    <center>
-      <VBox alignment="CENTER" spacing="20.0" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
+            <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@/com/filevault/icons/app-icon.png" />
+               </image>
+            </ImageView>
             <Label text="FileVault" textAlignment="CENTER">
                <font>
-                  <Font name="System Bold" size="32.0" />
+                  <Font name="System Bold" size="30.0" />
                </font>
             </Label>
             <Label text="Sicherer Dateispeicher" textAlignment="CENTER">
                <font>
-                  <Font size="18.0" />
+                  <Font size="16.0" />
                </font>
             </Label>
             <VBox alignment="CENTER" spacing="10.0">
@@ -64,4 +71,4 @@
          </BorderPane.margin>
       </Label>
    </bottom>
-</BorderPane> 
+</BorderPane>
