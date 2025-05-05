@@ -18,6 +18,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -35,6 +36,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -149,13 +151,20 @@ public class MainController {
             }
         });
 
-        // Set up custom cell factory for file table
+        // Add tooltips for folders in the file table and handle right-click options for folders
         fileTableView.setRowFactory(tv -> {
             TableRow<Object> row = new TableRow<>();
             ContextMenu contextMenu = new ContextMenu();
 
             MenuItem renameItem = new MenuItem("Rename");
-            renameItem.setOnAction(event -> handleRenameFile());
+            renameItem.setOnAction(event -> {
+                Object selectedItem = row.getItem();
+                if (selectedItem instanceof VirtualFolder folder) {
+                    handleRenameFolder(folder);
+                } else if (selectedItem instanceof EncryptedFile file) {
+                    handleRenameFile(file);
+                }
+            });
 
             MenuItem deleteItem = new MenuItem("Delete");
             deleteItem.setOnAction(event -> handleDeleteFile());
@@ -168,6 +177,38 @@ public class MainController {
                         .then((ContextMenu) null)
                         .otherwise(contextMenu)
             );
+
+            // Add tooltips for folders
+            row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem instanceof VirtualFolder folder) {
+                    row.setTooltip(new Tooltip(folder.getDescription()));
+                } else {
+                    row.setTooltip(null);
+                }
+            });
+
+            // Fix double-click behavior to ensure only files are exported and folders are opened
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                    Object selectedItem = row.getItem();
+                    LoggingUtil.logInfo("MainController", "Double-click detected. Selected item: " + selectedItem);
+
+                    if (selectedItem instanceof EncryptedFile file) {
+                        LoggingUtil.logInfo("MainController", "Exporting file: " + file.getOriginalName());
+                        if (!row.isSelected()) { // Ensure the row is selected only once
+                            fileTableView.getSelectionModel().select(file);
+                            handleExportFile();
+                        }
+                    } else if (selectedItem instanceof VirtualFolder folder) {
+                        LoggingUtil.logInfo("MainController", "Opening folder: " + folder.getName());
+                        FolderManager.getInstance().setCurrentFolder(folder);
+                        refreshFileList();
+                        event.consume(); // Stop further event propagation
+                    } else {
+                        LoggingUtil.logInfo("MainController", "Unknown item type selected. No action taken.");
+                    }
+                }
+            });
 
             return row;
         });
@@ -395,14 +436,13 @@ public class MainController {
      * Zeigt einen Dialog zur Eingabe des neuen Namens.
      */
     @FXML
-    public void handleRenameFile() {
-        EncryptedFile selectedFile = (EncryptedFile) fileTableView.getSelectionModel().getSelectedItem();
-        if (selectedFile == null) {
+    public void handleRenameFile(EncryptedFile file) {
+        if (file == null) {
             showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Umbenennen aus.");
             return;
         }
         
-        TextInputDialog dialog = new TextInputDialog(selectedFile.getOriginalName());
+        TextInputDialog dialog = new TextInputDialog(file.getOriginalName());
         dialog.setTitle("Datei umbenennen");
         dialog.setHeaderText("Geben Sie einen neuen Namen für die Datei ein");
         dialog.setContentText("Neuer Name:");
@@ -414,7 +454,7 @@ public class MainController {
         result.ifPresent(newName -> {
             if (!newName.isEmpty()) {
                 try {
-                    boolean success = FileStorage.getInstance().renameFile(selectedFile, newName);
+                    boolean success = FileStorage.getInstance().renameFile(file, newName);
                     
                     if (success) {
                         refreshFileList();
@@ -428,6 +468,16 @@ public class MainController {
                 }
             }
         });
+    }
+
+    @FXML
+    public void handleRenameFile(ActionEvent event) {
+        Object selectedItem = fileTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem instanceof EncryptedFile file) {
+            handleRenameFile(file);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Umbenennen aus.");
+        }
     }
     
     /**
@@ -452,13 +502,17 @@ public class MainController {
         }
 
         try {
-            if (selectedItem instanceof VirtualFolder virtualFolder) {
-                FolderManager.getInstance().deleteFolder(virtualFolder);
+            if (selectedItem instanceof VirtualFolder) {
+                VirtualFolder folder = (VirtualFolder) selectedItem;
+                FolderManager.getInstance().deleteFolder(folder);
                 refreshFolderTree();
                 statusLabel.setText("Ordner erfolgreich gelöscht.");
-            } else {
-                FileStorage.getInstance().deleteFile((EncryptedFile) selectedItem);
+            } else if (selectedItem instanceof EncryptedFile) {
+                EncryptedFile file = (EncryptedFile) selectedItem;
+                FileStorage.getInstance().deleteFile(file);
                 statusLabel.setText("Datei erfolgreich gelöscht.");
+            } else {
+                throw new IllegalStateException("Unexpected value: " + selectedItem);
             }
             refreshFileList();
         } catch (IllegalStateException e) {
@@ -608,9 +662,8 @@ public class MainController {
      * Zeigt einen Dialog zur Eingabe des neuen Ordnernamens.
      */
     @FXML
-    public void handleRenameFolder() {
-        VirtualFolder selectedFolder = folderTreeView.getSelectionModel().getSelectedItem().getValue();
-        if (selectedFolder == null) {
+    public void handleRenameFolder(VirtualFolder folder) {
+        if (folder == null) {
             showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Umbenennen aus.");
             return;
         }
@@ -630,9 +683,9 @@ public class MainController {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        TextField nameField = new TextField(selectedFolder.getName());
+        TextField nameField = new TextField(folder.getName());
         nameField.setPromptText("Ordnername");
-        TextArea descriptionField = new TextArea(selectedFolder.getDescription());
+        TextArea descriptionField = new TextArea(folder.getDescription());
         descriptionField.setPromptText("Beschreibung");
         descriptionField.setPrefRowCount(3);
 
@@ -664,8 +717,8 @@ public class MainController {
             
             if (!newName.isEmpty()) {
                 try {
-                    boolean success = FolderManager.getInstance().renameFolder(selectedFolder, newName);
-                    selectedFolder.setDescription(newDescription);
+                    boolean success = FolderManager.getInstance().renameFolder(folder, newName);
+                    folder.setDescription(newDescription);
                     
                     if (success) {
                         refreshFolderTree();
@@ -679,6 +732,16 @@ public class MainController {
                 }
             }
         });
+    }
+
+    @FXML
+    public void handleRenameFolder(ActionEvent event) {
+        Object selectedItem = fileTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem instanceof VirtualFolder folder) {
+            handleRenameFolder(folder);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Umbenennen aus.");
+        }
     }
     
     /**
@@ -843,8 +906,10 @@ public class MainController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Über FileVault");
         alert.setHeaderText("FileVault");
-        alert.setContentText("Version 1.0\n" +
-                "2025 Phillip Schneider - Projekt FileVault- Java II");
+        alert.setContentText("""
+            Version 1.0
+            2025 Phillip Schneider - Projekt FileVault- Java II
+        """);
         alert.showAndWait();
     }
     

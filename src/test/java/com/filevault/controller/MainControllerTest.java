@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.filevault.model.EncryptedFile;
+
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -67,7 +69,8 @@ class MainControllerTest {
     @Test
     void testHandleRenameFile() {
         Platform.runLater(() -> {
-            assertDoesNotThrow(() -> mainController.handleRenameFile());
+            EncryptedFile mockFile = new EncryptedFile(1, 1, "mockFile", "mockPath", 1024L, "mockKey", null, null); // Create a valid mock EncryptedFile instance
+            assertDoesNotThrow(() -> mainController.handleRenameFile(mockFile));
         });
     }
 

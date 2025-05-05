@@ -12,3 +12,4 @@
 - bug: wenn man doppelclivk auf ordner macht in tabelle rechts
 - logos und icons einbauen
 - zip export
+- test log immer resetten
