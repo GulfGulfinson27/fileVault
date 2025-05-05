@@ -1,13 +1,17 @@
 package com.filevault.core;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.FileStorage;
 import com.filevault.util.FolderManager;
 import com.filevault.util.LoggingUtil;
 
-import java.io.File;
-import java.util.List;
+import javafx.scene.control.TreeItem;
 
 /**
  * Kernklasse, die die Operationen des Datei-Tresors verwaltet.
@@ -99,5 +103,55 @@ public class Vault {
             LoggingUtil.logError("Vault", "Failed to export file: " + encryptedFile.getOriginalName());
         }
         return success;
+    }
+
+    /**
+     * Benennt einen Ordner im Tresor um.
+     *
+     * @param oldName Der aktuelle Name des Ordners.
+     * @param newName Der neue Name des Ordners.
+     * @throws Exception Wenn der Ordner nicht umbenannt werden kann.
+     */
+    public void renameFolder(String oldName, String newName) throws Exception {
+        LoggingUtil.logInfo("Vault", "Attempting to rename folder: " + oldName + " to: " + newName);
+        VirtualFolder folder = folderManager.getFolderByName(oldName);
+        if (folder == null) {
+            LoggingUtil.logError("Vault", "Folder not found: " + oldName);
+            throw new Exception("Ordner nicht gefunden: " + oldName);
+        }
+
+        boolean success = folderManager.renameFolder(folder, newName);
+        if (success) {
+            LoggingUtil.logInfo("Vault", "Folder renamed successfully: " + oldName + " to: " + newName);
+        } else {
+            LoggingUtil.logError("Vault", "Failed to rename folder: " + oldName);
+            throw new Exception("Fehler beim Umbenennen des Ordners: " + oldName);
+        }
+    }
+
+    /**
+     * Gibt die Ordnerstruktur als TreeItem zurück.
+     *
+     * @return Die Wurzel des Ordnerbaums.
+     */
+    public TreeItem<String> getFolderTree() {
+        TreeItem<String> root = new TreeItem<>("Root");
+        List<VirtualFolder> folders = folderManager.getAllFolders();
+
+        // Erstelle die Baumstruktur
+        Map<Integer, TreeItem<String>> folderMap = new HashMap<>();
+        folderMap.put(null, root);
+
+        for (VirtualFolder folder : folders) {
+            TreeItem<String> item = new TreeItem<>(folder.getName());
+            folderMap.put(folder.getId(), item);
+
+            TreeItem<String> parent = folderMap.get(folder.getParentId());
+            if (parent != null) {
+                parent.getChildren().add(item);
+            }
+        }
+
+        return root;
     }
 }

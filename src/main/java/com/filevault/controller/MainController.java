@@ -441,21 +441,17 @@ public class MainController {
             showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Umbenennen aus.");
             return;
         }
-        
+
         TextInputDialog dialog = new TextInputDialog(file.getOriginalName());
         dialog.setTitle("Datei umbenennen");
         dialog.setHeaderText("Geben Sie einen neuen Namen für die Datei ein");
         dialog.setContentText("Neuer Name:");
-        
-        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        stage.setAlwaysOnTop(true);
-        
+
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newName -> {
             if (!newName.isEmpty()) {
                 try {
                     boolean success = FileStorage.getInstance().renameFile(file, newName);
-                    
                     if (success) {
                         refreshFileList();
                         statusLabel.setText("Datei erfolgreich umbenannt.");
@@ -464,7 +460,6 @@ public class MainController {
                     }
                 } catch (Exception e) {
                     statusLabel.setText("Fehler beim Umbenennen: " + e.getMessage());
-                    showAlert(Alert.AlertType.ERROR, "Umbenennungsfehler", "Fehler beim Umbenennen der Datei: " + e.getMessage());
                 }
             }
         });
@@ -502,25 +497,18 @@ public class MainController {
         }
 
         try {
-            if (selectedItem instanceof VirtualFolder) {
-                VirtualFolder folder = (VirtualFolder) selectedItem;
+            if (selectedItem instanceof VirtualFolder folder) {
                 FolderManager.getInstance().deleteFolder(folder);
-                refreshFolderTree();
                 statusLabel.setText("Ordner erfolgreich gelöscht.");
-            } else if (selectedItem instanceof EncryptedFile) {
-                EncryptedFile file = (EncryptedFile) selectedItem;
+            } else if (selectedItem instanceof EncryptedFile file) {
                 FileStorage.getInstance().deleteFile(file);
                 statusLabel.setText("Datei erfolgreich gelöscht.");
             } else {
                 throw new IllegalStateException("Unexpected value: " + selectedItem);
             }
-            refreshFileList();
-        } catch (IllegalStateException e) {
-            showAlert(Alert.AlertType.ERROR, "Ordner kann nicht gelöscht werden", 
-                    "Der Ordner enthält Unterordner und kann daher nicht gelöscht werden.");
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Löschfehler", 
-                    "Fehler beim Löschen: " + e.getMessage());
+            refreshUI();
+        } catch (RuntimeException e) {
+            showAlert(Alert.AlertType.ERROR, "Fehler beim Löschen", "Fehler beim Löschen: " + e.getMessage());
         }
     }
     
@@ -547,6 +535,32 @@ public class MainController {
             fileTableView.setItems(FXCollections.observableArrayList());
             LoggingUtil.logInfo("MainController", "No folder selected. File list cleared.");
         }
+    }
+
+    /**
+     * Refreshes both the folder tree and file table while preserving the folder tree's state.
+     */
+    private void refreshUI() {
+        TreeItem<VirtualFolder> selectedFolder = folderTreeView.getSelectionModel().getSelectedItem();
+        refreshFolderTree();
+        if (selectedFolder != null) {
+            selectFolderInTree(selectedFolder.getValue());
+        }
+        refreshFileList();
+    }
+
+    /**
+     * Refreshes both the folder tree and file table while preserving the folder tree's state.
+     */
+    private void refreshUIAfterRename(VirtualFolder folder) {
+        TreeItem<VirtualFolder> selectedFolder = folderTreeView.getSelectionModel().getSelectedItem();
+        refreshFolderTree();
+        if (folder != null) {
+            selectFolderInTree(folder);
+        } else if (selectedFolder != null) {
+            selectFolderInTree(selectedFolder.getValue());
+        }
+        refreshFileList();
     }
 
     /**
@@ -668,16 +682,13 @@ public class MainController {
             return;
         }
 
-        // Create a custom dialog
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Ordner bearbeiten");
         dialog.setHeaderText("Bearbeiten Sie die Details des Ordners");
 
-        // Set the button types
         ButtonType saveButtonType = new ButtonType("Speichern", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        // Create the name and description fields
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -696,10 +707,8 @@ public class MainController {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Request focus on the name field by default
         Platform.runLater(nameField::requestFocus);
 
-        // Convert the result to a name-description pair when the save button is clicked
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
                 return new Pair<>(nameField.getText(), descriptionField.getText());
@@ -707,21 +716,20 @@ public class MainController {
             return null;
         });
 
-        Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-        stage.setAlwaysOnTop(true);
-
         Optional<Pair<String, String>> result = dialog.showAndWait();
         result.ifPresent(pair -> {
             String newName = pair.getKey();
             String newDescription = pair.getValue();
-            
+
             if (!newName.isEmpty()) {
                 try {
                     boolean success = FolderManager.getInstance().renameFolder(folder, newName);
                     folder.setDescription(newDescription);
-                    
+
                     if (success) {
                         refreshFolderTree();
+                        selectFolderInTree(folder);
+                        refreshFileList();
                         statusLabel.setText("Ordner erfolgreich bearbeitet.");
                     } else {
                         statusLabel.setText("Bearbeiten des Ordners fehlgeschlagen.");

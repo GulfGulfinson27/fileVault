@@ -375,4 +375,13 @@ public class FolderManager {
         }
         return subfolders;
     }
+
+    /**
+     * Gibt alle Ordner zurück.
+     *
+     * @return Eine Liste aller Ordner.
+     */
+    public List<VirtualFolder> getAllFolders() {
+        return new ArrayList<>(folders);
+    }
 }

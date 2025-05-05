@@ -1,14 +1,26 @@
 package com.filevault.gui;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.stage.Stage;
-import com.filevault.core.Vault;
 import java.io.File;
 import java.util.Optional;
+
+import com.filevault.core.Vault;
+
+import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 /**
  * Hauptklasse für die grafische Benutzeroberfläche (GUI) der Anwendung.
@@ -89,7 +101,10 @@ public class MainGUI extends Application {
         TableColumn<File, String> nameColumn = new TableColumn<>("Name");
         TableColumn<File, String> sizeColumn = new TableColumn<>("Size");
         TableColumn<File, String> dateColumn = new TableColumn<>("Date");
-        fileTable.getColumns().addAll(nameColumn, sizeColumn, dateColumn);
+        // Suppress type safety warning for adding columns
+        @SuppressWarnings("unchecked")
+        TableColumn<File, String>[] columns = new TableColumn[] { nameColumn, sizeColumn, dateColumn };
+        fileTable.getColumns().addAll(columns);
 
         // Erstelle das SplitPane
         splitPane = new SplitPane();
@@ -146,6 +161,32 @@ public class MainGUI extends Application {
                 showError("Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Löschen aus.");
             }
         });
+
+        // Füge einen Refresh-Button hinzu
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setOnAction(e -> {
+            try {
+                // Aktualisiere die Ordner- und Dateiansicht
+                folderTree.setRoot(vault.getFolderTree());
+                refreshFileTable();
+                statusBar.setText("Ansicht erfolgreich aktualisiert");
+            } catch (Exception ex) {
+                showError("Fehler beim Aktualisieren", ex.getMessage());
+            }
+        });
+
+        // Füge den Refresh-Button zur Button-Leiste hinzu
+        HBox buttonBar = new HBox(10, importButton, exportButton, createFolderButton, deleteButton, refreshButton);
+        mainContainer.getChildren().set(0, buttonBar);
+    }
+
+    /**
+     * Aktualisiert die Dateitabelle nach einer Änderung.
+     */
+    private void refreshFileTable() {
+        fileTable.getItems().clear();
+        // Hier können Sie die aktualisierten Dateien aus dem Tresor abrufen und hinzufügen
+        // Beispiel: fileTable.getItems().addAll(vault.getFilesForCurrentFolder());
     }
 
     /**
