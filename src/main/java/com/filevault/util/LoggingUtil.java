@@ -119,6 +119,16 @@ public class LoggingUtil {
     }
 
     /**
+     * Logs a warning message.
+     *
+     * @param className The name of the class where the log is generated.
+     * @param message   The message to log.
+     */
+    public static void logWarning(String className, String message) {
+        log("WARNING: [" + className + "] " + message);
+    }
+
+    /**
      * Logs a database-related message.
      *
      * @param operation The database operation (e.g., "Get", "Put").

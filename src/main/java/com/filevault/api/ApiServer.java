@@ -42,20 +42,20 @@ public class ApiServer {
 
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/api/auth", new AuthHandler());
-            logger.log(Level.INFO, "Kontext /api/auth registriert.");
+            LoggingUtil.logInfo("ApiServer", "Kontext /api/auth registriert.");
 
             server.createContext("/api/folders", new AuthMiddleware(new FoldersHandler()));
-            logger.log(Level.INFO, "Kontext /api/folders mit Authentifizierung registriert.");
+            LoggingUtil.logInfo("ApiServer", "Kontext /api/folders mit Authentifizierung registriert.");
 
             server.createContext("/api/files", new AuthMiddleware(new FileHandler()));
-            logger.log(Level.INFO, "Kontext /api/files mit Authentifizierung registriert.");
+            LoggingUtil.logInfo("ApiServer", "Kontext /api/files mit Authentifizierung registriert.");
 
             server.createContext("/", new WebInterfaceHandler());
-            logger.log(Level.INFO, "Kontext / für Web-Interface registriert.");
+            LoggingUtil.logInfo("ApiServer", "Kontext / für Web-Interface registriert.");
 
             server.setExecutor(null); // Standard-Executor
             server.start();
-            logger.log(Level.INFO, "API-Server gestartet auf Port {0}", port);
+            LoggingUtil.logInfo("ApiServer", "API-Server gestartet auf Port " + port);
             LoggingUtil.logInfo("ApiServer", "API server started successfully.");
         } catch (IOException | IllegalArgumentException e) {
             LoggingUtil.logSevere("ApiServer", "Failed to start API server: " + e.getMessage());
@@ -101,17 +101,16 @@ public class ApiServer {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            Logger logger = Logger.getLogger(AuthHandler.class.getName());
-            logger.log(Level.INFO, "Verarbeite Authentifizierungsanfrage...");
+            LoggingUtil.logInfo("ApiServer", "Verarbeite Authentifizierungsanfrage...");
 
             if ("POST".equals(exchange.getRequestMethod())) {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes());
-                logger.log(Level.INFO, "Anfrageinhalt: {0}", requestBody);
+                LoggingUtil.logInfo("ApiServer", "Anfrageinhalt: " + requestBody);
 
                 if (requestBody.contains(MASTER_PASSWORD)) {
                     String token = TokenManager.generateToken("user");
                     String response = String.format("{\"token\":\"%s\"}", token);
-                    logger.log(Level.INFO, "Token generiert: {0}", token);
+                    LoggingUtil.logInfo("ApiServer", "Token generiert: " + token);
 
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
@@ -119,14 +118,14 @@ public class ApiServer {
                     }
                 } else {
                     String response = "{\"error\":\"Ungültiges Passwort. Zugriff verweigert.\"}";
-                    logger.log(Level.WARNING, "Authentifizierung fehlgeschlagen: Ungültiges Passwort.");
+                    LoggingUtil.logWarning("ApiServer", "Authentifizierung fehlgeschlagen: Ungültiges Passwort.");
                     exchange.sendResponseHeaders(401, response.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(response.getBytes());
                     }
                 }
             } else {
-                logger.log(Level.WARNING, "HTTP-Methode nicht erlaubt: {0}", exchange.getRequestMethod());
+                LoggingUtil.logWarning("ApiServer", "HTTP-Methode nicht erlaubt: " + exchange.getRequestMethod());
                 exchange.sendResponseHeaders(405, -1); // Methode nicht erlaubt
             }
         }
@@ -144,15 +143,14 @@ public class ApiServer {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            Logger logger = Logger.getLogger(AuthMiddleware.class.getName());
-            logger.log(Level.INFO, "Überprüfe Authentifizierungs-Token...");
+            LoggingUtil.logInfo("ApiServer", "Überprüfe Authentifizierungs-Token...");
 
             String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
             if (authHeader != null && TokenManager.isValidToken(authHeader)) {
-                logger.log(Level.INFO, "Token gültig. Anfrage wird weitergeleitet.");
+                LoggingUtil.logInfo("ApiServer", "Token gültig. Anfrage wird weitergeleitet.");
                 next.handle(exchange);
             } else {
-                logger.log(Level.WARNING, "Ungültiges oder fehlendes Token.");
+                LoggingUtil.logWarning("ApiServer", "Ungültiges oder fehlendes Token.");
                 exchange.sendResponseHeaders(401, -1); // Nicht autorisiert
             }
         }
@@ -167,7 +165,7 @@ public class ApiServer {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
-            logger.log(Level.INFO, "Verarbeite Anfrage an /api/folders mit Methode: {0}", method);
+            LoggingUtil.logInfo("ApiServer", "Verarbeite Anfrage an /api/folders mit Methode: " + method);
 
             String response;
 
@@ -190,7 +188,7 @@ public class ApiServer {
                 }
                 default -> {
                     response = "Methode nicht erlaubt.";
-                    logger.log(Level.WARNING, "Methode nicht erlaubt: {0}", method);
+                    LoggingUtil.logWarning("ApiServer", "Methode nicht erlaubt: " + method);
                     exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
             }
@@ -201,7 +199,7 @@ public class ApiServer {
         }
 
         private String listFolders() {
-            logger.log(Level.INFO, "Liste alle Ordner auf...");
+            LoggingUtil.logInfo("ApiServer", "Liste alle Ordner auf...");
             StringBuilder response = new StringBuilder("[");
             try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement("SELECT id, name, COALESCE(parent_id, 0) AS parent_id FROM folders");
@@ -215,18 +213,18 @@ public class ApiServer {
                             rs.getInt("id"), rs.getString("name"), rs.getInt("parent_id")));
                 }
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Datenbankfehler: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Datenbankfehler: " + e.getMessage());
                 return "Datenbankfehler: " + e.getMessage();
             }
             response.append("]");
-            logger.log(Level.INFO, "Ordnerliste erstellt: {0}", response);
+            LoggingUtil.logInfo("ApiServer", "Ordnerliste erstellt: " + response);
             return response.toString();
         }
 
         private String createFolder(HttpExchange exchange) {
             try {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes());
-                logger.log(Level.INFO, "Empfangene Anfrage zum Erstellen eines Ordners: {0}", requestBody);
+                LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Erstellen eines Ordners: " + requestBody);
 
                 // Parse JSON to extract folder details
                 String folderName = parseJson(requestBody, "name");
@@ -234,6 +232,19 @@ public class ApiServer {
                         ? Integer.parseInt(parseJson(requestBody, "parentFolderId"))
                         : 0; // Default to root folder
 
+                // Validate parentFolderId
+                try (Connection conn = DatabaseManager.getConnection();
+                     PreparedStatement validateStmt = conn.prepareStatement("SELECT COUNT(*) FROM folders WHERE id = ?")) {
+
+                    validateStmt.setInt(1, parentFolderId);
+                    try (ResultSet rs = validateStmt.executeQuery()) {
+                        if (parentFolderId != 0 && (!rs.next() || rs.getInt(1) == 0)) {
+                            return "Ungültige parentFolderId: Der übergeordnete Ordner existiert nicht.";
+                        }
+                    }
+                }
+
+                // Proceed with folder creation
                 try (Connection conn = DatabaseManager.getConnection();
                      PreparedStatement stmt = conn.prepareStatement(
                              "INSERT INTO folders (name, parent_id) VALUES (?, ?)",
@@ -246,7 +257,7 @@ public class ApiServer {
                     try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             int folderId = generatedKeys.getInt(1);
-                            logger.log(Level.INFO, "Ordner erstellt mit ID: {0}", folderId);
+                            LoggingUtil.logInfo("ApiServer", "Ordner erstellt mit ID: " + folderId);
                             return String.format("{\"id\":%d,\"name\":\"%s\",\"parentFolderId\":%d}", folderId, folderName, parentFolderId);
                         } else {
                             throw new SQLException("Erstellen des Ordners fehlgeschlagen, keine ID erhalten.");
@@ -285,9 +296,15 @@ public class ApiServer {
                         return "Ordner nicht gefunden.";
                     }
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Fehler beim Aktualisieren des Ordners: {0}", e.getMessage());
                 return "Fehler beim Aktualisieren des Ordners: " + e.getMessage();
+            } catch (NumberFormatException e) {
+                logger.log(Level.SEVERE, "Ungültiges Format in der Anfrage: {0}", e.getMessage());
+                return "Ungültiges Format in der Anfrage: " + e.getMessage();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Fehler beim Lesen der Anfrage: {0}", e.getMessage());
+                return "Fehler beim Lesen der Anfrage: " + e.getMessage();
             }
         }
 
@@ -346,7 +363,7 @@ public class ApiServer {
 
             switch (method) {
                 case "GET" -> {
-                    response = listFiles(exchange);
+                    response = listFiles();
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                 }
                 case "POST", "PUT", "DELETE" -> {
@@ -366,7 +383,7 @@ public class ApiServer {
             }
         }
 
-        private String listFiles(HttpExchange exchange) {
+        private String listFiles() {
             try {
                 FileStorage fileStorage = FileStorage.getInstance();
                 logger.info("Rufe alle Dateien aus allen Ordnern ab...");
