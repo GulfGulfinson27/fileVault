@@ -45,6 +45,12 @@ public class DatabaseManager {
                 Files.createDirectories(parentDir);
             }
             
+            // Ensure the database file is writable
+            File dbFile = new File(currentDbPath);
+            if (dbFile.exists() && !dbFile.canWrite()) {
+                throw new RuntimeException("Database file is read-only: " + currentDbPath);
+            }
+            
             // Verbindung zur Datenbank herstellen (erstellt sie, falls sie nicht existiert)
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection(DB_URL_PREFIX + currentDbPath);
@@ -73,7 +79,7 @@ public class DatabaseManager {
                 }
             }
             
-            // Tabellen erstellen, falls sie nicht existieren
+            // Ensure tables are created even if no recreation is needed
             createTables();
             LoggingUtil.logDatabase("Initialize", "Database", "Database initialized successfully.");
             

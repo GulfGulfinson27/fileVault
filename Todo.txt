@@ -9,5 +9,4 @@
 - gui dark/whitemode button sichtbar machen im darkmode
 - logos und icons einbauen
 - test log immer resetten
-- refresh button einbauen
 - folders with same name

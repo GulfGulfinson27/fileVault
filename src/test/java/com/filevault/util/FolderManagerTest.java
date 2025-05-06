@@ -153,13 +153,52 @@ class FolderManagerTest {
         assertEquals(level1.getId(), level2.getParentId());
         
         // Teste das Löschen eines Ordners mit Unterordnern
-        assertThrows(IllegalStateException.class, () -> {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             folderManager.deleteFolder(root);
         });
+        assertEquals("Ordner enthält Unterordner und kann nicht gelöscht werden", exception.getMessage());
         
         // Lösche zuerst die Unterordner
         folderManager.deleteFolder(level2);
         folderManager.deleteFolder(level1);
         folderManager.deleteFolder(root);
     }
-} 
+
+    /**
+     * Testet die Erstellung eines Ordners mit einem doppelten Namen im gleichen Verzeichnis.
+     * Überprüft, ob eine IllegalArgumentException ausgelöst wird.
+     */
+    @Test
+    public void testDuplicateFolderNameInSameParent() {
+        VirtualFolder rootFolder = folderManager.createFolder("Root", null);
+        assertNotNull(rootFolder);
+
+        // Erstelle einen Ordner mit dem gleichen Namen im gleichen Verzeichnis
+        folderManager.createFolder("Test", rootFolder.getId());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            folderManager.createFolder("Test", rootFolder.getId());
+        });
+        assertEquals("Ein Ordner mit diesem Namen existiert bereits im gleichen Verzeichnis", exception.getMessage());
+    }
+
+    /**
+     * Testet die Erstellung eines Ordners mit einem doppelten Namen in unterschiedlichen Verzeichnissen.
+     * Überprüft, ob die Erstellung erfolgreich ist.
+     */
+    @Test
+    public void testDuplicateFolderNameInDifferentParents() {
+        VirtualFolder rootFolder1 = folderManager.createFolder("Root1", null);
+        VirtualFolder rootFolder2 = folderManager.createFolder("Root2", null);
+        assertNotNull(rootFolder1);
+        assertNotNull(rootFolder2);
+
+        // Erstelle Ordner mit gleichem Namen in unterschiedlichen Verzeichnissen
+        VirtualFolder folder1 = folderManager.createFolder("Test", rootFolder1.getId());
+        VirtualFolder folder2 = folderManager.createFolder("Test", rootFolder2.getId());
+
+        assertNotNull(folder1);
+        assertNotNull(folder2);
+        assertEquals("Test", folder1.getName());
+        assertEquals("Test", folder2.getName());
+    }
+}

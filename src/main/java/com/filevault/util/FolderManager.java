@@ -159,6 +159,23 @@ public class FolderManager {
     }
     
     /**
+     * Checks if a folder with the same name exists under the same parent.
+     * @param name The name of the folder to check.
+     * @param parentId The ID of the parent folder.
+     * @return true if a folder with the same name exists, false otherwise.
+     */
+    private boolean isDuplicateFolderName(String name, Integer parentId) {
+        for (VirtualFolder folder : folders) {
+            if (folder.getName().equalsIgnoreCase(name) && 
+                ((folder.getParentId() == null && parentId == null) || 
+                 (folder.getParentId() != null && folder.getParentId().equals(parentId)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Erstellt einen neuen Ordner mit Namen und Beschreibung.
      * @param name Der Name des neuen Ordners
      * @param description Die Beschreibung des Ordners
@@ -171,6 +188,11 @@ public class FolderManager {
         if (name == null || name.trim().isEmpty()) {
             LoggingUtil.logError("FolderManager", "Folder creation failed: Name is empty.");
             throw new IllegalArgumentException("Ordnername darf nicht leer sein");
+        }
+
+        if (isDuplicateFolderName(name, parentId)) {
+            LoggingUtil.logError("FolderManager", "Folder creation failed: Duplicate folder name.");
+            throw new IllegalArgumentException("Ein Ordner mit diesem Namen existiert bereits im gleichen Verzeichnis");
         }
 
         try (Connection conn = DatabaseManager.getConnection();
