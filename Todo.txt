@@ -8,5 +8,3 @@
 - gui animationen
 - gui dark/whitemode button sichtbar machen im darkmode
 - logos und icons einbauen
-- test log immer resetten
-- folders with same name

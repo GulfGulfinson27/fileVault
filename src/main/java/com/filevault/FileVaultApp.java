@@ -42,7 +42,7 @@ public class FileVaultApp extends Application {
             stage.setScene(scene);
             stage.setTitle("FileVault - Sicherer Dateispeicher");
             try {
-                stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/app-icon.png"))));
+                stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/filevault/icons/icon.png"))));
             } catch (Exception e) {
                 System.err.println("Anwendungs-Icon konnte nicht geladen werden: " + e.getMessage());
             }

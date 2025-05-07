@@ -18,9 +18,9 @@
    <center>
       <VBox alignment="CENTER" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" translateX="-15.0">
                <image>
-                  <Image url="@/com/filevault/icons/app-icon.png" />
+                  <Image url="@/com/filevault/icons/icon.png" />
                </image>
             </ImageView>
             <Label text="FileVault" textAlignment="CENTER">
