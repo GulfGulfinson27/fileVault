@@ -19,6 +19,7 @@
     -fx-border-color: #6A4BAF; /* Brighter accent */
     -fx-border-width: 2px;
     -fx-transition: all 0.3s ease;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.5, 0, 0);
 }
 
 .button:hover {
@@ -41,11 +42,12 @@
     -fx-border-color: #6A4BAF;
     -fx-border-width: 2px;
     -fx-transition: all 0.3s ease;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.5, 0, 0);
 }
 
 .text-field:focused, .password-field:focused {
     -fx-border-color: #E0C3FC;
-    -fx-box-shadow: 0 0 10px #E0C3FC;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 10, 0, 0, 0);
 }
 
 .scroll-pane {

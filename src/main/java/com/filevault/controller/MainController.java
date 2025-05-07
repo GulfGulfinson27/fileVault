@@ -250,9 +250,11 @@ public class MainController {
      */
     private void updateToggleButtonIcon(String mode) {
         if ("dark".equals(mode)) {
-            themeToggleButton.setText("☀️"); // Sun icon for light mode
+            themeToggleButton.setText("☀️");
+            themeToggleButton.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
         } else {
-            themeToggleButton.setText("🌙"); // Moon icon for dark mode
+            themeToggleButton.setText("🌕");
+            themeToggleButton.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
         }
     }
 

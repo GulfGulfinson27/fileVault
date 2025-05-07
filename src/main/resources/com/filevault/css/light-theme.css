@@ -1,5 +1,6 @@
 /* Updated Light Theme CSS with new color palette */
 .root {
+    background-color: #F8F0FF; /* Standard property for compatibility */
     -fx-background-color: #F8F0FF; /* Lighter lavender */
     -fx-text-fill: #6A4BAF; /* Darker purple */
     -fx-font-family: 'Segoe UI', Arial, sans-serif;
@@ -45,7 +46,7 @@
 
 .text-field:focused, .password-field:focused {
     -fx-border-color: #6A4BAF;
-    -fx-box-shadow: 0 0 10px #6A4BAF;
+    -fx-effect: dropshadow(gaussian, #6A4BAF, 10, 0, 0, 0);
 }
 
 .scroll-pane {
