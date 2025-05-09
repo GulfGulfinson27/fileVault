@@ -8,3 +8,5 @@
 - gui animationen
 - gui dark/whitemode button sichtbar machen im darkmode
 - logos und icons einbauen
+- maincontroller test fixen
+- tests hinzufuegen

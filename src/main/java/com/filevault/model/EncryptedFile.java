@@ -1,8 +1,8 @@
 package com.filevault.model;
 
-import java.time.LocalDateTime;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 /**
@@ -197,6 +197,15 @@ public class EncryptedFile {
      * @return Die Dateierweiterung oder einen leeren String, falls keine vorhanden ist
      */
     public String getFileExtension() {
+        if (originalName == null) {
+            return "";
+        }
+        
+        // Prüfe, ob es sich um eine versteckte Datei handelt (.dateiname)
+        if (originalName.startsWith(".") && originalName.length() > 1 && !originalName.substring(1).contains(".")) {
+            return originalName.substring(1);
+        }
+        
         int dotIndex = originalName.lastIndexOf('.');
         if (dotIndex > 0 && dotIndex < originalName.length() - 1) {
             return originalName.substring(dotIndex + 1).toLowerCase();

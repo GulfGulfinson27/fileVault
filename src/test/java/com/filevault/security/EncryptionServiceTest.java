@@ -1,12 +1,12 @@
 package com.filevault.security;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,8 +14,17 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.filevault.model.UserManager;
 import com.filevault.storage.DatabaseManager;
@@ -36,6 +45,11 @@ public class EncryptionServiceTest {
     private File encryptedFile;
     private File decryptedFile;
     private String testDbPath;
+    
+    @TempDir
+    File tempDir;
+    
+    private byte[] testMasterKey;
     
     /**
      * Initialisiert die Testumgebung vor jedem Test.
@@ -95,6 +109,19 @@ public class EncryptionServiceTest {
         
         // EncryptionService holen
         encryptionService = EncryptionService.getInstance();
+        
+        // Erzeuge einen Test-Masterschlüssel
+        testMasterKey = new byte[32]; // 256 bit AES key
+        new Random().nextBytes(testMasterKey);
+        
+        // Setze den Masterschlüssel über Reflection im UserManager
+        setMasterKeyViaReflection(userManager, testMasterKey);
+    }
+    
+    private void setMasterKeyViaReflection(UserManager userManager, byte[] masterKey) throws Exception {
+        Field masterKeyField = UserManager.class.getDeclaredField("masterKey");
+        masterKeyField.setAccessible(true);
+        masterKeyField.set(userManager, masterKey);
     }
     
     /**
@@ -282,5 +309,130 @@ public class EncryptionServiceTest {
         
         // Aufräumen
         invalidFile.delete();
+    }
+    
+    @Test
+    void testEncryptAndDecryptFile() throws Exception {
+        // Erstelle eine Testdatei
+        String testContent = "Dies ist ein Test mit einigen speziellen Zeichen: äöüßÄÖÜ!@#$%^&*()";
+        File originalFile = new File(tempDir, "original.txt");
+        Files.write(originalFile.toPath(), testContent.getBytes(StandardCharsets.UTF_8));
+        
+        // Erstelle Dateien für die Verschlüsselung und Entschlüsselung
+        File encryptedFile = new File(tempDir, "encrypted.bin");
+        File decryptedFile = new File(tempDir, "decrypted.txt");
+        
+        // Verschlüssele die Datei
+        boolean encryptResult = encryptionService.encryptFile(originalFile, encryptedFile);
+        assertTrue(encryptResult);
+        assertTrue(encryptedFile.exists());
+        
+        // Stelle sicher, dass die verschlüsselte Datei anders ist als die Originaldatei
+        byte[] originalBytes = Files.readAllBytes(originalFile.toPath());
+        byte[] encryptedBytes = Files.readAllBytes(encryptedFile.toPath());
+        assertFalse(Arrays.equals(originalBytes, encryptedBytes));
+        
+        // Entschlüssele die Datei
+        boolean decryptResult = encryptionService.decryptFile(encryptedFile, decryptedFile);
+        assertTrue(decryptResult);
+        assertTrue(decryptedFile.exists());
+        
+        // Überprüfe, ob der entschlüsselte Inhalt mit dem Original übereinstimmt
+        String decryptedContent = new String(Files.readAllBytes(decryptedFile.toPath()), StandardCharsets.UTF_8);
+        assertEquals(testContent, decryptedContent);
+    }
+    
+    @Test
+    void testEncryptAndDecryptLargeFile() throws Exception {
+        // Erstelle eine größere Testdatei (1 MB)
+        File largeFile = new File(tempDir, "large.bin");
+        byte[] randomData = new byte[1024 * 1024]; // 1 MB
+        new Random().nextBytes(randomData);
+        try (FileOutputStream fos = new FileOutputStream(largeFile)) {
+            fos.write(randomData);
+        }
+        
+        // Erstelle Dateien für die Verschlüsselung und Entschlüsselung
+        File encryptedLargeFile = new File(tempDir, "large_encrypted.bin");
+        File decryptedLargeFile = new File(tempDir, "large_decrypted.bin");
+        
+        // Verschlüssele die Datei
+        boolean encryptResult = encryptionService.encryptFile(largeFile, encryptedLargeFile);
+        assertTrue(encryptResult);
+        
+        // Entschlüssele die Datei
+        boolean decryptResult = encryptionService.decryptFile(encryptedLargeFile, decryptedLargeFile);
+        assertTrue(decryptResult);
+        
+        // Überprüfe, ob der entschlüsselte Inhalt mit dem Original übereinstimmt
+        byte[] decryptedData = new byte[randomData.length];
+        try (FileInputStream fis = new FileInputStream(decryptedLargeFile)) {
+            assertEquals(randomData.length, fis.read(decryptedData));
+        }
+        
+        assertArrayEquals(randomData, decryptedData);
+    }
+    
+    @Test
+    void testEncryptWithoutMasterKey() throws Exception {
+        // Lösche den Masterschlüssel über Reflection
+        setMasterKeyViaReflection(UserManager.getInstance(), null);
+        
+        // Erstelle eine Testdatei
+        File testFile = new File(tempDir, "test.txt");
+        Files.write(testFile.toPath(), "Test".getBytes());
+        
+        File encryptedFile = new File(tempDir, "encrypted.bin");
+        
+        // Versuch zu verschlüsseln ohne Masterschlüssel sollte fehlschlagen
+        assertThrows(IllegalStateException.class, () -> {
+            encryptionService.encryptFile(testFile, encryptedFile);
+        });
+        
+        // Stelle den Masterschlüssel wieder her
+        setMasterKeyViaReflection(UserManager.getInstance(), testMasterKey);
+    }
+    
+    @Test
+    void testDecryptWithoutMasterKey() throws Exception {
+        // Erstelle eine Testdatei und verschlüssele sie mit dem vorhandenen Schlüssel
+        File testFile = new File(tempDir, "test.txt");
+        Files.write(testFile.toPath(), "Test".getBytes());
+        
+        File encryptedFile = new File(tempDir, "encrypted.bin");
+        encryptionService.encryptFile(testFile, encryptedFile);
+        
+        // Lösche den Masterschlüssel über Reflection
+        setMasterKeyViaReflection(UserManager.getInstance(), null);
+        
+        File decryptedFile = new File(tempDir, "decrypted.txt");
+        
+        // Versuch zu entschlüsseln ohne Masterschlüssel sollte fehlschlagen
+        assertThrows(IllegalStateException.class, () -> {
+            encryptionService.decryptFile(encryptedFile, decryptedFile);
+        });
+        
+        // Stelle den Masterschlüssel wieder her
+        setMasterKeyViaReflection(UserManager.getInstance(), testMasterKey);
+    }
+    
+    @Test
+    void testDecryptCorruptedFile() throws Exception {
+        // Erstelle eine Testdatei
+        File testFile = new File(tempDir, "test.txt");
+        Files.write(testFile.toPath(), "Test".getBytes());
+        
+        // Erstelle eine absichtlich beschädigte "verschlüsselte" Datei
+        File corruptedFile = new File(tempDir, "corrupted.bin");
+        byte[] corruptedData = new byte[20]; // Zu kurz für einen gültigen IV
+        new Random().nextBytes(corruptedData);
+        Files.write(corruptedFile.toPath(), corruptedData);
+        
+        File decryptedFile = new File(tempDir, "decrypted.txt");
+        
+        // Versuch, die beschädigte Datei zu entschlüsseln, sollte fehlschlagen
+        assertThrows(IOException.class, () -> {
+            encryptionService.decryptFile(corruptedFile, decryptedFile);
+        });
     }
 }

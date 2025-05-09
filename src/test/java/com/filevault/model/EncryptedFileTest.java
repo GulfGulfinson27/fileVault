@@ -1,7 +1,14 @@
 package com.filevault.model;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Testklasse für die EncryptedFile-Klasse.
  * Diese Klasse testet die Funktionalität der verschlüsselten Dateien im Tresor.
  */
+@DisplayName("Tests für EncryptedFile")
 public class EncryptedFileTest {
     
     private EncryptedFile testFile;
@@ -33,101 +41,150 @@ public class EncryptedFileTest {
         );
     }
     
-    /**
-     * Testet die Getter-Methoden der EncryptedFile-Klasse.
-     * Überprüft, ob alle Werte korrekt gesetzt und abgerufen werden können.
-     */
-    @Test
-    public void testGetters() {
-        assertEquals(1, testFile.getId());
-        assertEquals(2, testFile.getFolderId());
-        assertEquals("test.txt", testFile.getOriginalName());
-        assertEquals("/path/to/encrypted", testFile.getEncryptedPath());
-        assertEquals(1024, testFile.getSizeBytes());
-        assertEquals("text/plain", testFile.getMimeType());
-        assertEquals(testTime, testFile.getCreatedAt());
-        assertEquals(testTime, testFile.getLastAccess());
+    @Nested
+    @DisplayName("Getter und Setter Tests")
+    class GetterSetterTests {
+        /**
+         * Testet die Getter-Methoden der EncryptedFile-Klasse.
+         * Überprüft, ob alle Werte korrekt gesetzt und abgerufen werden können.
+         */
+        @Test
+        @DisplayName("Getter sollten korrekte Werte zurückgeben")
+        public void testGetters() {
+            assertEquals(1, testFile.getId(), "getId() sollte die korrekte ID zurückgeben");
+            assertEquals(2, testFile.getFolderId(), "getFolderId() sollte die korrekte Ordner-ID zurückgeben");
+            assertEquals("test.txt", testFile.getOriginalName(), "getOriginalName() sollte den korrekten Dateinamen zurückgeben");
+            assertEquals("/path/to/encrypted", testFile.getEncryptedPath(), "getEncryptedPath() sollte den korrekten Pfad zurückgeben");
+            assertEquals(1024, testFile.getSizeBytes(), "getSizeBytes() sollte die korrekte Größe zurückgeben");
+            assertEquals("text/plain", testFile.getMimeType(), "getMimeType() sollte den korrekten MIME-Typ zurückgeben");
+            assertEquals(testTime, testFile.getCreatedAt(), "getCreatedAt() sollte die korrekte Erstellungszeit zurückgeben");
+            assertEquals(testTime, testFile.getLastAccess(), "getLastAccess() sollte die korrekte Zugriffszeit zurückgeben");
+        }
+        
+        /**
+         * Testet die Setter-Methoden der EncryptedFile-Klasse.
+         * Überprüft, ob Werte korrekt geändert werden können.
+         */
+        @Test
+        @DisplayName("Setter sollten Werte korrekt ändern")
+        public void testSetters() {
+            testFile.setFolderId(3);
+            assertEquals(3, testFile.getFolderId(), "setFolderId() sollte die Ordner-ID korrekt ändern");
+            
+            testFile.setOriginalName("neuerName.txt");
+            assertEquals("neuerName.txt", testFile.getOriginalName(), "setOriginalName() sollte den Dateinamen korrekt ändern");
+            
+            testFile.setMimeType("application/pdf");
+            assertEquals("application/pdf", testFile.getMimeType(), "setMimeType() sollte den MIME-Typ korrekt ändern");
+            
+            LocalDateTime newTime = LocalDateTime.now().plusHours(1);
+            testFile.setLastAccess(newTime);
+            assertEquals(newTime, testFile.getLastAccess(), "setLastAccess() sollte die Zugriffszeit korrekt ändern");
+        }
+        
+        /**
+         * Testet die Setter mit Null-Werten.
+         */
+        @ParameterizedTest
+        @DisplayName("Setter sollten mit Null-Werten umgehen können")
+        @NullAndEmptySource
+        public void testSettersWithNullValues(String value) {
+            testFile.setOriginalName(value);
+            assertEquals(value, testFile.getOriginalName(), "setOriginalName() sollte Null-Werte akzeptieren");
+            
+            testFile.setMimeType(value);
+            assertEquals(value, testFile.getMimeType(), "setMimeType() sollte Null-Werte akzeptieren");
+            
+            testFile.setLastAccess(null);
+            assertNull(testFile.getLastAccess(), "setLastAccess() sollte NULL akzeptieren");
+        }
     }
     
-    /**
-     * Testet die Setter-Methoden der EncryptedFile-Klasse.
-     * Überprüft, ob Werte korrekt geändert werden können.
-     */
-    @Test
-    public void testSetters() {
-        testFile.setFolderId(3);
-        assertEquals(3, testFile.getFolderId());
-        
-        testFile.setOriginalName("neuerName.txt");
-        assertEquals("neuerName.txt", testFile.getOriginalName());
-        
-        testFile.setMimeType("application/pdf");
-        assertEquals("application/pdf", testFile.getMimeType());
-        
-        LocalDateTime newTime = LocalDateTime.now();
-        testFile.setLastAccess(newTime);
-        assertEquals(newTime, testFile.getLastAccess());
+    @Nested
+    @DisplayName("Formatierung Tests")
+    class FormattingTests {
+        /**
+         * Testet die Formatierung der Dateigröße mit verschiedenen Größen.
+         */
+        @ParameterizedTest
+        @DisplayName("Dateigröße sollte korrekt formatiert werden")
+        @CsvSource({
+            "500, '500 B'",
+            "1024, '1.0 KB'",
+            "1536, '1.5 KB'",
+            "2097152, '2.0 MB'",
+            "3221225472, '3.0 GB'"
+        })
+        public void testFormattedSize(long size, String expected) {
+            EncryptedFile file = new EncryptedFile(1, 1, "test.txt", "/path", size, "text/plain", testTime, testTime);
+            assertEquals(expected, file.getFormattedSize(), "Die Formatierung der Dateigröße sollte korrekt sein");
+        }
     }
     
-    /**
-     * Testet die Formatierung der Dateigröße.
-     * Überprüft verschiedene Größenangaben in Bytes, KB, MB und GB.
-     */
-    @Test
-    public void testFormattedSize() {
-        // Test für Bytes
-        EncryptedFile smallFile = new EncryptedFile(2, 1, "small.txt", "/path", 500, "text/plain", testTime, testTime);
-        assertEquals("500 B", smallFile.getFormattedSize());
-        
-        // Test für KB
-        EncryptedFile kbFile = new EncryptedFile(3, 1, "kb.txt", "/path", 2048, "text/plain", testTime, testTime);
-        assertEquals("2.0 KB", kbFile.getFormattedSize());
-        
-        // Test für MB
-        EncryptedFile mbFile = new EncryptedFile(4, 1, "mb.txt", "/path", 2 * 1024 * 1024, "text/plain", testTime, testTime);
-        assertEquals("2.0 MB", mbFile.getFormattedSize());
-        
-        // Test für GB
-        EncryptedFile gbFile = new EncryptedFile(5, 1, "gb.txt", "/path", 3L * 1024 * 1024 * 1024, "text/plain", testTime, testTime);
-        assertEquals("3.0 GB", gbFile.getFormattedSize());
+    @Nested
+    @DisplayName("Dateierweiterung Tests")
+    class FileExtensionTests {
+        /**
+         * Testet die Extraktion der Dateierweiterung mit verschiedenen Dateinamen.
+         */
+        @ParameterizedTest
+        @DisplayName("Dateierweiterung sollte korrekt extrahiert werden")
+        @CsvSource({
+            "test.txt, txt",
+            "noextension, ''",
+            "multiple.dots.pdf, pdf",
+            ".hiddenfile, hiddenfile",
+            "file.with.many.dots.zip, zip"
+        })
+        public void testFileExtension(String filename, String expected) {
+            EncryptedFile file = new EncryptedFile(1, 1, filename, "/path", 1024, "text/plain", testTime, testTime);
+            assertEquals(expected, file.getFileExtension(), "Die Dateierweiterung sollte korrekt extrahiert werden");
+        }
     }
     
-    /**
-     * Testet die Extraktion der Dateierweiterung.
-     * Überprüft verschiedene Dateinamen mit und ohne Erweiterung.
-     */
-    @Test
-    public void testFileExtension() {
-        assertEquals("txt", testFile.getFileExtension());
-        
-        EncryptedFile noExtension = new EncryptedFile(6, 1, "noextension", "/path", 1024, "text/plain", testTime, testTime);
-        assertEquals("", noExtension.getFileExtension());
-        
-        EncryptedFile multipleDots = new EncryptedFile(7, 1, "test.file.txt", "/path", 1024, "text/plain", testTime, testTime);
-        assertEquals("txt", multipleDots.getFileExtension());
+    @Nested
+    @DisplayName("Objektvergleich Tests")
+    class ObjectComparisonTests {
+        /**
+         * Testet die equals- und hashCode-Methoden.
+         * Überprüft die korrekte Implementierung der Objektgleichheit.
+         */
+        @Test
+        @DisplayName("equals() und hashCode() sollten korrekt implementiert sein")
+        public void testEqualsAndHashCode() {
+            EncryptedFile sameId = new EncryptedFile(1, 3, "different.txt", "/other/path", 2048, "text/html", testTime, testTime);
+            EncryptedFile differentId = new EncryptedFile(2, 2, "test.txt", "/path/to/encrypted", 1024, "text/plain", testTime, testTime);
+            
+            // Gleichheit basiert nur auf der ID
+            assertTrue(testFile.equals(testFile), "Ein Objekt sollte sich selbst gleichen");
+            assertTrue(testFile.equals(sameId), "Dateien mit gleicher ID sollten gleich sein");
+            assertFalse(testFile.equals(differentId), "Dateien mit unterschiedlicher ID sollten ungleich sein");
+            assertFalse(testFile.equals(null), "equals() sollte null-sicher sein");
+            assertFalse(testFile.equals("nicht eine Datei"), "equals() sollte typsicher sein");
+            
+            // HashCode-Konsistenz mit equals
+            assertEquals(testFile.hashCode(), sameId.hashCode(), "hashCode() sollte für gleiche Objekte gleich sein");
+            assertNotEquals(testFile.hashCode(), differentId.hashCode(), "hashCode() sollte für ungleiche Objekte unterschiedlich sein");
+        }
     }
     
-    /**
-     * Testet die equals- und hashCode-Methoden.
-     * Überprüft die korrekte Implementierung der Objektgleichheit.
-     */
     @Test
-    public void testEqualsAndHashCode() {
-        EncryptedFile sameId = new EncryptedFile(1, 3, "different.txt", "/other/path", 2048, "text/html", testTime, testTime);
-        EncryptedFile differentId = new EncryptedFile(2, 2, "test.txt", "/path/to/encrypted", 1024, "text/plain", testTime, testTime);
-        
-        assertTrue(testFile.equals(sameId));
-        assertFalse(testFile.equals(differentId));
-        assertEquals(testFile.hashCode(), sameId.hashCode());
-        assertNotEquals(testFile.hashCode(), differentId.hashCode());
-    }
-    
-    /**
-     * Testet die toString-Methode.
-     * Überprüft, ob der Originalname korrekt zurückgegeben wird.
-     */
-    @Test
+    @DisplayName("toString() sollte den Originalnamen zurückgeben")
     public void testToString() {
-        assertEquals("test.txt", testFile.toString());
+        assertEquals("test.txt", testFile.toString(), "toString() sollte den Originalnamen zurückgeben");
+    }
+    
+    @Test
+    @DisplayName("Konstruktor sollte Objekte korrekt initialisieren")
+    public void testConstructor() {
+        EncryptedFile file = new EncryptedFile(10, 20, "file.txt", "/path", 2048, "text/plain", testTime, null);
+        assertEquals(10, file.getId());
+        assertEquals(20, file.getFolderId());
+        assertEquals("file.txt", file.getOriginalName());
+        assertEquals("/path", file.getEncryptedPath());
+        assertEquals(2048, file.getSizeBytes());
+        assertEquals("text/plain", file.getMimeType());
+        assertEquals(testTime, file.getCreatedAt());
+        assertNull(file.getLastAccess());
     }
 } 

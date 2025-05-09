@@ -1,11 +1,13 @@
 package com.filevault.security;
 
-import org.junit.jupiter.api.Test;
-
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for PasswordUtils class.
@@ -13,41 +15,98 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PasswordUtilsTest {
 
     @Test
-    public void testGenerateKeyFromPassword() {
-        String password = "securePassword123";
+    void testGenerateKeyFromPassword() {
+        // Test mit einfachem Passwort
+        String password = "testPassword";
         byte[] key = PasswordUtils.generateKeyFromPassword(password);
-
-        assertNotNull(key, "Generated key should not be null");
-        assertEquals(32, key.length, "Generated key should have a length of 32 bytes");
+        
+        assertNotNull(key);
+        assertEquals(32, key.length); // 256 Bit = 32 Byte
     }
-
+    
     @Test
-    public void testGenerateKeyFromPasswordWithSalt() {
-        String password = "securePassword123";
-        byte[] salt = PasswordUtils.generateSalt();
+    void testGenerateKeyFromPasswordConsistency() {
+        // Test, ob die gleiche Eingabe den gleichen Schlüssel erzeugt
+        String password = "testPassword";
+        byte[] key1 = PasswordUtils.generateKeyFromPassword(password);
+        byte[] key2 = PasswordUtils.generateKeyFromPassword(password);
+        
+        assertArrayEquals(key1, key2, "Derselbe Passwort-Input sollte denselben Schlüssel erzeugen");
+    }
+    
+    @Test
+    void testGenerateKeyFromPasswordWithDifferentInputs() {
+        // Test, ob unterschiedliche Eingaben unterschiedliche Schlüssel erzeugen
+        String password1 = "testPassword1";
+        String password2 = "testPassword2";
+        
+        byte[] key1 = PasswordUtils.generateKeyFromPassword(password1);
+        byte[] key2 = PasswordUtils.generateKeyFromPassword(password2);
+        
+        assertNotEquals(Arrays.hashCode(key1), Arrays.hashCode(key2), 
+                "Verschiedene Passwörter sollten verschiedene Schlüssel erzeugen");
+    }
+    
+    @Test
+    void testGenerateKeyFromPasswordWithCustomSalt() {
+        // Test mit benutzerdefiniertem Salt
+        String password = "testPassword";
+        byte[] salt = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        
         byte[] key = PasswordUtils.generateKeyFromPassword(password, salt);
-
-        assertNotNull(key, "Generated key should not be null");
-        assertEquals(32, key.length, "Generated key should have a length of 32 bytes");
+        
+        assertNotNull(key);
+        assertEquals(32, key.length); // 256 Bit = 32 Byte
     }
-
+    
     @Test
-    public void testGenerateSalt() {
+    void testSaltChangesOutput() {
+        // Test, ob verschiedene Salts bei gleichem Passwort unterschiedliche Schlüssel erzeugen
+        String password = "testPassword";
+        byte[] salt1 = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        byte[] salt2 = new byte[] { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+        
+        byte[] key1 = PasswordUtils.generateKeyFromPassword(password, salt1);
+        byte[] key2 = PasswordUtils.generateKeyFromPassword(password, salt2);
+        
+        assertNotEquals(Arrays.hashCode(key1), Arrays.hashCode(key2), 
+                "Derselbe Passwort mit unterschiedlichen Salts sollte unterschiedliche Schlüssel erzeugen");
+    }
+    
+    @Test
+    void testGenerateSalt() {
+        // Test der Salt-Generierung
         byte[] salt1 = PasswordUtils.generateSalt();
         byte[] salt2 = PasswordUtils.generateSalt();
-
-        assertNotNull(salt1, "Generated salt should not be null");
-        assertNotNull(salt2, "Generated salt should not be null");
-        assertEquals(16, salt1.length, "Generated salt should have a length of 16 bytes");
-        assertEquals(16, salt2.length, "Generated salt should have a length of 16 bytes");
-        assertFalse(Arrays.equals(salt1, salt2), "Generated salts should be unique");
+        
+        assertNotNull(salt1);
+        assertNotNull(salt2);
+        assertEquals(16, salt1.length); // Erwartete Länge für den Salt
+        assertEquals(16, salt2.length);
+        
+        // Die Salts sollten zufällig und damit unterschiedlich sein
+        assertNotEquals(Arrays.hashCode(salt1), Arrays.hashCode(salt2), 
+                "Zufällig generierte Salts sollten unterschiedlich sein");
     }
-
+    
     @Test
-    public void testDefaultSaltInitialization() {
-        byte[] defaultSalt = PasswordUtils.generateKeyFromPassword("test");
-
-        assertNotNull(defaultSalt, "Default salt should not be null");
-        assertEquals(32, defaultSalt.length, "Default salt should generate a key of 32 bytes");
+    void testPasswordStrength() {
+        // Test der Schlüsselqualität - einfacher Test, der überprüft, ob die Bits gut verteilt sind
+        String password = "veryStrongPassword123!@#";
+        byte[] key = PasswordUtils.generateKeyFromPassword(password);
+        
+        // Überprüfe die Entropie durch Zählen der gesetzten Bits
+        int setBits = 0;
+        for (byte b : key) {
+            setBits += Integer.bitCount(b & 0xFF);
+        }
+        
+        // Bei einem 256-Bit-Schlüssel erwarten wir ungefähr 128 gesetzte Bits (50%)
+        // Ein guter Schlüssel sollte nahe an diesem Wert liegen
+        double percentageOfSetBits = (double) setBits / (key.length * 8);
+        
+        // Wir erwarten, dass zwischen 40% und 60% der Bits gesetzt sind
+        assertTrue(percentageOfSetBits > 0.4 && percentageOfSetBits < 0.6,
+                "Der generierte Schlüssel sollte eine gute Bitverteilung haben");
     }
 }
