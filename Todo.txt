@@ -1,12 +1,7 @@
 - API
     - doku in 3 Dateien splitten: gesamt, linux, windows
-    - logs anpassen
     - sh/bat in normale start dateien einbinden
     - wenn nicht authorisiert, dann richtige ausgabe
     - parentfolder im web
 - auf deutsch alle kommentare
-- gui animationen
-- gui dark/whitemode button sichtbar machen im darkmode
-- logos und icons einbauen
-- maincontroller test fixen
-- tests hinzufuegen
+- ordner rekursiv loeschen

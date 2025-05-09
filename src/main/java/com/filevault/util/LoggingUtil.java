@@ -24,7 +24,7 @@ public class LoggingUtil {
     private static final int RING_BUFFER_CAPACITY = 500;
     private static final ArrayBlockingQueue<String> ringBuffer = new ArrayBlockingQueue<>(RING_BUFFER_CAPACITY);
     private static final LinkedList<String> fileRingBuffer = new LinkedList<>();
-    private static final String LOG_FILE_PATH = "logs/filevault_log.log";
+    private static final String LOG_FILE_PATH = "logs/filevault.log";
     private static String logFilePath = LOG_FILE_PATH;
     private static boolean loggingEnabled = true;
     private static final Logger logger = Logger.getLogger("com.filevault");
@@ -75,7 +75,9 @@ public class LoggingUtil {
             return;
         }
 
-        String timestampedMessage = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS")) + " " + message;
+        String currentTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS"));
+        String timestampedMessage = currentTime + " " + message;
+        
         if (!ringBuffer.offer(timestampedMessage)) {
             ringBuffer.poll();
             ringBuffer.offer(timestampedMessage);
@@ -180,23 +182,39 @@ public class LoggingUtil {
                 logDir.mkdir();
             }
             
-            // Configure file handler
-            fileHandler = new FileHandler("logs/" + LOG_FILE, 1048576, 5, true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            fileHandler.setLevel(Level.ALL);
-            logger.addHandler(fileHandler);
+            // Create custom formatter
+            SimpleFormatter customFormatter = new SimpleFormatter() {
+                @Override
+                public String format(java.util.logging.LogRecord record) {
+                    java.time.LocalDateTime datetime = java.time.LocalDateTime.now();
+                    String timestamp = datetime.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SS"));
+                    return timestamp + " " + record.getMessage() + System.lineSeparator();
+                }
+            };
             
-            // Configure console handler
-            ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setLevel(Level.INFO);
-            logger.addHandler(consoleHandler);
+            // Remove any existing handlers
+            if (fileHandler != null) {
+                logger.removeHandler(fileHandler);
+                fileHandler.close();
+            }
             
-            // Remove default handlers
             Logger rootLogger = Logger.getLogger("");
             Handler[] handlers = rootLogger.getHandlers();
             for (Handler handler : handlers) {
                 rootLogger.removeHandler(handler);
             }
+            
+            // Configure single file handler without rotation (no limit on file count)
+            fileHandler = new FileHandler("logs/" + LOG_FILE, 0, 1, true);
+            fileHandler.setFormatter(customFormatter);
+            fileHandler.setLevel(Level.ALL);
+            logger.addHandler(fileHandler);
+            
+            // Configure console handler
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(customFormatter);
+            consoleHandler.setLevel(Level.INFO);
+            logger.addHandler(consoleHandler);
             
             logger.info("Logging system initialized");
         } catch (IOException e) {

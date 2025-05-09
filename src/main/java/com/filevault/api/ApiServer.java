@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.filevault.model.EncryptedFile;
@@ -265,10 +264,10 @@ public class ApiServer {
                     }
                 }
             } catch (IOException | SQLException e) {
-                logger.log(Level.SEVERE, "Fehler beim Erstellen des Ordners: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Fehler beim Erstellen des Ordners: " + e.getMessage());
                 return "Fehler beim Erstellen des Ordners: " + e.getMessage();
             } catch (NumberFormatException e) {
-                logger.log(Level.SEVERE, "Ungültiges Format in der Anfrage: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Ungültiges Format in der Anfrage: " + e.getMessage());
                 return "Ungültiges Format in der Anfrage: " + e.getMessage();
             }
         }
@@ -276,7 +275,7 @@ public class ApiServer {
         private String updateFolder(HttpExchange exchange) {
             try {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes());
-                logger.log(Level.INFO, "Empfangene Anfrage zum Aktualisieren eines Ordners: {0}", requestBody);
+                LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Aktualisieren eines Ordners: " + requestBody);
 
                 // Parse JSON to extract folder details
                 int folderId = Integer.parseInt(parseJson(requestBody, "id"));
@@ -290,20 +289,20 @@ public class ApiServer {
 
                     int rowsUpdated = stmt.executeUpdate();
                     if (rowsUpdated > 0) {
-                        logger.log(Level.INFO, "Ordner erfolgreich aktualisiert: ID={0}", folderId);
+                        LoggingUtil.logInfo("ApiServer", "Ordner erfolgreich aktualisiert: ID=" + folderId);
                         return String.format("{\"id\":%d,\"name\":\"%s\"}", folderId, folderName);
                     } else {
                         return "Ordner nicht gefunden.";
                     }
                 }
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Fehler beim Aktualisieren des Ordners: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Fehler beim Aktualisieren des Ordners: " + e.getMessage());
                 return "Fehler beim Aktualisieren des Ordners: " + e.getMessage();
             } catch (NumberFormatException e) {
-                logger.log(Level.SEVERE, "Ungültiges Format in der Anfrage: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Ungültiges Format in der Anfrage: " + e.getMessage());
                 return "Ungültiges Format in der Anfrage: " + e.getMessage();
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "Fehler beim Lesen der Anfrage: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Fehler beim Lesen der Anfrage: " + e.getMessage());
                 return "Fehler beim Lesen der Anfrage: " + e.getMessage();
             }
         }
@@ -312,7 +311,7 @@ public class ApiServer {
             try {
                 String query = exchange.getRequestURI().getQuery();
                 int folderId = Integer.parseInt(query.split("=")[1]);
-                logger.log(Level.INFO, "Empfangene Anfrage zum Löschen des Ordners mit ID: {0}", folderId);
+                LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Löschen des Ordners mit ID: " + folderId);
 
                 try (Connection conn = DatabaseManager.getConnection();
                      PreparedStatement stmt = conn.prepareStatement("DELETE FROM folders WHERE id = ?")) {
@@ -321,17 +320,17 @@ public class ApiServer {
 
                     int rowsDeleted = stmt.executeUpdate();
                     if (rowsDeleted > 0) {
-                        logger.log(Level.INFO, "Ordner erfolgreich gelöscht: ID={0}", folderId);
+                        LoggingUtil.logInfo("ApiServer", "Ordner erfolgreich gelöscht: ID=" + folderId);
                         return "Ordner erfolgreich gelöscht.";
                     } else {
                         return "Ordner nicht gefunden.";
                     }
                 }
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Datenbankfehler beim Löschen des Ordners: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Datenbankfehler beim Löschen des Ordners: " + e.getMessage());
                 return "Datenbankfehler beim Löschen des Ordners: " + e.getMessage();
             } catch (NumberFormatException e) {
-                logger.log(Level.SEVERE, "Ungültige Ordner-ID: {0}", e.getMessage());
+                LoggingUtil.logError("ApiServer", "Ungültige Ordner-ID: " + e.getMessage());
                 return "Ungültige Ordner-ID: " + e.getMessage();
             }
         }
@@ -357,7 +356,7 @@ public class ApiServer {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
-            logger.log(Level.INFO, "Verarbeite Anfrage an /api/files mit Methode: {0}", method);
+            LoggingUtil.logInfo("FileHandler", "Verarbeite Anfrage an /api/files mit Methode: " + method);
 
             String response;
 
@@ -368,12 +367,12 @@ public class ApiServer {
                 }
                 case "POST", "PUT", "DELETE" -> {
                     response = "Diese Aktion ist nicht erlaubt.";
-                    logger.log(Level.WARNING, "Methode nicht erlaubt: {0}", method);
+                    LoggingUtil.logWarning("FileHandler", "Methode nicht erlaubt: " + method);
                     exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
                 default -> {
                     response = "Methode nicht unterstützt.";
-                    logger.log(Level.WARNING, "Methode nicht unterstützt: {0}", method);
+                    LoggingUtil.logWarning("FileHandler", "Methode nicht unterstützt: " + method);
                     exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
             }
@@ -386,20 +385,20 @@ public class ApiServer {
         private String listFiles() {
             try {
                 FileStorage fileStorage = FileStorage.getInstance();
-                logger.info("Rufe alle Dateien aus allen Ordnern ab...");
+                LoggingUtil.logInfo("FileHandler", "Rufe alle Dateien aus allen Ordnern ab...");
 
                 List<EncryptedFile> files = fileStorage.getAllFiles();
 
                 if (files.isEmpty()) {
-                    logger.info("Keine Dateien gefunden.");
+                    LoggingUtil.logInfo("FileHandler", "Keine Dateien gefunden.");
                     return "[]";
                 }
 
-                logger.log(Level.INFO, "Anzahl der gefundenen Dateien: {0}", files.size());
+                LoggingUtil.logInfo("FileHandler", "Anzahl der gefundenen Dateien: " + files.size());
                 StringBuilder response = new StringBuilder("[");
 
                 for (EncryptedFile file : files) {
-                    logger.log(Level.INFO, "Datei gefunden: ID={0}, Name={1}", new Object[]{file.getId(), file.getOriginalName()});
+                    LoggingUtil.logInfo("FileHandler", "Datei gefunden: ID=" + file.getId() + ", Name=" + file.getOriginalName());
                     if (response.length() > 1) {
                         response.append(",");
                     }
@@ -410,7 +409,7 @@ public class ApiServer {
                 response.append("]");
                 return response.toString();
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Fehler beim Abrufen aller Dateien: {0}", e.getMessage());
+                LoggingUtil.logError("FileHandler", "Fehler beim Abrufen aller Dateien: " + e.getMessage());
                 return "Fehler beim Abrufen aller Dateien: " + e.getMessage();
             }
         }
@@ -473,12 +472,39 @@ public class ApiServer {
                                 border: 1px solid #ccc;
                                 border-radius: 4px;
                             }
+                            select {
+                                padding: 0.5rem;
+                                margin-right: 0.5rem;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                                background-color: white;
+                                min-width: 150px;
+                            }
+                            .path-text {
+                                font-size: 0.8em;
+                                color: #666;
+                                font-style: italic;
+                                margin-left: 5px;
+                            }
                             .input-group {
                                 margin-bottom: 1rem;
+                                display: flex;
+                                align-items: center;
+                                flex-wrap: wrap;
+                                gap: 0.5rem;
                             }
                         </style>
                         <script>
                             let token = null;
+
+                            // Check if token exists in localStorage when page loads
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const savedToken = localStorage.getItem('authToken');
+                                if (savedToken) {
+                                    token = savedToken;
+                                    loadFolderOptions();
+                                }
+                            });
 
                             async function authenticate() {
                                 const password = document.getElementById('password').value;
@@ -491,7 +517,11 @@ public class ApiServer {
                                 if (response.ok) {
                                     const data = await response.json();
                                     token = data.token;
+                                    // Save token to localStorage to maintain authentication after refresh
+                                    localStorage.setItem('authToken', token);
                                     alert('Authentication successful!');
+                                    // Load folder options after successful authentication
+                                    loadFolderOptions();
                                 } else {
                                     alert('Authentication failed!');
                                 }
@@ -516,8 +546,9 @@ public class ApiServer {
 
                                 if (response.ok) {
                                     const data = await response.text();
-                                    alert(`Response from ${endpoint}:
-${data}`);
+                                    alert(`Response from ${endpoint}:\n${data}`);
+                                    // Refresh the page after successful API call
+                                    location.reload();
                                 } else {
                                     alert(`Failed to access ${endpoint}.`);
                                 }
@@ -536,21 +567,105 @@ ${data}`);
                                 if (response.ok) {
                                     const folders = await response.json();
                                     alert(`Folders: ${JSON.stringify(folders)}`);
+                                    // Refresh the page
+                                    location.reload();
                                 } else {
                                     alert('Failed to list folders.');
                                 }
                             }
 
+                            async function loadFolderOptions() {
+                                if (!token) {
+                                    alert('Please authenticate first!');
+                                    return;
+                                }
+                                
+                                const parentFolderSelect = document.getElementById('parentFolderId');
+                                parentFolderSelect.innerHTML = '<option value="0">Root (No Parent)</option>';
+                                
+                                const response = await fetch('/api/folders', {
+                                    method: 'GET',
+                                    headers: { 'Authorization': token }
+                                });
+
+                                if (response.ok) {
+                                    const folders = await response.json();
+                                    
+                                    // First build folder structure to calculate paths
+                                    const folderMap = {};
+                                    folders.forEach(folder => {
+                                        folderMap[folder.id] = { 
+                                            ...folder, 
+                                            children: [] 
+                                        };
+                                    });
+                                    
+                                    // Build the folder tree
+                                    folders.forEach(folder => {
+                                        if (folder.parentFolderId && folder.parentFolderId !== 0 && folderMap[folder.parentFolderId]) {
+                                            folderMap[folder.parentFolderId].children.push(folderMap[folder.id]);
+                                        }
+                                    });
+                                    
+                                    // Function to get folder path
+                                    const getFolderPath = (folderId) => {
+                                        let path = [];
+                                        let currentId = folderId;
+                                        
+                                        while (currentId && currentId !== 0) {
+                                            const folder = folderMap[currentId];
+                                            if (!folder) break;
+                                            
+                                            path.unshift(folder.name);
+                                            currentId = folder.parentFolderId;
+                                        }
+                                        
+                                        return path.join(' / ');
+                                    };
+                                    
+                                    // Add options with paths
+                                    folders.forEach(folder => {
+                                        const option = document.createElement('option');
+                                        option.value = folder.id;
+                                        
+                                        const path = getFolderPath(folder.parentFolderId);
+                                        
+                                        // Include the path in the option text if it exists
+                                        if (path) {
+                                            option.textContent = `${folder.name} (${path})`;
+                                        } else {
+                                            option.textContent = folder.name;
+                                        }
+                                        
+                                        parentFolderSelect.appendChild(option);
+                                    });
+                                } else {
+                                    alert('Failed to load folders.');
+                                }
+                            }
+
                             async function createFolder() {
                                 const folderName = getInputValue('folderName');
+                                const parentFolderId = getInputValue('parentFolderId');
+                                
+                                const requestBody = { 
+                                    name: folderName 
+                                };
+                                
+                                if (parentFolderId && parentFolderId !== "0") {
+                                    requestBody.parentFolderId = parseInt(parentFolderId);
+                                }
+                                
                                 const response = await fetch('/api/folders', {
                                     method: 'POST',
                                     headers: { 'Authorization': token, 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ name: folderName })
+                                    body: JSON.stringify(requestBody)
                                 });
 
                                 if (response.ok) {
                                     alert('Folder created successfully!');
+                                    // Refresh the page after successful folder creation
+                                    location.reload();
                                 } else {
                                     alert('Failed to create folder.');
                                 }
@@ -594,6 +709,10 @@ ${data}`);
                                 </div>
                                 <div class="input-group">
                                     <input type="text" id="folderName" placeholder="Folder Name" />
+                                    <label for="parentFolderId">Parent Folder:</label>
+                                    <select id="parentFolderId">
+                                        <option value="0">Root (No Parent)</option>
+                                    </select>
                                     <button onclick="createFolder()">Create Folder</button>
                                 </div>
                                 <div class="input-group">
