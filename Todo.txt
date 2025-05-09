@@ -1,7 +1,6 @@
 - API
     - doku in 3 Dateien splitten: gesamt, linux, windows
-    - sh/bat in normale start dateien einbinden
     - wenn nicht authorisiert, dann richtige ausgabe
-    - parentfolder im web
 - auf deutsch alle kommentare
-- ordner rekursiv loeschen
+- ordner rekursiv loeschen - falls das nicht geht, in der api fehlermeldung
+- ordner verschluesselts

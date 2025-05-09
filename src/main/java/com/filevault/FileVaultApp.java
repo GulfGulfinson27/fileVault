@@ -3,6 +3,8 @@ package com.filevault;
 import java.io.IOException;
 import java.util.prefs.Preferences;
 
+import com.filevault.api.ApiServer;
+import com.filevault.storage.DatabaseManager;
 import com.filevault.util.LoggingUtil;
 
 import javafx.animation.FadeTransition;
@@ -39,6 +41,9 @@ public class FileVaultApp extends Application {
     
     /** Flag, das angibt, ob das Dark Mode aktiv ist */
     private static boolean isDarkMode;
+    
+    /** Die API-Server Instanz */
+    private static ApiServer apiServer;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -274,11 +279,86 @@ public class FileVaultApp extends Application {
     }
 
     /**
-     * Startet die Anwendung
-     * 
-     * @param args Kommandozeilenargumente
+     * Hauptmethode zum Starten der Anwendung.
+     *
+     * @param args Kommandozeilenparameter
      */
     public static void main(String[] args) {
+        int apiPort = 9090; // Standardport für API
+        
+        // Check for API port parameter
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--api-port") && i + 1 < args.length) {
+                try {
+                    apiPort = Integer.parseInt(args[i + 1]);
+                    break;
+                } catch (NumberFormatException e) {
+                    System.err.println("Ungültiger API-Port. Der Standardport 9090 wird verwendet.");
+                }
+            }
+        }
+        
+        // Initialize database
+        DatabaseManager.initDatabase();
+        
+        // Start API server
+        startApiServer(apiPort);
+        
+        // Launch the JavaFX application
         launch(args);
+    }
+    
+    /**
+     * Startet den API-Server.
+     *
+     * @param port Der Port, auf dem der API-Server laufen soll
+     */
+    private static void startApiServer(int port) {
+        try {
+            LoggingUtil.logInfo("FileVaultApp", "Starting API server on port " + port);
+            apiServer = new ApiServer();
+            apiServer.start(port);
+            
+            // Register shutdown hook
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (apiServer != null) {
+                    LoggingUtil.logInfo("FileVaultApp", "Stopping API server");
+                    apiServer.stop();
+                }
+            }));
+            
+            LoggingUtil.logInfo("FileVaultApp", "API server started successfully");
+        } catch (IOException e) {
+            LoggingUtil.logError("FileVaultApp", "Error starting API server: " + e.getMessage());
+            final String errorMsg = "Error starting API server: " + e.getMessage();
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("API Server Error");
+                alert.setHeaderText("Failed to start API server");
+                alert.setContentText(errorMsg);
+                alert.showAndWait();
+            });
+        } catch (Exception e) {
+            LoggingUtil.logError("FileVaultApp", "Unexpected error starting API server: " + e.getMessage());
+            final String errorMsg = "Unexpected error starting API server: " + e.getMessage();
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("API Server Error");
+                alert.setHeaderText("Unexpected error");
+                alert.setContentText(errorMsg);
+                alert.showAndWait();
+            });
+        }
+    }
+    
+    @Override
+    public void stop() {
+        LoggingUtil.logInfo("FileVaultApp", "Application stopping");
+        
+        // Stop API server when application closes
+        if (apiServer != null) {
+            LoggingUtil.logInfo("FileVaultApp", "Stopping API server");
+            apiServer.stop();
+        }
     }
 }

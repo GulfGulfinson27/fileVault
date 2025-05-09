@@ -1,3 +1,10 @@
 @echo off
-java --module-path ".\lib\javafx-sdk-17.0.14\lib" --add-modules javafx.controls,javafx.fxml -jar target/FileVault-shaded.jar
+
+:: Default API port
+set PORT=%1
+if "%PORT%"=="" set PORT=9090
+
+:: Start the FileVault application with API server
+mvn exec:java -Dexec.mainClass="com.filevault.FileVaultApp" -Dexec.args="--api-port=%PORT%" -Dexec.cleanupDaemonThreads=false
+
 pause 

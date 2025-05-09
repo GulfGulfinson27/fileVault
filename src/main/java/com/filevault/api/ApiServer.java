@@ -150,7 +150,12 @@ public class ApiServer {
                 next.handle(exchange);
             } else {
                 LoggingUtil.logWarning("ApiServer", "Ungültiges oder fehlendes Token.");
-                exchange.sendResponseHeaders(401, -1); // Nicht autorisiert
+                String errorResponse = "{\"error\":\"Unauthorized: Invalid or missing authentication token.\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(401, errorResponse.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(errorResponse.getBytes());
+                }
             }
         }
     }
@@ -542,15 +547,24 @@ public class ApiServer {
                                     options.body = JSON.stringify(body);
                                 }
 
-                                const response = await fetch(endpoint, options);
+                                try {
+                                    const response = await fetch(endpoint, options);
 
-                                if (response.ok) {
-                                    const data = await response.text();
-                                    alert(`Response from ${endpoint}:\n${data}`);
-                                    // Refresh the page after successful API call
-                                    location.reload();
-                                } else {
-                                    alert(`Failed to access ${endpoint}.`);
+                                    if (response.ok) {
+                                        const data = await response.text();
+                                        alert(`Response from ${endpoint}:\n${data}`);
+                                        // Refresh the page after successful API call
+                                        location.reload();
+                                    } else if (response.status === 401) {
+                                        // Clear invalid token
+                                        token = null;
+                                        localStorage.removeItem('authToken');
+                                        alert('Authentication error: Invalid or missing token. Please login again.');
+                                    } else {
+                                        alert(`Error (${response.status}): Failed to access ${endpoint}`);
+                                    }
+                                } catch (error) {
+                                    alert(`Network error: ${error.message}`);
                                 }
                             }
 
@@ -559,92 +573,120 @@ public class ApiServer {
                             }
 
                             async function listFolders() {
-                                const response = await fetch('/api/folders', {
-                                    method: 'GET',
-                                    headers: { 'Authorization': token }
-                                });
+                                if (!token) {
+                                    alert('Please authenticate first!');
+                                    return;
+                                }
+                                
+                                try {
+                                    const response = await fetch('/api/folders', {
+                                        method: 'GET',
+                                        headers: { 'Authorization': token }
+                                    });
 
-                                if (response.ok) {
-                                    const folders = await response.json();
-                                    alert(`Folders: ${JSON.stringify(folders)}`);
-                                    // Refresh the page
-                                    location.reload();
-                                } else {
-                                    alert('Failed to list folders.');
+                                    if (response.ok) {
+                                        const folders = await response.json();
+                                        alert(`Folders: ${JSON.stringify(folders)}`);
+                                        // Refresh the page
+                                        location.reload();
+                                    } else if (response.status === 401) {
+                                        // Clear invalid token
+                                        token = null;
+                                        localStorage.removeItem('authToken');
+                                        alert('Authentication error: Invalid or missing token. Please login again.');
+                                    } else {
+                                        alert(`Error (${response.status}): Failed to list folders.`);
+                                    }
+                                } catch (error) {
+                                    alert(`Network error: ${error.message}`);
                                 }
                             }
 
                             async function loadFolderOptions() {
                                 if (!token) {
-                                    alert('Please authenticate first!');
+                                    // Don't show alert here to avoid duplicate alerts
                                     return;
                                 }
                                 
                                 const parentFolderSelect = document.getElementById('parentFolderId');
                                 parentFolderSelect.innerHTML = '<option value="0">Root (No Parent)</option>';
                                 
-                                const response = await fetch('/api/folders', {
-                                    method: 'GET',
-                                    headers: { 'Authorization': token }
-                                });
+                                try {
+                                    const response = await fetch('/api/folders', {
+                                        method: 'GET',
+                                        headers: { 'Authorization': token }
+                                    });
 
-                                if (response.ok) {
-                                    const folders = await response.json();
-                                    
-                                    // First build folder structure to calculate paths
-                                    const folderMap = {};
-                                    folders.forEach(folder => {
-                                        folderMap[folder.id] = { 
-                                            ...folder, 
-                                            children: [] 
-                                        };
-                                    });
-                                    
-                                    // Build the folder tree
-                                    folders.forEach(folder => {
-                                        if (folder.parentFolderId && folder.parentFolderId !== 0 && folderMap[folder.parentFolderId]) {
-                                            folderMap[folder.parentFolderId].children.push(folderMap[folder.id]);
-                                        }
-                                    });
-                                    
-                                    // Function to get folder path
-                                    const getFolderPath = (folderId) => {
-                                        let path = [];
-                                        let currentId = folderId;
+                                    if (response.ok) {
+                                        const folders = await response.json();
                                         
-                                        while (currentId && currentId !== 0) {
-                                            const folder = folderMap[currentId];
-                                            if (!folder) break;
+                                        // First build folder structure to calculate paths
+                                        const folderMap = {};
+                                        folders.forEach(folder => {
+                                            folderMap[folder.id] = { 
+                                                ...folder, 
+                                                children: [] 
+                                            };
+                                        });
+                                        
+                                        // Build the folder tree
+                                        folders.forEach(folder => {
+                                            if (folder.parentFolderId && folder.parentFolderId !== 0 && folderMap[folder.parentFolderId]) {
+                                                folderMap[folder.parentFolderId].children.push(folderMap[folder.id]);
+                                            }
+                                        });
+                                        
+                                        // Function to get folder path
+                                        const getFolderPath = (folderId) => {
+                                            let path = [];
+                                            let currentId = folderId;
                                             
-                                            path.unshift(folder.name);
-                                            currentId = folder.parentFolderId;
-                                        }
+                                            while (currentId && currentId !== 0) {
+                                                const folder = folderMap[currentId];
+                                                if (!folder) break;
+                                                
+                                                path.unshift(folder.name);
+                                                currentId = folder.parentFolderId;
+                                            }
+                                            
+                                            return path.join(' / ');
+                                        };
                                         
-                                        return path.join(' / ');
-                                    };
-                                    
-                                    // Add options with paths
-                                    folders.forEach(folder => {
-                                        const option = document.createElement('option');
-                                        option.value = folder.id;
-                                        
-                                        const path = getFolderPath(folder.parentFolderId);
-                                        
-                                        // Include the path in the option text if it exists
-                                        if (path) {
-                                            option.textContent = `${folder.name} (${path})`;
-                                        } else {
-                                            option.textContent = folder.name;
-                                        }
-                                        
-                                        parentFolderSelect.appendChild(option);
-                                    });
-                                } else {
-                                    alert('Failed to load folders.');
+                                        // Add options with paths
+                                        folders.forEach(folder => {
+                                            const option = document.createElement('option');
+                                            option.value = folder.id;
+                                            
+                                            const path = getFolderPath(folder.parentFolderId);
+                                            
+                                            // Include the path in the option text if it exists
+                                            if (path) {
+                                                option.textContent = `${folder.name} (${path})`;
+                                            } else {
+                                                option.textContent = folder.name;
+                                            }
+                                            
+                                            parentFolderSelect.appendChild(option);
+                                        });
+                                    } else if (response.status === 401) {
+                                        // Clear invalid token
+                                        token = null;
+                                        localStorage.removeItem('authToken');
+                                        // Don't show alert here to avoid duplicate alerts when page loads
+                                    } else {
+                                        console.error(`Error loading folders: ${response.status}`);
+                                    }
+                                } catch (error) {
+                                    console.error(`Network error loading folders: ${error.message}`);
                                 }
                             }
 
                             async function createFolder() {
+                                if (!token) {
+                                    alert('Please authenticate first!');
+                                    return;
+                                }
+                                
                                 const folderName = getInputValue('folderName');
                                 const parentFolderId = getInputValue('parentFolderId');
                                 
@@ -656,32 +698,59 @@ public class ApiServer {
                                     requestBody.parentFolderId = parseInt(parentFolderId);
                                 }
                                 
-                                const response = await fetch('/api/folders', {
-                                    method: 'POST',
-                                    headers: { 'Authorization': token, 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(requestBody)
-                                });
+                                try {
+                                    const response = await fetch('/api/folders', {
+                                        method: 'POST',
+                                        headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(requestBody)
+                                    });
 
-                                if (response.ok) {
-                                    alert('Folder created successfully!');
-                                    // Refresh the page after successful folder creation
-                                    location.reload();
-                                } else {
-                                    alert('Failed to create folder.');
+                                    if (response.ok) {
+                                        alert('Folder created successfully!');
+                                        // Refresh the page after successful folder creation
+                                        location.reload();
+                                    } else if (response.status === 401) {
+                                        // Clear invalid token
+                                        token = null;
+                                        localStorage.removeItem('authToken');
+                                        alert('Authentication error: Invalid or missing token. Please login again.');
+                                    } else {
+                                        const errorText = await response.text();
+                                        alert(`Failed to create folder: ${errorText}`);
+                                    }
+                                } catch (error) {
+                                    alert(`Network error: ${error.message}`);
                                 }
                             }
 
                             async function deleteFolder() {
-                                const folderId = getInputValue('folderId');
-                                const response = await fetch(`/api/folders?id=${folderId}`, {
-                                    method: 'DELETE',
-                                    headers: { 'Authorization': token }
-                                });
+                                if (!token) {
+                                    alert('Please authenticate first!');
+                                    return;
+                                }
+                                
+                                const folderId = getInputValue('folderIdToDelete');
+                                
+                                try {
+                                    const response = await fetch(`/api/folders?id=${folderId}`, {
+                                        method: 'DELETE',
+                                        headers: { 'Authorization': token }
+                                    });
 
-                                if (response.ok) {
-                                    alert('Folder deleted successfully!');
-                                } else {
-                                    alert('Failed to delete folder.');
+                                    if (response.ok) {
+                                        alert('Folder deleted successfully!');
+                                        location.reload();
+                                    } else if (response.status === 401) {
+                                        // Clear invalid token
+                                        token = null;
+                                        localStorage.removeItem('authToken');
+                                        alert('Authentication error: Invalid or missing token. Please login again.');
+                                    } else {
+                                        const errorText = await response.text();
+                                        alert(`Failed to delete folder: ${errorText}`);
+                                    }
+                                } catch (error) {
+                                    alert(`Network error: ${error.message}`);
                                 }
                             }
                         </script>
