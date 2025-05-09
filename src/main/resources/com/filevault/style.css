@@ -877,4 +877,103 @@
     -fx-shape: " ";
     -fx-padding: 0;
     -fx-background-color: transparent;
+}
+
+/* Logo hover effect */
+.login-container ImageView {
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.login-container ImageView:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.8), 10, 0.5, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* Password field hover effect */
+.password-field {
+    -fx-transition: all 0.3s ease;
+    -fx-cursor: text;
+}
+
+.password-field:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.9);
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.5), 5, 0, 0, 0);
+}
+
+/* Making labels hoverable with subtle effects */
+.login-container .label {
+    -fx-transition: all 0.3s ease;
+}
+
+.login-container .label:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.5), 5, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+/* Special hover effect for headline and title labels */
+.headline-label:hover, .title-label:hover {
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.7), 10, 0.5, 0, 0);
+}
+
+/* Enhanced hover for the toggle form button */
+.button.secondary:hover {
+    -fx-background-color: rgba(66, 133, 244, 0.3);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-cursor: hand;
+}
+
+/* Enhanced hover for the login button */
+.glow-button:hover {
+    -fx-background-color: #1a65e3;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.8), 15, 0.7, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-cursor: hand;
+}
+
+/* Footer text hover effect */
+.footer-text:hover {
+    -fx-text-fill: #ffffff;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+/* Dark theme variations for hover effects */
+.dark-theme .login-container ImageView:hover {
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.7, 0, 0);
+}
+
+.dark-theme .password-field:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 10, 0.3, 0, 0);
+}
+
+.dark-theme .login-container .label:hover {
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 10, 0.3, 0, 0);
+}
+
+.dark-theme .headline-label:hover, .dark-theme .title-label:hover {
+    -fx-text-fill: #E0C3FC;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.7, 0, 0);
+}
+
+.dark-theme .footer-text:hover {
+    -fx-text-fill: #E0C3FC;
+    -fx-underline: true;
+}
+
+/* Glass pane hover effect */
+.glass-pane:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-effect: dropshadow(three-pass-box, rgba(255, 255, 255, 0.6), 8, 0, 0, 0);
+}
+
+.dark-theme .glass-pane:hover {
+    -fx-background-color: rgba(26, 31, 109, 0.6);
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.4, 0, 0);
 } 

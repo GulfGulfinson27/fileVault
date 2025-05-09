@@ -406,4 +406,53 @@ public class AuthController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
+    
+    /**
+     * Öffnet das GitHub-Repository, wenn das Logo angeklickt wird.
+     */
+    @FXML
+    public void handleLogoClick() {
+        LoggingUtil.logInfo("AuthController", "Logo clicked. Opening GitHub repository.");
+        try {
+            // Check which operating system is running
+            String os = System.getProperty("os.name").toLowerCase();
+            String repoUrl = "https://github.com/pschneider-manzell/fileVault";
+            
+            ProcessBuilder processBuilder;
+            if (os.contains("win")) {
+                // Windows
+                processBuilder = new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", repoUrl);
+            } else if (os.contains("mac")) {
+                // MacOS
+                processBuilder = new ProcessBuilder("open", repoUrl);
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("linux")) {
+                // Linux
+                processBuilder = new ProcessBuilder("xdg-open", repoUrl);
+            } else {
+                // Fallback
+                throw new UnsupportedOperationException("Ihr Betriebssystem wird nicht unterstützt.");
+            }
+            
+            // Start the process
+            processBuilder.start();
+            
+            // Apply a brief animation to show feedback
+            RotateTransition rotate = new RotateTransition(Duration.millis(200), logoImage);
+            rotate.setByAngle(360);
+            rotate.setCycleCount(1);
+            
+            ScaleTransition pulse = new ScaleTransition(Duration.millis(200), logoImage);
+            pulse.setToX(1.2);
+            pulse.setToY(1.2);
+            pulse.setCycleCount(2);
+            pulse.setAutoReverse(true);
+            
+            ParallelTransition animation = new ParallelTransition(rotate, pulse);
+            animation.play();
+            
+        } catch (Exception e) {
+            showMessage("Fehler beim Öffnen des Browsers: " + e.getMessage(), true);
+            LoggingUtil.logError("AuthController", "Error opening browser: " + e.getMessage());
+        }
+    }
 }
