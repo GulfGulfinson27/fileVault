@@ -1277,4 +1277,89 @@ public class MainController {
         // For now, just show a notification
         showAlert(Alert.AlertType.INFORMATION, "Export", "Datei wird exportiert: " + file.getOriginalName());
     }
+
+    /**
+     * Behandelt die Anforderung zum Bereinigen von leeren und verwaisten Dateien
+     */
+    @FXML
+    public void handleCleanupOrphanedFiles() {
+        LoggingUtil.logInfo("MainController", "Cleaning up orphaned files.");
+        
+        // Zeige Bestätigungsdialog
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Dateien aufräumen");
+        confirmAlert.setHeaderText("Leere und verwaiste Dateien aufräumen");
+        confirmAlert.setContentText("Möchten Sie leere und verwaiste Dateien im Datenverzeichnis aufräumen?\n" +
+                                  "Dies entfernt Dateien, die keine entsprechenden Datenbankeinträge haben oder 0 Bytes groß sind.");
+        
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Zeige Fortschrittsindikator an
+                RotateTransition rotation = startButtonRotation(refreshButton);
+                
+                // Führe Bereinigung in einem separaten Thread aus
+                new Thread(() -> {
+                    try {
+                        int removedCount = FileStorage.getInstance().cleanupOrphanedFiles();
+                        
+                        Platform.runLater(() -> {
+                            stopButtonRotation(rotation);
+                            
+                            // Zeige Erfolgsbenachrichtigung
+                            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+                            successAlert.setTitle("Aufräumen abgeschlossen");
+                            successAlert.setHeaderText("Aufräumen erfolgreich");
+                            successAlert.setContentText("Es wurden " + removedCount + " leere oder verwaiste Dateien entfernt.");
+                            successAlert.showAndWait();
+                            
+                            // Aktualisiere die Benutzeroberfläche
+                            refreshUI();
+                        });
+                    } catch (Exception e) {
+                        Platform.runLater(() -> {
+                            stopButtonRotation(rotation);
+                            
+                            // Zeige Fehlermeldung
+                            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                            errorAlert.setTitle("Fehler beim Aufräumen");
+                            errorAlert.setHeaderText("Fehler beim Aufräumen der Dateien");
+                            errorAlert.setContentText("Beim Aufräumen ist ein Fehler aufgetreten: " + e.getMessage());
+                            errorAlert.showAndWait();
+                        });
+                    }
+                }).start();
+            } catch (Exception e) {
+                LoggingUtil.logError("MainController", "Error cleaning up orphaned files: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Fehler beim Aufräumen", "Beim Aufräumen ist ein Fehler aufgetreten: " + e.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Startet eine Rotationsanimation für einen Button
+     * 
+     * @param button Der zu animierende Button
+     * @return Die RotateTransition-Instanz
+     */
+    private RotateTransition startButtonRotation(Button button) {
+        RotateTransition rotateTransition = new RotateTransition(Duration.millis(1000), button);
+        rotateTransition.setFromAngle(0);
+        rotateTransition.setToAngle(360);
+        rotateTransition.setCycleCount(RotateTransition.INDEFINITE);
+        rotateTransition.setInterpolator(Interpolator.LINEAR);
+        rotateTransition.play();
+        return rotateTransition;
+    }
+    
+    /**
+     * Stoppt eine Rotationsanimation für einen Button
+     * 
+     * @param rotateTransition Die zu stoppende Animation
+     */
+    private void stopButtonRotation(RotateTransition rotateTransition) {
+        if (rotateTransition != null) {
+            rotateTransition.stop();
+        }
+    }
 }

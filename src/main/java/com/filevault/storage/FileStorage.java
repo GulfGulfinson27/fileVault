@@ -3,6 +3,7 @@ package com.filevault.storage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
@@ -64,51 +66,67 @@ public class FileStorage {
         String encryptedFileName = UUID.randomUUID().toString();
         String encryptedFilePath = Paths.get(FolderManager.getInstance().getDataDirectoryPath(), encryptedFileName).toString();
         File encryptedFile = new File(encryptedFilePath);
+        boolean fileCreated = false;
 
-        EncryptionService.getInstance().encryptFile(sourceFile, encryptedFile);
+        try {
+            // Datei verschlüsseln
+            EncryptionService.getInstance().encryptFile(sourceFile, encryptedFile);
+            fileCreated = true;
 
-        String mimeType = Files.probeContentType(sourceFile.toPath());
-        if (mimeType == null) {
-            mimeType = "application/octet-stream";
-        }
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
-                     PreparedStatement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, folder.getId());
-            stmt.setString(2, sourceFile.getName());
-            stmt.setString(3, encryptedFilePath);
-            stmt.setLong(4, sourceFile.length());
-            stmt.setString(5, mimeType);
-
-            int affected = stmt.executeUpdate();
-
-            if (affected > 0) {
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int id = generatedKeys.getInt(1);
-                        LoggingUtil.logInfo("FileStorage", "File imported successfully: " + sourceFile.getAbsolutePath());
-                        return new EncryptedFile(
-                                id,
-                                folder.getId(),
-                                sourceFile.getName(),
-                                encryptedFilePath,
-                                sourceFile.length(),
-                                mimeType,
-                                LocalDateTime.now(),
-                                null
-                        );
-                    }
-                }
+            String mimeType = Files.probeContentType(sourceFile.toPath());
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
             }
 
-            encryptedFile.delete();
-            LoggingUtil.logError("FileStorage", "File import failed: Database insertion error.");
-            return null;
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(
+                         "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
+                         "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                         PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+                stmt.setInt(1, folder.getId());
+                stmt.setString(2, sourceFile.getName());
+                stmt.setString(3, encryptedFilePath);
+                stmt.setLong(4, sourceFile.length());
+                stmt.setString(5, mimeType);
+
+                int affected = stmt.executeUpdate();
+
+                if (affected > 0) {
+                    try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            int id = generatedKeys.getInt(1);
+                            LoggingUtil.logInfo("FileStorage", "File imported successfully: " + sourceFile.getAbsolutePath());
+                            return new EncryptedFile(
+                                    id,
+                                    folder.getId(),
+                                    sourceFile.getName(),
+                                    encryptedFilePath,
+                                    sourceFile.length(),
+                                    mimeType,
+                                    LocalDateTime.now(),
+                                    null
+                            );
+                        }
+                    }
+                }
+
+                // Wenn wir hier ankommen, ist die Datenbankeintragung fehlgeschlagen
+                LoggingUtil.logError("FileStorage", "File import failed: Database insertion error.");
+            }
+        } catch (Exception e) {
+            LoggingUtil.logError("FileStorage", "Error during file import: " + e.getMessage());
+            throw e;
+        } finally {
+            // Im Fehlerfall oder wenn die Datenbankeintragung fehlgeschlagen ist, die Datei entfernen
+            if (fileCreated && encryptedFile.exists()) {
+                if (!encryptedFile.delete()) {
+                    LoggingUtil.logWarning("FileStorage", "Could not delete temporary file: " + encryptedFilePath);
+                }
+            }
         }
+        
+        return null;
     }
     
     /**
@@ -438,6 +456,7 @@ public class FileStorage {
      * @return The created EncryptedFile object.
      */
     public EncryptedFile createFileRecord(String fileName, int folderId) {
+        // Keine Datei im Dateisystem erstellen, bis die Datenbankoperation erfolgreich ist
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO files (folder_id, original_name, encrypted_path, size_bytes, mime_type, created_at) " +
@@ -465,16 +484,80 @@ public class FileStorage {
                                 null
                         );
                     } else {
-                        System.err.println("No generated keys returned for the new file record.");
+                        LoggingUtil.logError("FileStorage", "No generated keys returned for the new file record.");
                     }
                 }
             } else {
-                System.err.println("No rows were affected when attempting to insert the file record.");
+                LoggingUtil.logError("FileStorage", "No rows were affected when attempting to insert the file record.");
             }
         } catch (SQLException e) {
-            System.err.println("Error creating file record: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Error creating file record: " + e.getMessage());
         }
 
         return null;
+    }
+
+    /**
+     * Bereinigt leere oder überflüssige Dateien im Datenverzeichnis.
+     * Entfernt Dateien, die keine Datenbankeinträge haben oder leer sind.
+     * 
+     * @return Die Anzahl der bereinigten Dateien
+     */
+    public int cleanupOrphanedFiles() {
+        LoggingUtil.logInfo("FileStorage", "Starting cleanup of orphaned files in data directory.");
+        AtomicInteger removedCount = new AtomicInteger(0);
+        Path dataDir = Paths.get(FolderManager.getInstance().getDataDirectoryPath());
+        
+        if (!Files.exists(dataDir)) {
+            LoggingUtil.logWarning("FileStorage", "Data directory does not exist: " + dataDir);
+            return 0;
+        }
+        
+        // Hole alle Dateipfade aus der Datenbank
+        List<String> validFilePaths = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT encrypted_path FROM files");
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                String path = rs.getString("encrypted_path");
+                if (path != null && !path.isEmpty()) {
+                    validFilePaths.add(path);
+                }
+            }
+        } catch (SQLException e) {
+            LoggingUtil.logError("FileStorage", "Error retrieving file paths from database: " + e.getMessage());
+            return 0;
+        }
+        
+        try {
+            // Iteriere durch alle Dateien im Datenverzeichnis
+            final List<String> finalValidFilePaths = validFilePaths;
+            Files.list(dataDir).filter(Files::isRegularFile).forEach(filePath -> {
+                try {
+                    File file = filePath.toFile();
+                    String absolutePath = file.getAbsolutePath();
+                    
+                    // Prüfe, ob die Datei in der Datenbank eingetragen ist
+                    boolean isInDatabase = finalValidFilePaths.stream().anyMatch(dbPath -> dbPath.equals(absolutePath));
+                    
+                    // Entferne die Datei, wenn sie nicht in der Datenbank ist oder leer ist
+                    if (!isInDatabase || file.length() == 0) {
+                        if (Files.deleteIfExists(filePath)) {
+                            LoggingUtil.logInfo("FileStorage", "Deleted orphaned file: " + filePath.getFileName());
+                            removedCount.incrementAndGet();
+                        }
+                    }
+                } catch (Exception e) {
+                    LoggingUtil.logWarning("FileStorage", "Could not process or delete orphaned file: " + filePath + " - " + e.getMessage());
+                }
+            });
+        } catch (IOException e) {
+            LoggingUtil.logError("FileStorage", "Error while cleaning up orphaned files: " + e.getMessage());
+        }
+        
+        int totalRemoved = removedCount.get();
+        LoggingUtil.logInfo("FileStorage", "Cleanup completed. Removed " + totalRemoved + " orphaned files.");
+        return totalRemoved;
     }
 }

@@ -5,6 +5,7 @@ import java.util.prefs.Preferences;
 
 import com.filevault.api.ApiServer;
 import com.filevault.storage.DatabaseManager;
+import com.filevault.storage.FileStorage;
 import com.filevault.util.LoggingUtil;
 
 import javafx.animation.FadeTransition;
@@ -301,11 +302,26 @@ public class FileVaultApp extends Application {
         // Initialize database
         DatabaseManager.initDatabase();
         
+        // Bereinige verwaiste Dateien im Datenverzeichnis
+        cleanupOrphanedFiles();
+        
         // Start API server
         startApiServer(apiPort);
         
         // Launch the JavaFX application
         launch(args);
+    }
+    
+    /**
+     * Bereinigt verwaiste Dateien im Datenverzeichnis.
+     */
+    private static void cleanupOrphanedFiles() {
+        try {
+            int removedFiles = FileStorage.getInstance().cleanupOrphanedFiles();
+            LoggingUtil.logInfo("FileVaultApp", "Cleaned up " + removedFiles + " orphaned files.");
+        } catch (Exception e) {
+            LoggingUtil.logError("FileVaultApp", "Error cleaning up orphaned files: " + e.getMessage());
+        }
     }
     
     /**

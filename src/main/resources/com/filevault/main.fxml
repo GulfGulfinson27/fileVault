@@ -47,6 +47,8 @@
                 <Menu mnemonicParsing="false" text="Einstellungen">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#handleChangePassword" text="Passwort ändern..." />
+                    <MenuItem mnemonicParsing="false" onAction="#handleCleanupOrphanedFiles" text="Leere Dateien aufräumen..." />
+                    <SeparatorMenuItem mnemonicParsing="false" />
                     <MenuItem mnemonicParsing="false" onAction="#handleSettings" text="Einstellungen..." />
                   </items>
                 </Menu>
