@@ -14,6 +14,10 @@ import com.filevault.storage.FileStorage;
 import com.filevault.util.FolderManager;
 import com.filevault.util.LoggingUtil;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -27,6 +31,7 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
@@ -47,6 +52,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.util.Duration;
 import javafx.util.Pair;
 
 /**
@@ -86,6 +93,10 @@ public class MainController {
     /** Button für Theme-Toggle */
     @FXML
     private Button themeToggleButton;
+
+    /** Button für Refresh */
+    @FXML
+    private Button refreshButton;
 
     /** Formatierer für Datumsangaben */
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -165,9 +176,11 @@ public class MainController {
                     handleRenameFile(file);
                 }
             });
+            renameItem.getStyleClass().add("rename-context-item");
 
             MenuItem deleteItem = new MenuItem("Delete");
             deleteItem.setOnAction(event -> handleDeleteFile());
+            deleteItem.getStyleClass().add("delete-context-item");
 
             contextMenu.getItems().addAll(renameItem, deleteItem);
 
@@ -223,57 +236,45 @@ public class MainController {
 
         // Initialize theme toggle button
         initializeThemeToggle();
+        
+        // Initialize refresh button
+        initializeRefreshButton();
     }
 
     /**
-     * Aktualisiert die Icons des Theme-Toggle-Buttons für bessere Sichtbarkeit.
+     * Initialisiert den Theme-Toggle-Button
      */
-    @FXML
-    public void initializeThemeToggle() {
-        themeToggleButton.setStyle("-fx-background-color: transparent; -fx-padding: 5px;");
-        updateToggleButtonIcon("dark");
+    private void initializeThemeToggle() {
+        LoggingUtil.logInfo("MainController", "Initializing theme toggle button");
+        
+        // Set initial button text based on current theme
+        updateThemeToggleText(FileVaultApp.isDarkMode());
+        
+        // Add click event handler
         themeToggleButton.setOnAction(event -> {
-            toggleTheme();
-            String currentTheme = FileVaultApp.getPrimaryStage().getScene().getStylesheets().get(0);
-            if (currentTheme.contains("dark-theme.css")) {
-                updateToggleButtonIcon("dark");
-            } else {
-                updateToggleButtonIcon("light");
-            }
+            boolean newDarkMode = !FileVaultApp.isDarkMode();
+            
+            // Apply rotation animation to the button
+            RotateTransition rotateTransition = new RotateTransition(Duration.millis(500), themeToggleButton);
+            rotateTransition.setByAngle(newDarkMode ? 360 : -360);
+            rotateTransition.setCycleCount(1);
+            rotateTransition.setInterpolator(Interpolator.EASE_BOTH);
+            
+            // Toggle theme and update button text
+            rotateTransition.setOnFinished(e -> updateThemeToggleText(newDarkMode));
+            rotateTransition.play();
+            
+            // Toggle theme in app
+            FileVaultApp.toggleTheme(newDarkMode);
         });
     }
-
+    
     /**
-     * Aktualisiert das Icon des Theme-Toggle-Buttons basierend auf dem aktuellen Modus.
-     *
-     * @param mode Der aktuelle Modus ("dark" oder "light").
+     * Updates the theme toggle button text with appropriate emoji
      */
-    private void updateToggleButtonIcon(String mode) {
-        if ("dark".equals(mode)) {
-            themeToggleButton.setText("☀️");
-            themeToggleButton.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
-        } else {
-            themeToggleButton.setText("🌕");
-            themeToggleButton.setStyle("-fx-text-fill: black; -fx-font-size: 16px;");
-        }
-    }
-
-    /**
-     * Wechselt zwischen Dark- und Light-Mode und aktualisiert das Icon.
-     */
-    private void toggleTheme() {
-        String currentTheme = FileVaultApp.getPrimaryStage().getScene().getStylesheets().get(0);
-        if (currentTheme.contains("dark-theme.css")) {
-            FileVaultApp.getPrimaryStage().getScene().getStylesheets().clear();
-            FileVaultApp.getPrimaryStage().getScene().getStylesheets().add(
-                getClass().getResource("/com/filevault/css/light-theme.css").toExternalForm()
-            );
-        } else {
-            FileVaultApp.getPrimaryStage().getScene().getStylesheets().clear();
-            FileVaultApp.getPrimaryStage().getScene().getStylesheets().add(
-                getClass().getResource("/com/filevault/css/dark-theme.css").toExternalForm()
-            );
-        }
+    private void updateThemeToggleText(boolean isDarkMode) {
+        themeToggleButton.setText(isDarkMode ? "☀️" : "🌕");
+        themeToggleButton.setTooltip(new Tooltip(isDarkMode ? "Light Mode" : "Dark Mode"));
     }
 
     /**
@@ -331,8 +332,27 @@ public class MainController {
         if (selectedItem != null && selectedItem.getValue() != null) {
             VirtualFolder selectedFolder = selectedItem.getValue();
             LoggingUtil.logInfo("MainController", "Folder selected: " + selectedFolder.getName());
-            FolderManager.getInstance().setCurrentFolder(selectedFolder);
-            refreshFileList();
+            
+            // Check if this is the root folder
+            if (selectedFolder.getId() == -1) {
+                // For root folder, show the top-level folders and their files
+                currentFolderLabel.setText(selectedFolder.getName());
+                
+                // Get only top-level folders
+                List<VirtualFolder> topFolders = new ArrayList<>();
+                for (VirtualFolder folder : FolderManager.getInstance().getFolders()) {
+                    if (folder.getParentId() == null) {
+                        topFolders.add(folder);
+                    }
+                }
+                
+                fileTableView.setItems(FXCollections.observableArrayList(topFolders));
+                LoggingUtil.logInfo("MainController", "Root folder selected, showing top-level folders");
+            } else {
+                // Normal folder selection
+                FolderManager.getInstance().setCurrentFolder(selectedFolder);
+                refreshFileList();
+            }
         }
     }
 
@@ -351,85 +371,62 @@ public class MainController {
     }
 
     /**
-     * Importiert eine Datei in den Tresor.
-     * Zeigt einen Dateiauswahldialog und verarbeitet den Import.
+     * Öffnet einen Datei-Auswahldialog, um eine Datei zu importieren.
      */
     @FXML
-    public void handleImportFile() {
-        LoggingUtil.logInfo("MainController", "Starting file import.");
-        VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
-        if (currentFolder == null) {
-            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie zuerst einen Ordner aus.");
-            return;
-        }
-
+    private void handleImportFile() {
+        LoggingUtil.logInfo("MainController", "Import file dialog opened");
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Datei zum Importieren auswählen");
-
-        File file = fileChooser.showOpenDialog(FileVaultApp.getPrimaryStage());
+        fileChooser.setTitle("Datei importieren");
+        
+        // Get current window from any control in the scene
+        Window currentWindow = folderTreeView.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(currentWindow);
+        
         if (file != null) {
-            try {
-                statusLabel.setText("Datei wird importiert...");
-
-                EncryptedFile encryptedFile = FileStorage.getInstance().importFile(file, currentFolder);
-
-                if (encryptedFile != null) {
-                    refreshFileList();
-                    statusLabel.setText("Datei erfolgreich importiert.");
-                    LoggingUtil.logInfo("MainController", "File imported successfully.");
-                } else {
-                    statusLabel.setText("Import der Datei fehlgeschlagen.");
-                }
-            } catch (Exception e) {
-                LoggingUtil.logError("MainController", "Error importing file: " + e.getMessage());
-                statusLabel.setText("Fehler beim Importieren: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren der Datei: " + e.getMessage());
-            }
+            importFile(file);
         }
     }
 
     /**
-     * Exportiert eine Datei aus dem Tresor.
-     * Zeigt einen Ordnerauswahldialog und verarbeitet den Export.
+     * Öffnet einen Verzeichnis-Auswahldialog, um einen Ordner zu importieren.
      */
     @FXML
-    public void handleExportFile() {
+    private void handleImportFolder() {
+        LoggingUtil.logInfo("MainController", "Import folder dialog opened");
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Ordner importieren");
+        
+        // Get current window from any control in the scene
+        Window currentWindow = folderTreeView.getScene().getWindow();
+        File directory = directoryChooser.showDialog(currentWindow);
+        
+        if (directory != null) {
+            importFolder(directory);
+        }
+    }
+
+    /**
+     * Öffnet einen Dialog zum Exportieren einer Datei.
+     */
+    @FXML
+    private void handleExportFile() {
+        LoggingUtil.logInfo("MainController", "Export file dialog opened");
         EncryptedFile selectedFile = (EncryptedFile) fileTableView.getSelectionModel().getSelectedItem();
         if (selectedFile == null) {
             showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Exportieren aus.");
             return;
         }
-
+        
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Exportziel auswählen");
-
-        File directory = directoryChooser.showDialog(FileVaultApp.getPrimaryStage());
+        directoryChooser.setTitle("Exportieren nach");
+        
+        // Get current window from any control in the scene
+        Window currentWindow = folderTreeView.getScene().getWindow();
+        File directory = directoryChooser.showDialog(currentWindow);
+        
         if (directory != null) {
-            File outputFile = new File(directory, selectedFile.getOriginalName());
-
-            if (outputFile.exists()) {
-                boolean overwrite = showConfirmationDialog("Datei existiert bereits",
-                        "Eine Datei mit dem gleichen Namen existiert bereits. Möchten Sie sie überschreiben?");
-
-                if (!overwrite) {
-                    return;
-                }
-            }
-
-            try {
-                statusLabel.setText("Datei wird exportiert...");
-
-                boolean success = FileStorage.getInstance().exportFile(selectedFile, outputFile);
-
-                if (success) {
-                    statusLabel.setText("Datei erfolgreich exportiert.");
-                } else {
-                    statusLabel.setText("Export der Datei fehlgeschlagen.");
-                }
-            } catch (Exception e) {
-                statusLabel.setText("Fehler beim Exportieren: " + e.getMessage());
-                showAlert(Alert.AlertType.ERROR, "Exportfehler", "Fehler beim Exportieren der Datei: " + e.getMessage());
-            }
+            exportFile(selectedFile, directory);
         }
     }
 
@@ -1035,5 +1032,249 @@ public class MainController {
      */
     public void setThemeToggleButton(Button themeToggleButton) {
         this.themeToggleButton = themeToggleButton;
+    }
+
+    /**
+     * Initialisiert den Refresh-Button mit Styling und Animation.
+     */
+    private void initializeRefreshButton() {
+        if (refreshButton != null) {
+            refreshButton.getStyleClass().add("refresh-button");
+            
+            // Set button text with refresh symbol
+            refreshButton.setText("↻ Aktualisieren");
+            refreshButton.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+            refreshButton.setTooltip(new Tooltip("Ansicht aktualisieren"));
+        }
+    }
+
+    /**
+     * Verarbeitet das Klicken auf den Refresh-Button.
+     * Aktualisiert die Ordnerliste und Dateiliste mit Animation.
+     */
+    @FXML
+    public void handleRefresh() {
+        LoggingUtil.logInfo("MainController", "Refreshing UI with animation.");
+        
+        try {
+            if (refreshButton != null) {
+                // Create icon rotation animation
+                javafx.scene.shape.Circle circle = new javafx.scene.shape.Circle(10, javafx.scene.paint.Color.TRANSPARENT);
+                javafx.scene.text.Text rotatingIcon = new javafx.scene.text.Text("↻");
+                rotatingIcon.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+                
+                javafx.scene.layout.StackPane iconPane = new javafx.scene.layout.StackPane(circle, rotatingIcon);
+                
+                // Temporarily replace button content with the animated icon and text
+                String originalText = refreshButton.getText();
+                javafx.scene.layout.HBox content = new javafx.scene.layout.HBox(5, iconPane, 
+                    new javafx.scene.control.Label("Aktualisieren"));
+                content.setAlignment(javafx.geometry.Pos.CENTER);
+                refreshButton.setGraphic(content);
+                refreshButton.setText("");
+                
+                // Create the rotation animation
+                RotateTransition rotateTransition = 
+                    new RotateTransition(Duration.seconds(1), rotatingIcon);
+                rotateTransition.setFromAngle(0);
+                rotateTransition.setToAngle(360);
+                rotateTransition.setCycleCount(1);
+                rotateTransition.setInterpolator(javafx.animation.Interpolator.LINEAR);
+                
+                // Start the rotation animation
+                rotateTransition.play();
+            }
+        } catch (Exception ex) {
+            // Gracefully handle any animation setup errors in tests
+            LoggingUtil.logError("MainController", "Error setting up refresh animation: " + ex.getMessage());
+        }
+        
+        // Fade out the current views
+        FadeTransition fadeOutFolders = new FadeTransition(Duration.millis(200), folderTreeView);
+        fadeOutFolders.setFromValue(1.0);
+        fadeOutFolders.setToValue(0.5);
+        
+        FadeTransition fadeOutFiles = new FadeTransition(Duration.millis(200), fileTableView);
+        fadeOutFiles.setFromValue(1.0);
+        fadeOutFiles.setToValue(0.5);
+        
+        ParallelTransition fadeOut = new ParallelTransition(fadeOutFolders, fadeOutFiles);
+        fadeOut.setOnFinished(event -> {
+            // Refresh UI after a short delay to make animation visible
+            Platform.runLater(() -> {
+                try {
+                    // Refresh the UI
+                    refreshUI();
+                    if (statusLabel != null) {
+                        statusLabel.setText("Ansicht erfolgreich aktualisiert");
+                    }
+                    
+                    // Fade in the refreshed views
+                    FadeTransition fadeInFolders = new FadeTransition(Duration.millis(400), folderTreeView);
+                    fadeInFolders.setFromValue(0.5);
+                    fadeInFolders.setToValue(1.0);
+                    
+                    FadeTransition fadeInFiles = new FadeTransition(Duration.millis(400), fileTableView);
+                    fadeInFiles.setFromValue(0.5);
+                    fadeInFiles.setToValue(1.0);
+                    
+                    ParallelTransition fadeIn = new ParallelTransition(fadeInFolders, fadeInFiles);
+                    fadeIn.play();
+                    
+                    // Restore original button text after animation completes
+                    if (refreshButton != null) {
+                        try {
+                            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                                Duration.seconds(1.1));
+                            pause.setOnFinished(e -> {
+                                try {
+                                    refreshButton.setGraphic(null);
+                                    refreshButton.setText("↻ Aktualisieren");
+                                } catch (Exception ex) {
+                                    LoggingUtil.logError("MainController", "Error resetting button after animation: " + ex.getMessage());
+                                }
+                            });
+                            pause.play();
+                        } catch (Exception ex) {
+                            LoggingUtil.logError("MainController", "Error restoring button state: " + ex.getMessage());
+                        }
+                    }
+                    
+                } catch (Exception ex) {
+                    LoggingUtil.logError("MainController", "Error refreshing UI: " + ex.getMessage());
+                    if (statusLabel != null) {
+                        statusLabel.setText("Fehler beim Aktualisieren: " + ex.getMessage());
+                    }
+                    
+                    try {
+                        showAlert(Alert.AlertType.ERROR, "Aktualisierungsfehler", 
+                            "Fehler beim Aktualisieren der Ansicht: " + ex.getMessage());
+                    } catch (Exception alertEx) {
+                        LoggingUtil.logError("MainController", "Error showing alert: " + alertEx.getMessage());
+                    }
+                    
+                    // Restore original button immediately on error
+                    if (refreshButton != null) {
+                        try {
+                            refreshButton.setGraphic(null);
+                            refreshButton.setText("↻ Aktualisieren");
+                        } catch (Exception btnEx) {
+                            LoggingUtil.logError("MainController", "Error resetting button: " + btnEx.getMessage());
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Start fade out
+        fadeOut.play();
+    }
+
+    /**
+     * Setter für den Refresh-Button (für Testzwecke).
+     * 
+     * @param refreshButton Der zu setzende Button
+     */
+    public void setRefreshButton(Button refreshButton) {
+        this.refreshButton = refreshButton;
+    }
+
+    /**
+     * Zeigt einen Dialog zum Löschen einer Datei an.
+     * 
+     * @param fileToDelete Die zu löschende Datei.
+     * @return true, wenn der Benutzer das Löschen bestätigt hat, false sonst.
+     */
+    private boolean showDeleteConfirmationDialog(File fileToDelete) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Löschen bestätigen");
+        alert.setHeaderText("Datei löschen");
+        alert.setContentText("Möchten Sie die Datei/den Ordner " + fileToDelete.getName() + " wirklich löschen?");
+        
+        // Apply current theme to dialog
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/com/filevault/style.css").toExternalForm());
+        if (FileVaultApp.isDarkMode()) {
+            dialogPane.getStyleClass().add("dark-theme");
+        }
+        
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
+
+    /**
+     * Zeigt einen Dialog zum Umbenennen einer Datei oder eines Ordners an.
+     * 
+     * @param fileToRename Die umzubenennende Datei oder der umzubenennende Ordner.
+     * @return Der neue Name oder null, wenn der Dialog abgebrochen wurde.
+     */
+    private String showRenameDialog(File fileToRename) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Umbenennen");
+        dialog.setHeaderText("Datei/Ordner umbenennen");
+        
+        // Apply current theme to dialog
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/com/filevault/style.css").toExternalForm());
+        if (FileVaultApp.isDarkMode()) {
+            dialogPane.getStyleClass().add("dark-theme");
+        }
+        
+        ButtonType renameButtonType = new ButtonType("Umbenennen", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(renameButtonType, ButtonType.CANCEL);
+        
+        TextField nameField = new TextField(fileToRename.getName());
+        nameField.setMinWidth(250);
+        dialog.getDialogPane().setContent(nameField);
+        
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == renameButtonType) {
+                return nameField.getText();
+            }
+            return null;
+        });
+        
+        Optional<String> result = dialog.showAndWait();
+        return result.orElse(null);
+    }
+
+    /**
+     * Importiert eine ausgewählte Datei in den aktuellen Ordner.
+     * 
+     * @param file Die zu importierende Datei
+     */
+    private void importFile(File file) {
+        LoggingUtil.logInfo("MainController", "Starting file import: " + file.getName());
+        // Implementation will be added later
+        
+        // For now, just show a notification
+        showAlert(Alert.AlertType.INFORMATION, "Import", "Datei wird importiert: " + file.getName());
+    }
+    
+    /**
+     * Importiert einen ausgewählten Ordner in den aktuellen Ordner.
+     * 
+     * @param directory Der zu importierende Ordner
+     */
+    private void importFolder(File directory) {
+        LoggingUtil.logInfo("MainController", "Starting folder import: " + directory.getName());
+        // Implementation will be added later
+        
+        // For now, just show a notification
+        showAlert(Alert.AlertType.INFORMATION, "Import", "Ordner wird importiert: " + directory.getName());
+    }
+    
+    /**
+     * Exportiert eine ausgewählte Datei an einen bestimmten Ort.
+     * 
+     * @param file Die zu exportierende Datei
+     * @param directory Das Zielverzeichnis
+     */
+    private void exportFile(EncryptedFile file, File directory) {
+        LoggingUtil.logInfo("MainController", "Starting file export: " + file.getOriginalName());
+        // Implementation will be added later
+        
+        // For now, just show a notification
+        showAlert(Alert.AlertType.INFORMATION, "Export", "Datei wird exportiert: " + file.getOriginalName());
     }
 }

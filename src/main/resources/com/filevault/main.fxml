@@ -59,24 +59,34 @@
             </MenuBar>
             <ToolBar>
               <items>
-                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Datei importieren">
+                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Datei importieren" styleClass="import-button">
                   <tooltip>
                     <Tooltip text="Eine Datei in den Tresor importieren" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleExportFile" text="Exportieren">
+                <Button mnemonicParsing="false" onAction="#handleExportFile" text="Exportieren" styleClass="export-button">
                   <tooltip>
                     <Tooltip text="Die ausgewählte Datei exportieren" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleDeleteFile" text="Löschen">
+                <Button mnemonicParsing="false" onAction="#handleRenameFile" text="Umbenennen" styleClass="rename-button">
+                  <tooltip>
+                    <Tooltip text="Die ausgewählte Datei umbenennen" />
+                  </tooltip>
+                </Button>
+                <Button mnemonicParsing="false" onAction="#handleDeleteFile" text="Löschen" styleClass="delete-button">
                   <tooltip>
                     <Tooltip text="Die ausgewählte Datei löschen" />
                   </tooltip>
                 </Button>
-                <Button mnemonicParsing="false" onAction="#handleNewFolder" text="Neuer Ordner">
+                <Button mnemonicParsing="false" onAction="#handleNewFolder" text="Neuer Ordner" styleClass="new-folder-button">
                   <tooltip>
                     <Tooltip text="Einen neuen Ordner erstellen" />
+                  </tooltip>
+                </Button>
+                <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#handleRefresh" text="Aktualisieren" styleClass="refresh-button">
+                  <tooltip>
+                    <Tooltip text="Ansicht aktualisieren" />
                   </tooltip>
                 </Button>
                 <Button fx:id="themeToggleButton" mnemonicParsing="false" text="🌕" />

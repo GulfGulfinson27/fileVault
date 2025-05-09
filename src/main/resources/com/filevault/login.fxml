@@ -4,71 +4,84 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
-            prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filevault.controller.AuthController">
-   <center>
-      <VBox alignment="CENTER" spacing="5.0" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" translateX="-15.0">
-               <image>
-                  <Image url="@/com/filevault/icons/icon.png" />
-               </image>
-            </ImageView>
-            <Label text="FileVault" textAlignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="30.0" />
-               </font>
-            </Label>
-            <Label text="Sicherer Dateispeicher" textAlignment="CENTER">
-               <font>
-                  <Font size="16.0" />
-               </font>
-            </Label>
-            <VBox alignment="CENTER" spacing="10.0">
-               <children>
-                  <Label fx:id="messageLabel" textAlignment="CENTER" textFill="#ff6b68" visible="false" />
-                  <VBox fx:id="loginForm" alignment="CENTER" spacing="10.0">
-                     <children>
-                        <Label text="Passwort" />
-                        <PasswordField fx:id="passwordField" promptText="Geben Sie Ihr Passwort ein" />
-                        <Button fx:id="loginButton" defaultButton="true" mnemonicParsing="false" onAction="#handleLogin" prefWidth="200.0" text="Anmelden" />
-                     </children>
-                  </VBox>
-                  <VBox fx:id="registerForm" alignment="CENTER" spacing="10.0" visible="false">
-                     <children>
-                        <Label text="Passwort erstellen" />
-                        <PasswordField fx:id="newPasswordField" promptText="Passwort eingeben" />
-                        <PasswordField fx:id="confirmPasswordField" promptText="Passwort bestätigen" />
-                        <Button fx:id="registerButton" defaultButton="true" mnemonicParsing="false" onAction="#handleRegister" prefWidth="200.0" text="Konto erstellen" />
-                     </children>
-                  </VBox>
-                  <HBox alignment="CENTER" spacing="10.0">
-                     <children>
-                        <Button fx:id="toggleFormButton" mnemonicParsing="false" onAction="#toggleForm" text="Konto erstellen" />
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-         </children>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </VBox>
-   </center>
-   <bottom>
-      <Label text="© 2025 Phillip Schneider - Projekt FileVault" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets bottom="10.0" />
-         </BorderPane.margin>
-      </Label>
-   </bottom>
-</BorderPane>
+<StackPane xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.filevault.controller.AuthController"
+      styleClass="login-background">
+      
+    <VBox alignment="CENTER" spacing="20.0" styleClass="login-container">
+        <!-- App Logo -->
+        <ImageView fx:id="logoImage" fitHeight="120.0" fitWidth="120.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@icons/icon.png" />
+            <VBox.margin>
+                <Insets left="20.0" />
+            </VBox.margin>
+        </ImageView>
+        
+        <!-- Headline -->
+        <Label text="FileVault" styleClass="headline-label">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Label>
+        
+        <!-- Subtitle -->
+        <Label text="Sichere Dateiverwaltung" styleClass="subtitle-label">
+            <VBox.margin>
+                <Insets bottom="20.0" />
+            </VBox.margin>
+        </Label>
+        
+        <!-- Login Form -->
+        <VBox fx:id="loginForm" alignment="CENTER" spacing="15.0" styleClass="glass-pane">
+            <padding>
+                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+            </padding>
+            
+            <Label text="Anmelden" styleClass="title-label" />
+            
+            <Label text="Bitte geben Sie Ihr Passwort ein" />
+            
+            <PasswordField fx:id="passwordField" promptText="Passwort" />
+            
+            <Button fx:id="loginButton" onAction="#handleLogin" text="Anmelden" styleClass="glow-button" />
+        </VBox>
+        
+        <!-- Registration Form (initially hidden) -->
+        <VBox fx:id="registerForm" alignment="CENTER" spacing="15.0" visible="false" styleClass="glass-pane">
+            <padding>
+                <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+            </padding>
+            
+            <Label text="Konto erstellen" styleClass="title-label" />
+            
+            <Label text="Bitte wählen Sie ein sicheres Passwort" />
+            
+            <PasswordField fx:id="newPasswordField" promptText="Neues Passwort" />
+            
+            <PasswordField fx:id="confirmPasswordField" promptText="Passwort bestätigen" />
+            
+            <Button fx:id="registerButton" onAction="#handleRegister" text="Konto erstellen" styleClass="glow-button" />
+        </VBox>
+        
+        <!-- Message area for errors/success messages -->
+        <Label fx:id="messageLabel" visible="false" />
+        
+        <!-- Toggle between login and registration -->
+        <Button fx:id="toggleFormButton" onAction="#toggleForm" text="Konto erstellen" styleClass="button, secondary" />
+        
+        <!-- Footer -->
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="© Phillip Schneider" styleClass="footer-text" />
+            <Label text="FileVault 2025" styleClass="footer-text" />
+        </VBox>
+        
+        <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+        </padding>
+    </VBox>
+</StackPane>

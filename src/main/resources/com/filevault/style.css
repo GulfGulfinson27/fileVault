@@ -1,0 +1,880 @@
+/* Enhanced styling with proper color scheme */
+.root {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Segoe UI', system, -apple-system, BlinkMacSystemFont, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* Dark theme class */
+.dark-theme {
+    -fx-background-color: #0C134F;
+    -fx-text-fill: #E0C3FC;
+}
+
+/* Login background - light theme with a gentle color */
+.login-background {
+    -fx-background-color: linear-gradient(to bottom right, #9D4EDD, #7B2CBF, #5A189A);
+}
+
+/* Dark theme login background remains the same */
+.dark-theme.login-background {
+    -fx-background-color: #0C134F;
+}
+
+/* Action button styling - Import */
+.import-button {
+    -fx-background-color: #FF6B6B;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.import-button:hover {
+    -fx-background-color: #FF5252;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.import-button:pressed {
+    -fx-background-color: #E53935;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 0);
+}
+
+/* Dark theme import button - same color */
+.dark-theme .import-button {
+    -fx-background-color: #FF6B6B;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .import-button:hover {
+    -fx-background-color: #FF5252;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+}
+
+/* Action button styling - Export */
+.export-button {
+    -fx-background-color: #4ECDC4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.export-button:hover {
+    -fx-background-color: #26A69A;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.export-button:pressed {
+    -fx-background-color: #00897B;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 0);
+}
+
+/* Dark theme export button - same color */
+.dark-theme .export-button {
+    -fx-background-color: #4ECDC4;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .export-button:hover {
+    -fx-background-color: #26A69A;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+}
+
+/* Action button styling - New Folder */
+.new-folder-button {
+    -fx-background-color: #7367F0;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.new-folder-button:hover {
+    -fx-background-color: #5E50EE;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.new-folder-button:pressed {
+    -fx-background-color: #4839EA;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 0);
+}
+
+/* Dark theme new folder button - same color */
+.dark-theme .new-folder-button {
+    -fx-background-color: #7367F0;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .new-folder-button:hover {
+    -fx-background-color: #5E50EE;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+}
+
+/* Action button styling - Delete */
+.delete-button {
+    -fx-background-color: #F07427;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.delete-button:hover {
+    -fx-background-color: #E65100;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.delete-button:pressed {
+    -fx-background-color: #BF360C;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 0);
+}
+
+/* Dark theme delete button - same color */
+.dark-theme .delete-button {
+    -fx-background-color: #F07427;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .delete-button:hover {
+    -fx-background-color: #E65100;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+}
+
+/* Action button styling - Rename */
+.rename-button {
+    -fx-background-color: #6C63FF;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.rename-button:hover {
+    -fx-background-color: #5A52E0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);
+}
+
+.rename-button:pressed {
+    -fx-background-color: #4A42D0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 2, 0, 0, 0);
+}
+
+/* Dark theme rename button - same color */
+.dark-theme .rename-button {
+    -fx-background-color: #6C63FF;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .rename-button:hover {
+    -fx-background-color: #5A52E0;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+}
+
+/* General button styling (keep for backwards compatibility) */
+.button {
+    -fx-background-color: #4285f4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 3, 0, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: #2a75f3;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #1a65e3;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 1, 0, 0, 0);
+}
+
+/* Dark theme buttons */
+.dark-theme .button {
+    -fx-background-color: rgba(26, 31, 109, 0.8);
+    -fx-text-fill: #E0C3FC;
+    -fx-border-color: #6A4BAF;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.5, 0, 0);
+}
+
+.dark-theme .button:hover {
+    -fx-background-color: #6A4BAF;
+    -fx-border-color: #E0C3FC;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 20, 0.7, 0, 0);
+}
+
+.dark-theme .button:pressed {
+    -fx-background-color: #0C134F;
+    -fx-border-color: #5C469C;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* Secondary button styling */
+.button.secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #4285f4;
+    -fx-border-width: 1px;
+    -fx-text-fill: #4285f4;
+    -fx-effect: none;
+}
+
+.button.secondary:hover {
+    -fx-background-color: rgba(66, 133, 244, 0.1);
+}
+
+.button.secondary:pressed {
+    -fx-background-color: rgba(66, 133, 244, 0.2);
+}
+
+.dark-theme .button.secondary {
+    -fx-border-color: #6A4BAF;
+    -fx-text-fill: #E0C3FC;
+}
+
+.dark-theme .button.secondary:hover {
+    -fx-background-color: rgba(106, 75, 175, 0.3);
+}
+
+/* Icon button style */
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-padding: 6px;
+    -fx-background-radius: 50%;
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-content-display: graphic-only;
+    -fx-effect: none;
+}
+
+.icon-button:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+    -fx-effect: none;
+}
+
+.dark-theme .icon-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.icon-button:pressed {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .icon-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* List view styling */
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-padding: 0;
+}
+
+.dark-theme .list-view {
+    -fx-background-color: rgba(29, 38, 125, 0.7);
+    -fx-border-color: rgba(106, 75, 175, 0.3);
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-padding: 8px 12px;
+    -fx-border-color: transparent transparent #e0e0e0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.dark-theme .list-cell {
+    -fx-text-fill: #E0C3FC;
+    -fx-border-color: transparent transparent rgba(106, 75, 175, 0.3) transparent;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.dark-theme .list-cell:filled:hover {
+    -fx-background-color: rgba(106, 75, 175, 0.6);
+}
+
+.list-cell:selected {
+    -fx-background-color: #d6e5ff;
+    -fx-text-fill: #333333;
+}
+
+.dark-theme .list-cell:selected {
+    -fx-background-color: rgba(106, 75, 175, 0.8);
+    -fx-text-fill: #E0C3FC;
+}
+
+/* Text fields */
+.text-field, .password-field {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-text-fill: #333333;
+    -fx-padding: 8px 12px;
+}
+
+.dark-theme .text-field, .dark-theme .password-field {
+    -fx-background-color: rgba(26, 31, 109, 0.7);
+    -fx-border-color: #6A4BAF;
+    -fx-text-fill: #E0C3FC;
+    -fx-prompt-text-fill: #5C469C;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #4285f4;
+    -fx-border-width: 2px;
+}
+
+.dark-theme .text-field:focused, .dark-theme .password-field:focused {
+    -fx-border-color: #E0C3FC;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.7, 0, 0);
+    -fx-background-color: rgba(26, 31, 109, 0.9);
+}
+
+/* Label styling */
+.label {
+    -fx-text-fill: #333333;
+}
+
+.dark-theme .label {
+    -fx-text-fill: #E0C3FC;
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.dark-theme .title-label {
+    -fx-text-fill: #E0C3FC;
+}
+
+.headline-label {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2D3748;
+}
+
+.dark-theme .headline-label {
+    -fx-text-fill: #E0C3FC;
+}
+
+.subtitle-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4A5568;
+}
+
+.dark-theme .subtitle-label {
+    -fx-text-fill: #A08BEF;
+}
+
+.error-text {
+    -fx-text-fill: #ff5252;
+}
+
+.dark-theme .error-text {
+    -fx-text-fill: #ff6b68;
+}
+
+.success-text {
+    -fx-text-fill: #4caf50;
+}
+
+.dark-theme .success-text {
+    -fx-text-fill: #7cfc00;
+}
+
+.warning-text {
+    -fx-text-fill: #ffc107;
+}
+
+.info-text {
+    -fx-text-fill: #2196f3;
+}
+
+/* Login screen specific styles */
+.login-container {
+    -fx-alignment: center;
+    -fx-spacing: 20;
+    -fx-background-color: transparent;
+    -fx-fill-width: true;
+    -fx-fill-height: true;
+}
+
+.glass-pane {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 5);
+    -fx-min-width: 320px;
+}
+
+.dark-theme .glass-pane {
+    -fx-background-color: rgba(26, 31, 109, 0.7);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0, 0, 5);
+    -fx-border-color: rgba(224, 195, 252, 0.3);
+}
+
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+}
+
+.dark-theme .card {
+    -fx-background-color: rgba(26, 31, 109, 0.7);
+    -fx-border-color: rgba(224, 195, 252, 0.3);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 5);
+}
+
+.footer-text {
+    -fx-font-size: 11px;
+    -fx-text-fill: #666666;
+    -fx-padding: 2px 0 0 0;
+}
+
+.dark-theme .footer-text {
+    -fx-text-fill: #A08BEF;
+}
+
+/* Special buttons */
+.glow-button {
+    -fx-background-color: #4285f4;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(66, 133, 244, 0.5), 10, 0.5, 0, 0);
+}
+
+.glow-button:hover {
+    -fx-background-color: #2a75f3;
+    -fx-effect: dropshadow(gaussian, rgba(66, 133, 244, 0.5), 15, 0.7, 0, 0);
+}
+
+.glow-button:pressed {
+    -fx-background-color: #1a65e3;
+    -fx-effect: dropshadow(gaussian, rgba(66, 133, 244, 0.5), 5, 0.3, 0, 0);
+}
+
+.dark-theme .glow-button {
+    -fx-background-color: rgba(26, 31, 109, 0.8);
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 15, 0.7, 0, 0);
+}
+
+.dark-theme .glow-button:hover {
+    -fx-background-color: #6A4BAF;
+    -fx-border-color: #E0C3FC;
+    -fx-effect: dropshadow(gaussian, #E0C3FC, 25, 0.8, 0, 0);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-graphic-text-gap: 8;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-font-weight: normal;
+    -fx-effect: none;
+}
+
+.theme-toggle:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dark-theme .theme-toggle:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Table view styling */
+.table-view {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #e0e0e0;
+}
+
+.dark-theme .table-view {
+    -fx-background-color: rgba(29, 38, 125, 0.7);
+    -fx-border-color: rgba(106, 75, 175, 0.3);
+}
+
+.table-view .column-header {
+    -fx-background-color: rgba(237, 242, 247, 0.9);
+}
+
+.dark-theme .table-view .column-header {
+    -fx-background-color: rgba(92, 70, 156, 0.9);
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #4A5568;
+    -fx-font-weight: bold;
+}
+
+.dark-theme .table-view .column-header .label {
+    -fx-text-fill: #D4ADFC;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+}
+
+.table-row-cell .text {
+    -fx-fill: black;
+}
+
+.dark-theme .table-row-cell .text {
+    -fx-fill: #E0C3FC;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(237, 242, 247, 0.9);
+}
+
+.dark-theme .table-row-cell:hover {
+    -fx-background-color: rgba(92, 70, 156, 0.4);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4299E1;
+}
+
+.dark-theme .table-row-cell:selected {
+    -fx-background-color: rgba(106, 75, 175, 0.8);
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: white;
+}
+
+.dark-theme .table-row-cell:selected .text {
+    -fx-fill: #E0C3FC;
+}
+
+/* Tooltip styling */
+.tooltip {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #333333;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 10px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.dark-theme .tooltip {
+    -fx-background-color: rgba(29, 38, 125, 0.9);
+    -fx-text-fill: #E0C3FC;
+    -fx-border-color: rgba(106, 75, 175, 0.5);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+}
+
+/* Tree view styling */
+.tree-view {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+    -fx-background-radius: 8px;
+}
+
+.dark-theme .tree-view {
+    -fx-background-color: rgba(29, 38, 125, 0.7);
+}
+
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+}
+
+.dark-theme .tree-cell {
+    -fx-text-fill: #E0C3FC;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #4299E1;
+}
+
+.dark-theme .tree-cell:selected {
+    -fx-background-color: rgba(92, 70, 156, 0.8);
+}
+
+.tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: #4A5568;
+}
+
+.dark-theme .tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: #5C469C;
+}
+
+/* Enhanced refresh button style */
+.refresh-button {
+    -fx-background-color: #20c997;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 3, 0, 0, 1);
+    -fx-transition: all 0.3s ease;
+}
+
+.refresh-button:hover {
+    -fx-background-color: #0ca678;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.dark-theme .refresh-button {
+    -fx-background-color: #20c997;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 10, 0.5, 0, 0);
+}
+
+.dark-theme .refresh-button:hover {
+    -fx-background-color: #0ca678;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.4), 15, 0.7, 0, 0);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+/* Layout containers */
+.main-container {
+    -fx-background-color: #f5f5f5;
+    -fx-padding: 0;
+    -fx-spacing: 0;
+}
+
+.dark-theme .main-container {
+    -fx-background-color: #2c2c2c;
+}
+
+.sidebar {
+    -fx-background-color: #eeeeee;
+    -fx-padding: 10;
+    -fx-spacing: 8;
+    -fx-pref-width: 220;
+    -fx-min-width: 180;
+    -fx-border-color: #e0e0e0 transparent #e0e0e0 #e0e0e0;
+    -fx-border-width: 1 0 1 1;
+    -fx-border-radius: 0 0 0 4;
+}
+
+.dark-theme .sidebar {
+    -fx-background-color: #313335;
+    -fx-border-color: #555555 transparent #555555 #555555;
+}
+
+.content-area {
+    -fx-background-color: #f5f5f5;
+    -fx-padding: 10;
+    -fx-border-color: #e0e0e0 #e0e0e0 #e0e0e0 transparent;
+    -fx-border-width: 1 1 1 0;
+    -fx-border-radius: 0 0 4 0;
+    -fx-spacing: 10;
+}
+
+.dark-theme .content-area {
+    -fx-background-color: #2c2c2c;
+    -fx-border-color: #555555 #555555 #555555 transparent;
+}
+
+/* Icon styling */
+.file-icon, .folder-icon {
+    -fx-font-size: 16px;
+    -fx-padding: 0 8 0 0;
+}
+
+.folder-icon {
+    -fx-text-fill: #FFC107;
+}
+
+.file-icon {
+    -fx-text-fill: #2196F3;
+}
+
+/* Toolbar styling */
+.toolbar {
+    -fx-background-color: #f0f0f0;
+    -fx-padding: 8px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+    -fx-spacing: 5;
+    -fx-alignment: center-left;
+}
+
+.dark-theme .toolbar {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #555555;
+}
+
+/* File and folder list styling */
+.file-list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 12;
+    -fx-font-size: 13px;
+}
+
+.file-list-cell:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.dark-theme .file-list-cell:hover {
+    -fx-background-color: #494d4f;
+}
+
+.file-list-cell:selected {
+    -fx-background-color: #d6e5ff;
+}
+
+.dark-theme .file-list-cell:selected {
+    -fx-background-color: #1a3c81;
+}
+
+/* Context menu styling */
+.context-menu {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-padding: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.dark-theme .context-menu {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #555555;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 6px 12px;
+}
+
+.menu-item:hover {
+    -fx-background-color: #f0f0f0;
+}
+
+.dark-theme .menu-item:hover {
+    -fx-background-color: #494d4f;
+}
+
+.menu-item .label {
+    -fx-text-fill: #333333;
+    -fx-font-size: 12px;
+}
+
+.dark-theme .menu-item .label {
+    -fx-text-fill: #f5f5f5;
+}
+
+/* Progress indicator */
+.progress-indicator {
+    -fx-progress-color: #4285f4;
+}
+
+.progress-indicator .percentage {
+    -fx-fill: #333333;
+    -fx-font-weight: bold;
+}
+
+.dark-theme .progress-indicator .percentage {
+    -fx-fill: #f5f5f5;
+}
+
+/* Log text area */
+.log-area {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #333333;
+    -fx-font-family: 'Consolas', 'Monaco', monospace;
+    -fx-font-size: 12px;
+}
+
+.dark-theme .log-area {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #555555;
+    -fx-text-fill: #f5f5f5;
+}
+
+/* Scroll bar styling */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(128, 128, 128, 0.5);
+    -fx-background-radius: 4px;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(128, 128, 128, 0.7);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 10 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+} 

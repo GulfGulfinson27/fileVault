@@ -1,6 +1,7 @@
 package com.filevault.util;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +9,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Utility-Klasse für das Logging in einem benutzerdefinierten Ringpuffer.
@@ -20,6 +27,9 @@ public class LoggingUtil {
     private static final String LOG_FILE_PATH = "logs/filevault_log.log";
     private static String logFilePath = LOG_FILE_PATH;
     private static boolean loggingEnabled = true;
+    private static final Logger logger = Logger.getLogger("com.filevault");
+    private static Handler fileHandler;
+    private static final String LOG_FILE = "filevault.log";
 
     static {
         try {
@@ -155,5 +165,43 @@ public class LoggingUtil {
      */
     public static int getRingBufferCapacity() {
         return RING_BUFFER_CAPACITY;
+    }
+
+    /**
+     * Configures the logging system with file and console handlers.
+     */
+    public static void configureLogger() {
+        try {
+            logger.setLevel(Level.ALL);
+            
+            // Create log directory if it doesn't exist
+            File logDir = new File("logs");
+            if (!logDir.exists()) {
+                logDir.mkdir();
+            }
+            
+            // Configure file handler
+            fileHandler = new FileHandler("logs/" + LOG_FILE, 1048576, 5, true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            fileHandler.setLevel(Level.ALL);
+            logger.addHandler(fileHandler);
+            
+            // Configure console handler
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setLevel(Level.INFO);
+            logger.addHandler(consoleHandler);
+            
+            // Remove default handlers
+            Logger rootLogger = Logger.getLogger("");
+            Handler[] handlers = rootLogger.getHandlers();
+            for (Handler handler : handlers) {
+                rootLogger.removeHandler(handler);
+            }
+            
+            logger.info("Logging system initialized");
+        } catch (IOException e) {
+            System.err.println("Error setting up logger: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
