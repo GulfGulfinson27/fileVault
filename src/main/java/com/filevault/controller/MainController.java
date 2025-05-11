@@ -1245,10 +1245,29 @@ public class MainController {
      */
     private void importFile(File file) {
         LoggingUtil.logInfo("MainController", "Starting file import: " + file.getName());
-        // Implementation will be added later
         
-        // For now, just show a notification
-        showAlert(Alert.AlertType.INFORMATION, "Import", "Datei wird importiert: " + file.getName());
+        VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
+        if (currentFolder == null) {
+            showAlert(Alert.AlertType.ERROR, "Importfehler", "Kein Zielordner ausgewählt. Bitte wählen Sie einen Ordner aus.");
+            return;
+        }
+
+        try {
+            EncryptedFile importedFile = FileStorage.getInstance().importFile(file, currentFolder);
+            if (importedFile != null) {
+                refreshFileList();
+                statusLabel.setText("Datei erfolgreich importiert: " + file.getName());
+                LoggingUtil.logInfo("MainController", "File import successful: " + file.getName());
+            } else {
+                statusLabel.setText("Fehler beim Importieren der Datei: " + file.getName());
+                LoggingUtil.logError("MainController", "File import failed: " + file.getName());
+                showAlert(Alert.AlertType.ERROR, "Importfehler", "Die Datei konnte nicht importiert werden.");
+            }
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error importing file: " + e.getMessage());
+            statusLabel.setText("Fehler beim Importieren: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren der Datei: " + e.getMessage());
+        }
     }
     
     /**
@@ -1258,10 +1277,52 @@ public class MainController {
      */
     private void importFolder(File directory) {
         LoggingUtil.logInfo("MainController", "Starting folder import: " + directory.getName());
-        // Implementation will be added later
         
-        // For now, just show a notification
-        showAlert(Alert.AlertType.INFORMATION, "Import", "Ordner wird importiert: " + directory.getName());
+        VirtualFolder currentFolder = FolderManager.getInstance().getCurrentFolder();
+        if (currentFolder == null) {
+            showAlert(Alert.AlertType.ERROR, "Importfehler", "Kein Zielordner ausgewählt. Bitte wählen Sie einen Ordner aus.");
+            return;
+        }
+
+        // Erstelle einen neuen Unterordner
+        try {
+            VirtualFolder newFolder = FolderManager.getInstance().createFolder(directory.getName(), 
+                    "Importiert aus: " + directory.getAbsolutePath(), currentFolder.getId());
+            
+            if (newFolder != null) {
+                // Importiere alle Dateien aus dem Ordner
+                File[] files = directory.listFiles();
+                int successful = 0;
+                
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            try {
+                                EncryptedFile importedFile = FileStorage.getInstance().importFile(file, newFolder);
+                                if (importedFile != null) {
+                                    successful++;
+                                }
+                            } catch (Exception e) {
+                                LoggingUtil.logError("MainController", "Error importing file " + file.getName() + ": " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+                
+                refreshUI();
+                selectFolderInTree(newFolder);
+                statusLabel.setText(successful + " Dateien erfolgreich importiert aus: " + directory.getName());
+                LoggingUtil.logInfo("MainController", successful + " files imported from folder: " + directory.getName());
+            } else {
+                statusLabel.setText("Fehler beim Erstellen des Ordners: " + directory.getName());
+                LoggingUtil.logError("MainController", "Failed to create folder: " + directory.getName());
+                showAlert(Alert.AlertType.ERROR, "Importfehler", "Der Ordner konnte nicht erstellt werden.");
+            }
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error importing folder: " + e.getMessage());
+            statusLabel.setText("Fehler beim Importieren des Ordners: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Importfehler", "Fehler beim Importieren des Ordners: " + e.getMessage());
+        }
     }
     
     /**
@@ -1272,9 +1333,32 @@ public class MainController {
      */
     private void exportFile(EncryptedFile file, File directory) {
         LoggingUtil.logInfo("MainController", "Starting file export: " + file.getOriginalName());
-        // Implementation will be added later
         
-        // For now, just show a notification
-        showAlert(Alert.AlertType.INFORMATION, "Export", "Datei wird exportiert: " + file.getOriginalName());
+        try {
+            File targetFile = new File(directory, file.getOriginalName());
+            
+            // Prüfe, ob die Datei bereits existiert
+            if (targetFile.exists()) {
+                if (!showConfirmationDialog("Datei überschreiben", 
+                        "Die Datei " + file.getOriginalName() + " existiert bereits. Möchten Sie sie überschreiben?")) {
+                    return;
+                }
+            }
+            
+            boolean success = FileStorage.getInstance().exportFile(file, targetFile);
+            
+            if (success) {
+                statusLabel.setText("Datei erfolgreich exportiert: " + file.getOriginalName());
+                LoggingUtil.logInfo("MainController", "File export successful: " + file.getOriginalName());
+            } else {
+                statusLabel.setText("Fehler beim Exportieren der Datei: " + file.getOriginalName());
+                LoggingUtil.logError("MainController", "File export failed: " + file.getOriginalName());
+                showAlert(Alert.AlertType.ERROR, "Exportfehler", "Die Datei konnte nicht exportiert werden.");
+            }
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error exporting file: " + e.getMessage());
+            statusLabel.setText("Fehler beim Exportieren: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Exportfehler", "Fehler beim Exportieren der Datei: " + e.getMessage());
+        }
     }
 }
