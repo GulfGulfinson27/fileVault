@@ -41,15 +41,22 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       
-      - name: Build and analyze
+      - name: Build with Maven
+        run: xvfb-run --auto-servernum mvn -B verify
+      
+      - name: SonarCloud Analysis
+        uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Benötigt für PR-Deko usw.
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Muss in GitHub Secrets gesetzt werden
-        run: |
-          xvfb-run --auto-servernum mvn -B verify
-          xvfb-run --auto-servernum mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=GulfGulfinson_fileVault \
-            -Dsonar.organization=gulfgulfinson \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.qualitygate.wait=true \
-            -Dsonar.scm.disabled=true 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=GulfGulfinson_fileVault
+            -Dsonar.organization=gulfgulfinson
+            -Dsonar.sources=src/main/java
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.java.test.binaries=target/test-classes
+            -Dsonar.scm.disabled=true
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.scanner.force-deprecated-ci-on-auto-enabled=true 
