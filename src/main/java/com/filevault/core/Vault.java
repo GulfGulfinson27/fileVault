@@ -1,9 +1,9 @@
 package com.filevault.core;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
@@ -64,6 +64,24 @@ public class Vault {
 
         folderManager.deleteFolder(folder);
         LoggingUtil.logInfo("Vault", "Folder deleted successfully: " + folderName);
+    }
+
+    /**
+     * Löscht einen Ordner und alle seine Unterordner rekursiv aus dem Tresor.
+     *
+     * @param folderName Der Name des zu löschenden Ordners.
+     * @throws Exception Wenn der Ordner nicht gelöscht werden kann.
+     */
+    public void deleteFolderRecursive(String folderName) throws Exception {
+        LoggingUtil.logInfo("Vault", "Attempting to recursively delete folder: " + folderName);
+        VirtualFolder folder = folderManager.getFolderByName(folderName);
+        if (folder == null) {
+            LoggingUtil.logError("Vault", "Folder not found: " + folderName);
+            throw new Exception("Ordner nicht gefunden: " + folderName);
+        }
+
+        folderManager.deleteFolderRecursive(folder);
+        LoggingUtil.logInfo("Vault", "Folder and all subfolders deleted successfully: " + folderName);
     }
 
     /**

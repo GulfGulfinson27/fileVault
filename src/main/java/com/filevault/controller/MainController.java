@@ -490,15 +490,38 @@ public class MainController {
             ((VirtualFolder) selectedItem).getName() : 
             ((EncryptedFile) selectedItem).getOriginalName();
 
-        if (!showConfirmationDialog("Löschen bestätigen", 
-                "Möchten Sie '" + itemName + "' wirklich löschen?")) {
+        String confirmMessage;
+        boolean isRecursiveDelete = false;
+
+        if (selectedItem instanceof VirtualFolder folder) {
+            // Prüfen, ob Unterordner vorhanden sind
+            List<VirtualFolder> subfolders = FolderManager.getInstance().getSubfolders(folder.getId());
+            isRecursiveDelete = !subfolders.isEmpty();
+            
+            if (isRecursiveDelete) {
+                confirmMessage = "Der Ordner '" + folder.getName() + "' enthält Unterordner.\n" +
+                       "Möchten Sie diesen Ordner und ALLE darin enthaltenen Unterordner und Dateien löschen?\n" +
+                       "WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!";
+            } else {
+                confirmMessage = "Möchten Sie den Ordner '" + folder.getName() + "' wirklich löschen?";
+            }
+        } else {
+            confirmMessage = "Möchten Sie die Datei '" + itemName + "' wirklich löschen?";
+        }
+
+        if (!showConfirmationDialog("Löschen bestätigen", confirmMessage)) {
             return;
         }
 
         try {
             if (selectedItem instanceof VirtualFolder folder) {
-                FolderManager.getInstance().deleteFolder(folder);
-                statusLabel.setText("Ordner erfolgreich gelöscht.");
+                if (isRecursiveDelete) {
+                    FolderManager.getInstance().deleteFolderRecursive(folder);
+                    statusLabel.setText("Ordner und alle Unterordner erfolgreich gelöscht.");
+                } else {
+                    FolderManager.getInstance().deleteFolder(folder);
+                    statusLabel.setText("Ordner erfolgreich gelöscht.");
+                }
             } else if (selectedItem instanceof EncryptedFile file) {
                 FileStorage.getInstance().deleteFile(file);
                 statusLabel.setText("Datei erfolgreich gelöscht.");
@@ -508,6 +531,56 @@ public class MainController {
             refreshUI();
         } catch (RuntimeException e) {
             showAlert(Alert.AlertType.ERROR, "Fehler beim Löschen", "Fehler beim Löschen: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Löscht einen Ordner.
+     * Zeigt einen Bestätigungsdialog vor dem Löschen.
+     */
+    @FXML
+    public void handleDeleteFolder() {
+        TreeItem<VirtualFolder> selectedItem = folderTreeView.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || selectedItem.getValue() == null) {
+            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Löschen aus.");
+            return;
+        }
+
+        VirtualFolder folder = selectedItem.getValue();
+        if (folder.getId() == -1) {  // Root folder
+            showAlert(Alert.AlertType.WARNING, "Ungültige Aktion", "Der Root-Ordner kann nicht gelöscht werden.");
+            return;
+        }
+
+        // Prüfen, ob Unterordner vorhanden sind
+        List<VirtualFolder> subfolders = FolderManager.getInstance().getSubfolders(folder.getId());
+        boolean hasSubfolders = !subfolders.isEmpty();
+
+        String confirmMessage;
+        if (hasSubfolders) {
+            confirmMessage = "Der Ordner '" + folder.getName() + "' enthält Unterordner.\n" +
+                   "Möchten Sie diesen Ordner und ALLE darin enthaltenen Unterordner und Dateien löschen?\n" +
+                   "WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!";
+        } else {
+            confirmMessage = "Möchten Sie den Ordner '" + folder.getName() + "' wirklich löschen?";
+        }
+
+        if (!showConfirmationDialog("Ordner löschen", confirmMessage)) {
+            return;
+        }
+
+        try {
+            if (hasSubfolders) {
+                FolderManager.getInstance().deleteFolderRecursive(folder);
+                statusLabel.setText("Ordner und alle Unterordner erfolgreich gelöscht.");
+            } else {
+                FolderManager.getInstance().deleteFolder(folder);
+                statusLabel.setText("Ordner erfolgreich gelöscht.");
+            }
+            refreshFolderTree();
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Fehler beim Löschen", 
+                    "Fehler beim Löschen des Ordners: " + e.getMessage());
         }
     }
     
@@ -748,42 +821,6 @@ public class MainController {
             handleRenameFolder(folder);
         } else {
             showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Umbenennen aus.");
-        }
-    }
-    
-    /**
-     * Löscht einen Ordner.
-     * Zeigt einen Bestätigungsdialog vor dem Löschen.
-     */
-    @FXML
-    public void handleDeleteFolder() {
-        TreeItem<VirtualFolder> selectedItem = folderTreeView.getSelectionModel().getSelectedItem();
-        if (selectedItem == null || selectedItem.getValue() == null) {
-            showAlert(Alert.AlertType.WARNING, "Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Löschen aus.");
-            return;
-        }
-
-        VirtualFolder folder = selectedItem.getValue();
-        if (folder.getId() == -1) {  // Root folder
-            showAlert(Alert.AlertType.WARNING, "Ungültige Aktion", "Der Root-Ordner kann nicht gelöscht werden.");
-            return;
-        }
-
-        if (!showConfirmationDialog("Ordner löschen", 
-                "Möchten Sie den Ordner '" + folder.getName() + "' wirklich löschen?")) {
-            return;
-        }
-
-        try {
-            FolderManager.getInstance().deleteFolder(folder);
-            refreshFolderTree();
-            statusLabel.setText("Ordner erfolgreich gelöscht.");
-        } catch (IllegalStateException e) {
-            showAlert(Alert.AlertType.ERROR, "Ordner kann nicht gelöscht werden", 
-                    "Der Ordner enthält Unterordner und kann daher nicht gelöscht werden.");
-        } catch (Exception e) {
-            showAlert(Alert.AlertType.ERROR, "Fehler beim Löschen", 
-                    "Fehler beim Löschen des Ordners: " + e.getMessage());
         }
     }
     

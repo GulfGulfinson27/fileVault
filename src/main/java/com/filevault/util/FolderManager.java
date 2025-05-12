@@ -336,6 +336,92 @@ public class FolderManager {
     }
     
     /**
+     * Löscht einen Ordner und rekursiv alle seine Unterordner und Dateien.
+     * @param folder Der zu löschende Ordner
+     */
+    public void deleteFolderRecursive(VirtualFolder folder) {
+        LoggingUtil.logInfo("FolderManager", "Recursively deleting folder: " + folder.getName());
+        if (folder == null) {
+            LoggingUtil.logError("FolderManager", "Recursive folder deletion failed: Folder is null.");
+            throw new IllegalArgumentException("Ordner darf nicht null sein");
+        }
+
+        try {
+            // Disable auto-commit mode
+            DatabaseManager.getConnection().setAutoCommit(false);
+            
+            // Rekursiv alle Unterordner und deren Dateien löschen
+            deleteRecursively(folder);
+            
+            // Commit the transaction
+            DatabaseManager.getConnection().commit();
+            
+            // Remove from parent's children list if it has a parent
+            if (folder.getParentId() != null) {
+                for (VirtualFolder parent : folders) {
+                    if (parent.getId() == folder.getParentId()) {
+                        parent.removeChild(folder);
+                        break;
+                    }
+                }
+            }
+            
+            // Remove from local list
+            folders.remove(folder);
+            
+            // Reset auto-commit mode
+            DatabaseManager.getConnection().setAutoCommit(true);
+            LoggingUtil.logInfo("FolderManager", "Folder and all its contents deleted successfully: " + folder.getName());
+        } catch (SQLException e) {
+            try {
+                // Rollback in case of error
+                DatabaseManager.getConnection().rollback();
+                DatabaseManager.getConnection().setAutoCommit(true);
+            } catch (SQLException rollbackEx) {
+                LoggingUtil.logError("FolderManager", "Error during rollback: " + rollbackEx.getMessage());
+            }
+            LoggingUtil.logError("FolderManager", "Error recursively deleting folder: " + e.getMessage());
+            throw new RuntimeException("Fehler beim rekursiven Löschen des Ordners", e);
+        }
+    }
+    
+    /**
+     * Hilfsmethode für die rekursive Löschung von Ordnern.
+     * Löscht alle Dateien und Unterordner des angegebenen Ordners rekursiv.
+     * 
+     * @param folder Der zu löschende Ordner
+     * @throws SQLException wenn ein Datenbankfehler auftritt
+     */
+    private void deleteRecursively(VirtualFolder folder) throws SQLException {
+        LoggingUtil.logInfo("FolderManager", "Processing folder for recursive deletion: " + folder.getName());
+        
+        // Zuerst alle Unterordner rekursiv löschen
+        List<VirtualFolder> subfolders = getSubfolders(folder.getId());
+        for (VirtualFolder subfolder : subfolders) {
+            deleteRecursively(subfolder);
+            
+            // Remove from local list
+            folders.remove(subfolder);
+        }
+        
+        // Dann alle Dateien im aktuellen Ordner löschen
+        String deleteFilesSql = "DELETE FROM files WHERE folder_id = ?";
+        try (PreparedStatement deleteFilesStmt = DatabaseManager.getConnection().prepareStatement(deleteFilesSql)) {
+            deleteFilesStmt.setInt(1, folder.getId());
+            deleteFilesStmt.executeUpdate();
+            LoggingUtil.logInfo("FolderManager", "Deleted all files in folder: " + folder.getName());
+        }
+        
+        // Schließlich den aktuellen Ordner selbst löschen
+        String deleteFolderSql = "DELETE FROM folders WHERE id = ?";
+        try (PreparedStatement deleteFolderStmt = DatabaseManager.getConnection().prepareStatement(deleteFolderSql)) {
+            deleteFolderStmt.setInt(1, folder.getId());
+            deleteFolderStmt.executeUpdate();
+            LoggingUtil.logInfo("FolderManager", "Deleted folder itself: " + folder.getName());
+        }
+    }
+    
+    /**
      * Gibt die Liste aller Ordner zurück.
      * @return Die Liste der Ordner
      */

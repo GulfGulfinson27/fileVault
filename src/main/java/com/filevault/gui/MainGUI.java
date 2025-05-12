@@ -1,9 +1,12 @@
 package com.filevault.gui;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 import com.filevault.core.Vault;
+import com.filevault.model.VirtualFolder;
+import com.filevault.util.FolderManager;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -15,7 +18,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
@@ -140,25 +142,51 @@ public class MainGUI extends Application {
                 Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
                 confirmDialog.setTitle("Ordner löschen");
                 confirmDialog.setHeaderText("Ordner löschen");
-                confirmDialog.setContentText("Möchten Sie den Ordner '" + selectedFolder.getValue() + "' wirklich löschen?");
+                
+                // Prüfen, ob es Unterordner gibt
+                boolean hasSubfolders = false;
+                try {
+                    VirtualFolder folder = FolderManager.getInstance().getFolderByName(selectedFolder.getValue());
+                    if (folder != null) {
+                        List<VirtualFolder> subfolders = FolderManager.getInstance().getSubfolders(folder.getId());
+                        hasSubfolders = !subfolders.isEmpty();
+                    }
+                } catch (Exception ex) {
+                    showError("Fehler", "Fehler beim Prüfen der Unterordner: " + ex.getMessage());
+                    return;
+                }
+                
+                String confirmMessage;
+                if (hasSubfolders) {
+                    confirmMessage = "Der Ordner '" + selectedFolder.getValue() + "' enthält Unterordner.\n" +
+                            "Möchten Sie diesen Ordner und ALLE darin enthaltenen Unterordner und Dateien löschen?\n" +
+                            "WARNUNG: Diese Aktion kann nicht rückgängig gemacht werden!";
+                } else {
+                    confirmMessage = "Möchten Sie den Ordner '" + selectedFolder.getValue() + "' wirklich löschen?";
+                }
+                confirmDialog.setContentText(confirmMessage);
                 
                 Optional<ButtonType> result = confirmDialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     try {
                         // Lösche den Ordner aus dem Tresor
-                        vault.deleteFolder(selectedFolder.getValue());
+                        if (hasSubfolders) {
+                            vault.deleteFolderRecursive(selectedFolder.getValue());
+                        } else {
+                            vault.deleteFolder(selectedFolder.getValue());
+                        }
                         
                         // Entferne den Ordner aus der Baumansicht
                         selectedFolder.getParent().getChildren().remove(selectedFolder);
                         
                         // Aktualisiere die Statusleiste
-                        statusBar.setText("Ordner erfolgreich gelöscht");
+                        statusBar.setText("Ordner" + (hasSubfolders ? " und alle Unterordner" : "") + " erfolgreich gelöscht");
                     } catch (Exception ex) {
                         showError("Fehler beim Löschen des Ordners", ex.getMessage());
                     }
                 }
             } else {
-                showError("Kein Ordner ausgewählt", "Bitte wählen Sie einen Ordner zum Löschen aus.");
+                showError("Fehler", "Bitte wählen Sie einen Ordner zum Löschen aus.");
             }
         });
 
