@@ -30,7 +30,7 @@ jobs:
       run: xvfb-run --auto-servernum mvn test
     
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: FileVault-shaded
         path: target/FileVault-shaded-*.jar 
