@@ -28,6 +28,58 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          cp target/FileVault-shaded-*.jar release/
+          cp README.md release/
+          cp LICENSE release/ || echo "LICENSE file not found"
+          cp start.bat release/
+          cp start.sh release/
+          cp start-api.bat release/
+          cp start-api.sh release/
+          chmod +x release/*.sh
+          
+          # Erstellen einer Anleitung zur Ausführung
+          cat > release/AUSFÜHRUNG.md << 'EOL'
+          # Anleitung zur Ausführung von FileVault
+
+          ## Voraussetzungen
+          - Java 17 oder höher
+          - Maven (falls Sie nicht das JAR direkt verwenden)
+
+          ## Ausführung mit den Skripten
+          ### Windows
+          1. Doppelklick auf `start.bat` - startet die Anwendung mit dem Standard-API-Port 9090
+          2. Oder von der Kommandozeile: `start.bat [PORT]` - spezifiziert einen anderen Port
+
+          ### Linux/Mac
+          1. Stellen Sie sicher, dass die Skripte ausführbar sind: `chmod +x *.sh`
+          2. Ausführen mit: `./start.sh` - startet die Anwendung mit dem Standard-API-Port 9090
+          3. Oder mit anderem Port: `./start.sh [PORT]`
+
+          ## Ausführung nur der API
+          ### Windows
+          - `start-api.bat [PORT]`
+
+          ### Linux/Mac
+          - `./start-api.sh [PORT]`
+
+          ## Direkte Ausführung der JAR (Alternative)
+          ```
+          java -jar FileVault-shaded-*.jar --api-port=9090
+          ```
+
+          ## Erste Schritte
+          1. Bei der ersten Ausführung wird ein neuer Benutzer angelegt
+          2. Für einen neuen Benutzer muss die Datenbank gelöscht werden (im ~/.filevault/ Verzeichnis)
+          EOL
+          
+          # Erstellen eines ZIP-Archivs
+          cd release
+          zip -r ../FileVault-${{ steps.get_version.outputs.VERSION }}.zip .
+          cd ..
+      
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -38,8 +90,8 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
+            FileVault-${{ steps.get_version.outputs.VERSION }}.zip
             target/FileVault-shaded-*.jar
-            LICENSE
-            README.md
+            release/AUSFÜHRUNG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

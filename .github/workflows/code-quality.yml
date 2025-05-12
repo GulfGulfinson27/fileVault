@@ -42,4 +42,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Benötigt für PR-Deko usw.
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Muss in GitHub Secrets gesetzt werden
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=IhrBenutzerName_FileVault 
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GulfGulfinson_fileVault 

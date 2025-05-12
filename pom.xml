@@ -215,8 +215,8 @@
             <id>sonar</id>
             <properties>
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <sonar.organization>IhrBenutzerName</sonar.organization>
-                <sonar.projectKey>IhrBenutzerName_FileVault</sonar.projectKey>
+                <sonar.organization>GulfGulfinson</sonar.organization>
+                <sonar.projectKey>GulfGulfinson_fileVault</sonar.projectKey>
                 <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
                 <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
                 <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
