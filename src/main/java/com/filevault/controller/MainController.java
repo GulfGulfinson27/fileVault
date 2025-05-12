@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.filevault.FileVaultApp;
 import com.filevault.model.EncryptedFile;
@@ -198,50 +199,113 @@ public class MainController {
             row.itemProperty().addListener((obs, oldItem, newItem) -> {
                 if (newItem instanceof VirtualFolder folder) {
                     row.setTooltip(new Tooltip(folder.getDescription()));
-                } else {
-                    row.setTooltip(null);
-                }
-            });
-
-            // Fix double-click behavior to ensure only files are exported and folders are opened
-            row.setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                    Object selectedItem = row.getItem();
-                    LoggingUtil.logInfo("MainController", "Double-click detected. Selected item: " + selectedItem);
-
-                    if (selectedItem instanceof EncryptedFile file) {
-                        LoggingUtil.logInfo("MainController", "Exporting file: " + file.getOriginalName());
-                        if (!row.isSelected()) { // Ensure the row is selected only once
-                            fileTableView.getSelectionModel().select(file);
-                            handleExportFile();
-                        }
-                    } else if (selectedItem instanceof VirtualFolder folder) {
-                        LoggingUtil.logInfo("MainController", "Opening folder: " + folder.getName());
-                        FolderManager.getInstance().setCurrentFolder(folder);
-                        refreshFileList();
-                        event.consume(); // Stop further event propagation
-                    } else {
-                        LoggingUtil.logInfo("MainController", "Unknown item type selected. No action taken.");
-                    }
                 }
             });
 
             return row;
         });
 
-        // Select the first folder if available
-        Platform.runLater(() -> {
-            if (folderTreeView.getRoot() != null && !folderTreeView.getRoot().getChildren().isEmpty()) {
-                folderTreeView.getSelectionModel().clearSelection();
-                handleFolderSelection(null);
+        // Register the refresh handler for the file table
+        fileTableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                handleFileSelection(event);
             }
         });
-
-        // Initialize theme toggle button
+        
+        // Initialisiere den Theme-Toggle-Button
         initializeThemeToggle();
         
-        // Initialize refresh button
+        // Initialisiere den Refresh-Button
         initializeRefreshButton();
+        
+        // Registriere API-Change-Listener
+        registerApiChangeListener();
+        
+        LoggingUtil.logInfo("MainController", "UI initialization complete.");
+    }
+    
+    /**
+     * Registriert einen Listener für API-Änderungen, um die UI automatisch zu aktualisieren
+     */
+    private void registerApiChangeListener() {
+        try {
+            // Erstelle einen Consumer, der die UI aktualisiert
+            Consumer<String> apiChangeListener = action -> {
+                LoggingUtil.logInfo("MainController", "API change detected: " + action);
+                
+                // Stelle sicher, dass wir auf dem JavaFX Application Thread sind
+                if (!Platform.isFxApplicationThread()) {
+                    Platform.runLater(() -> handleApiChange(action));
+                } else {
+                    handleApiChange(action);
+                }
+            };
+            
+            // Registriere den Listener beim API-Server
+            com.filevault.api.ApiServer.addChangeListener(apiChangeListener);
+            
+            // Speichere den Listener als Instanzvariable, damit er später entfernt werden kann
+            this.apiChangeListener = apiChangeListener;
+            
+            LoggingUtil.logInfo("MainController", "API change listener registered successfully");
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error registering API change listener: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Verarbeitet eine Änderung von der API
+     * @param action Die Art der Änderung
+     */
+    private void handleApiChange(String action) {
+        try {
+            LoggingUtil.logInfo("MainController", "Handling API change: " + action + " - UI wird aktualisiert");
+            
+            // Führe ein vollständiges UI-Update durch
+            refreshUI();
+            
+            // Aktualisiere die Statusanzeige
+            if (statusLabel != null) {
+                statusLabel.setText("Änderung über API erkannt: " + action);
+                
+                // Lass den Status kurz blinken, um die Änderung hervorzuheben
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(100), statusLabel);
+                fadeOut.setFromValue(1.0);
+                fadeOut.setToValue(0.5);
+                
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(100), statusLabel);
+                fadeIn.setFromValue(0.5);
+                fadeIn.setToValue(1.0);
+                
+                fadeOut.setOnFinished(e -> fadeIn.play());
+                fadeOut.play();
+            }
+            
+            LoggingUtil.logInfo("MainController", "UI refresh completed after API change: " + action);
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error handling API change: " + e.getMessage());
+            if (statusLabel != null) {
+                statusLabel.setText("Fehler bei API-Änderung: " + e.getMessage());
+            }
+        }
+    }
+    
+    // Listener für API-Änderungen
+    private Consumer<String> apiChangeListener;
+    
+    /**
+     * Wird aufgerufen, wenn der Controller nicht mehr benötigt wird
+     */
+    public void cleanup() {
+        // Entferne den API-Change-Listener, wenn vorhanden
+        if (apiChangeListener != null) {
+            try {
+                com.filevault.api.ApiServer.removeChangeListener(apiChangeListener);
+                LoggingUtil.logInfo("MainController", "API change listener unregistered");
+            } catch (Exception e) {
+                LoggingUtil.logError("MainController", "Error removing API change listener: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -682,12 +746,40 @@ public class MainController {
      * Refreshes both the folder tree and file table while preserving the folder tree's state.
      */
     private void refreshUI() {
-        TreeItem<VirtualFolder> selectedFolder = folderTreeView.getSelectionModel().getSelectedItem();
-        refreshFolderTree();
-        if (selectedFolder != null) {
-            selectFolderInTree(selectedFolder.getValue());
+        LoggingUtil.logInfo("MainController", "Performing full UI refresh");
+        
+        try {
+            // Lade aktuelle Daten aus der Datenbank
+            FolderManager.getInstance().reloadFromDatabase();
+            FileStorage.getInstance().reloadFromDatabase();
+            
+            // Merke aktuell ausgewählten Ordner
+            TreeItem<VirtualFolder> selectedFolder = folderTreeView.getSelectionModel().getSelectedItem();
+            VirtualFolder currentFolder = selectedFolder != null ? selectedFolder.getValue() : null;
+            
+            // Aktualisiere Ordnerbaum
+            refreshFolderTree();
+            
+            // Versuche den vorher ausgewählten Ordner wieder zu selektieren
+            if (currentFolder != null) {
+                selectFolderInTree(currentFolder);
+                // Falls der Ordner nicht mehr existiert, wähle Root
+                if (folderTreeView.getSelectionModel().isEmpty() && folderTreeView.getRoot() != null) {
+                    folderTreeView.getSelectionModel().select(folderTreeView.getRoot());
+                }
+            } else if (folderTreeView.getRoot() != null) {
+                // Falls kein Ordner ausgewählt war, wähle Root
+                folderTreeView.getSelectionModel().select(folderTreeView.getRoot());
+            }
+            
+            // Aktualisiere Dateiliste
+            refreshFileList();
+            
+            LoggingUtil.logInfo("MainController", "Full UI refresh completed");
+        } catch (Exception e) {
+            LoggingUtil.logError("MainController", "Error during UI refresh: " + e.getMessage());
+            throw new RuntimeException("Error refreshing UI", e);
         }
-        refreshFileList();
     }
 
     /**
@@ -1164,6 +1256,9 @@ public class MainController {
         
         try {
             if (refreshButton != null) {
+                // Deaktiviere den Button während der Aktualisierung
+                refreshButton.setDisable(true);
+                
                 // Create icon rotation animation
                 javafx.scene.shape.Circle circle = new javafx.scene.shape.Circle(10, javafx.scene.paint.Color.TRANSPARENT);
                 javafx.scene.text.Text rotatingIcon = new javafx.scene.text.Text("↻");
@@ -1174,7 +1269,7 @@ public class MainController {
                 // Temporarily replace button content with the animated icon and text
                 String originalText = refreshButton.getText();
                 javafx.scene.layout.HBox content = new javafx.scene.layout.HBox(5, iconPane, 
-                    new javafx.scene.control.Label("Aktualisieren"));
+                    new javafx.scene.control.Label("Aktualisiere..."));
                 content.setAlignment(javafx.geometry.Pos.CENTER);
                 refreshButton.setGraphic(content);
                 refreshButton.setText("");
@@ -1236,6 +1331,7 @@ public class MainController {
                                 try {
                                     refreshButton.setGraphic(null);
                                     refreshButton.setText("↻ Aktualisieren");
+                                    refreshButton.setDisable(false);
                                 } catch (Exception ex) {
                                     LoggingUtil.logError("MainController", "Error resetting button after animation: " + ex.getMessage());
                                 }
@@ -1264,6 +1360,7 @@ public class MainController {
                         try {
                             refreshButton.setGraphic(null);
                             refreshButton.setText("↻ Aktualisieren");
+                            refreshButton.setDisable(false);
                         } catch (Exception btnEx) {
                             LoggingUtil.logError("MainController", "Error resetting button: " + btnEx.getMessage());
                         }

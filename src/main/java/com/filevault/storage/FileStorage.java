@@ -196,7 +196,7 @@ public class FileStorage {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Fehler beim Umbenennen der Datei: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Fehler beim Umbenennen der Datei: " + e.getMessage());
             return false;
         }
     }
@@ -224,7 +224,7 @@ public class FileStorage {
             
             return false;
         } catch (SQLException e) {
-            System.err.println("Fehler beim Verschieben der Datei: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Fehler beim Verschieben der Datei: " + e.getMessage());
             return false;
         }
     }
@@ -271,7 +271,7 @@ public class FileStorage {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Abrufen der Dateien: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Fehler beim Abrufen der Dateien: " + e.getMessage());
         }
         
         return files;
@@ -316,7 +316,7 @@ public class FileStorage {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Abrufen der Datei: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Fehler beim Abrufen der Datei: " + e.getMessage());
         }
         
         return null;
@@ -335,7 +335,7 @@ public class FileStorage {
             stmt.setInt(1, fileId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("Fehler beim Aktualisieren des letzten Zugriffs: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Fehler beim Aktualisieren des letzten Zugriffs: " + e.getMessage());
         }
     }
 
@@ -376,7 +376,7 @@ public class FileStorage {
                 files.add(file);
             }
         } catch (SQLException e) {
-            System.err.println("Error retrieving all files: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Error retrieving all files: " + e.getMessage());
         }
 
         return files;
@@ -424,7 +424,7 @@ public class FileStorage {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error retrieving files by folder ID: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Error retrieving files by folder ID: " + e.getMessage());
         }
 
         return files;
@@ -465,16 +465,26 @@ public class FileStorage {
                                 null
                         );
                     } else {
-                        System.err.println("No generated keys returned for the new file record.");
+                        LoggingUtil.logError("FileStorage", "No generated keys returned for the new file record.");
                     }
                 }
             } else {
-                System.err.println("No rows were affected when attempting to insert the file record.");
+                LoggingUtil.logError("FileStorage", "No rows were affected when attempting to insert the file record.");
             }
         } catch (SQLException e) {
-            System.err.println("Error creating file record: " + e.getMessage());
+            LoggingUtil.logError("FileStorage", "Error creating file record: " + e.getMessage());
         }
 
         return null;
+    }
+
+    /**
+     * Lädt die Dateidaten aus der Datenbank neu.
+     * Wird verwendet, um externe Änderungen zu erkennen (z.B. über die API).
+     */
+    public void reloadFromDatabase() {
+        LoggingUtil.logInfo("FileStorage", "Reloading files from database");
+        // Die Dateiliste wird nicht zwischengespeichert, sondern immer direkt geladen
+        // Daher muss hier nichts getan werden außer zu loggen
     }
 }

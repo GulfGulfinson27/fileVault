@@ -121,7 +121,15 @@ public class FileVaultApp extends Application {
      */
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FileVaultApp.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
+        Parent root = fxmlLoader.load();
+        
+        // Speichere den Controller im Root-Element für spätere Verwendung
+        Object controller = fxmlLoader.getController();
+        if (controller != null) {
+            root.setUserData(controller);
+        }
+        
+        return root;
     }
     
     /**
@@ -160,7 +168,12 @@ public class FileVaultApp extends Application {
      * Helper method to load and show the main view with animation
      */
     private static void loadAndShowMainView() throws IOException {
-        Parent mainRoot = loadFXML("main");
+        FXMLLoader fxmlLoader = new FXMLLoader(FileVaultApp.class.getResource("main.fxml"));
+        Parent mainRoot = fxmlLoader.load();
+        
+        // Speichere den Controller im Root-Element für spätere Verwendung
+        Object controller = fxmlLoader.getController();
+        mainRoot.setUserData(controller);
         
         // Apply current theme
         if (isDarkMode) {
@@ -293,7 +306,7 @@ public class FileVaultApp extends Application {
                     apiPort = Integer.parseInt(args[i + 1]);
                     break;
                 } catch (NumberFormatException e) {
-                    System.err.println("Ungültiger API-Port. Der Standardport 9090 wird verwendet.");
+                    LoggingUtil.logWarning("FileVaultApp", "Ungültiger API-Port. Der Standardport 9090 wird verwendet.");
                 }
             }
         }
@@ -327,6 +340,12 @@ public class FileVaultApp extends Application {
                 }
             }));
             
+            // Wichtige Benutzerbenachrichtigung beibehalten
+            System.out.println("\n============================================================");
+            System.out.println("API-Server erfolgreich gestartet auf Port " + port);
+            System.out.println("Änderungen über die API werden automatisch in der GUI angezeigt");
+            System.out.println("============================================================\n");
+            
             LoggingUtil.logInfo("FileVaultApp", "API server started successfully");
         } catch (IOException e) {
             LoggingUtil.logError("FileVaultApp", "Error starting API server: " + e.getMessage());
@@ -359,6 +378,19 @@ public class FileVaultApp extends Application {
         if (apiServer != null) {
             LoggingUtil.logInfo("FileVaultApp", "Stopping API server");
             apiServer.stop();
+        }
+        
+        // Cleanup für alle Controller
+        try {
+            if (mainScene != null && mainScene.getRoot() != null) {
+                Object controller = mainScene.getRoot().getUserData();
+                if (controller instanceof com.filevault.controller.MainController mainController) {
+                    LoggingUtil.logInfo("FileVaultApp", "Cleaning up MainController");
+                    mainController.cleanup();
+                }
+            }
+        } catch (Exception e) {
+            LoggingUtil.logError("FileVaultApp", "Error during controller cleanup: " + e.getMessage());
         }
     }
 }

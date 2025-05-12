@@ -7,11 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 import com.filevault.model.EncryptedFile;
 import com.filevault.storage.DatabaseManager;
@@ -27,6 +30,51 @@ import com.sun.net.httpserver.HttpServer;
 public class ApiServer {
 
     private HttpServer server;
+    
+    // Liste von Listenern, die bei API-Änderungen informiert werden
+    private static final List<Consumer<String>> changeListeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Fügt einen Listener hinzu, der bei Änderungen über die API informiert wird
+     * @param listener Der Listener-Callback
+     */
+    public static void addChangeListener(Consumer<String> listener) {
+        if (listener != null) {
+            changeListeners.add(listener);
+            LoggingUtil.logInfo("ApiServer", "Change listener registered");
+        }
+    }
+    
+    /**
+     * Entfernt einen vorher registrierten Change-Listener
+     * @param listener Der zu entfernende Listener
+     */
+    public static void removeChangeListener(Consumer<String> listener) {
+        if (listener != null) {
+            changeListeners.remove(listener);
+            LoggingUtil.logInfo("ApiServer", "Change listener unregistered");
+        }
+    }
+    
+    /**
+     * Benachrichtigt alle registrierten Listener über eine Änderung
+     * @param action Die Art der Änderung (z.B. "create_folder", "delete_file")
+     */
+    private static void notifyChangeListeners(String action) {
+        LoggingUtil.logInfo("ApiServer", "Notifying listeners about action: " + action);
+        
+        // Ensure we have a consistent list even if listeners are changed during iteration
+        List<Consumer<String>> listenersCopy = new ArrayList<>(changeListeners);
+        
+        for (Consumer<String> listener : listenersCopy) {
+            try {
+                listener.accept(action);
+                LoggingUtil.logInfo("ApiServer", "Listener notified about action: " + action);
+            } catch (Exception e) {
+                LoggingUtil.logError("ApiServer", "Error notifying listener: " + e.getMessage());
+            }
+        }
+    }
 
     /**
      * Startet den API-Server auf dem angegebenen Port.
@@ -179,16 +227,34 @@ public class ApiServer {
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                 }
                 case "POST" -> {
-                    response = createFolder(exchange);
-                    exchange.sendResponseHeaders(201, response.getBytes().length);
+                    try {
+                        response = createFolder(exchange);
+                        exchange.sendResponseHeaders(201, response.getBytes().length);
+                    } finally {
+                        // Benachrichtige über Änderung, selbst wenn ein Fehler auftritt
+                        LoggingUtil.logInfo("ApiServer", "POST Anfrage für Ordner abgeschlossen - sende Änderungsbenachrichtigung");
+                        notifyChangeListeners("create_folder");
+                    }
                 }
                 case "PUT" -> {
-                    response = updateFolder(exchange);
-                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                    try {
+                        response = updateFolder(exchange);
+                        exchange.sendResponseHeaders(200, response.getBytes().length);
+                    } finally {
+                        // Benachrichtige über Änderung, selbst wenn ein Fehler auftritt
+                        LoggingUtil.logInfo("ApiServer", "PUT Anfrage für Ordner abgeschlossen - sende Änderungsbenachrichtigung");
+                        notifyChangeListeners("update_folder");
+                    }
                 }
                 case "DELETE" -> {
-                    response = deleteFolder(exchange);
-                    exchange.sendResponseHeaders(200, response.getBytes().length);
+                    try {
+                        response = deleteFolder(exchange);
+                        exchange.sendResponseHeaders(200, response.getBytes().length);
+                    } finally {
+                        // Benachrichtige über Änderung, selbst wenn ein Fehler auftritt
+                        LoggingUtil.logInfo("ApiServer", "DELETE Anfrage für Ordner abgeschlossen - sende Änderungsbenachrichtigung");
+                        notifyChangeListeners("delete_folder");
+                    }
                 }
                 default -> {
                     response = "Methode nicht erlaubt.";
@@ -317,7 +383,57 @@ public class ApiServer {
                 String query = exchange.getRequestURI().getQuery();
                 int folderId = Integer.parseInt(query.split("=")[1]);
                 LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Löschen des Ordners mit ID: " + folderId);
+                
+                // Prüfe zuerst, ob der Ordner existiert
+                boolean folderExists = false;
+                try (Connection conn = DatabaseManager.getConnection();
+                     PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM folders WHERE id = ?")) {
+                    
+                    checkStmt.setInt(1, folderId);
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        if (rs.next()) {
+                            folderExists = rs.getInt(1) > 0;
+                        }
+                    }
+                }
+                
+                if (!folderExists) {
+                    return "Ordner nicht gefunden.";
+                }
+                
+                // Prüfe, ob der Ordner Unterordner hat
+                boolean hasSubfolders = false;
+                try (Connection conn = DatabaseManager.getConnection();
+                     PreparedStatement subfolderStmt = conn.prepareStatement("SELECT COUNT(*) FROM folders WHERE parent_id = ?")) {
+                    
+                    subfolderStmt.setInt(1, folderId);
+                    try (ResultSet rs = subfolderStmt.executeQuery()) {
+                        if (rs.next()) {
+                            hasSubfolders = rs.getInt(1) > 0;
+                        }
+                    }
+                }
+                
+                // Prüfe, ob der Ordner Dateien enthält
+                boolean hasFiles = false;
+                try (Connection conn = DatabaseManager.getConnection();
+                     PreparedStatement filesStmt = conn.prepareStatement("SELECT COUNT(*) FROM files WHERE folder_id = ?")) {
+                    
+                    filesStmt.setInt(1, folderId);
+                    try (ResultSet rs = filesStmt.executeQuery()) {
+                        if (rs.next()) {
+                            hasFiles = rs.getInt(1) > 0;
+                        }
+                    }
+                }
+                
+                // Wenn der Ordner Unterordner oder Dateien hat, verhindere das Löschen über die API
+                if (hasSubfolders || hasFiles) {
+                    LoggingUtil.logWarning("ApiServer", "Versuch, einen Ordner mit Inhalt über die API zu löschen: ID=" + folderId);
+                    return "Ordner mit Inhalt koennen nicht über die API geloescht werden. Bitte verwende die grafische Benutzeroberflaeche (GUI), um Ordner mit Unterordnern oder Dateien zu loeschen.";
+                }
 
+                // Ansonsten führe das Löschen durch
                 try (Connection conn = DatabaseManager.getConnection();
                      PreparedStatement stmt = conn.prepareStatement("DELETE FROM folders WHERE id = ?")) {
 
@@ -326,14 +442,19 @@ public class ApiServer {
                     int rowsDeleted = stmt.executeUpdate();
                     if (rowsDeleted > 0) {
                         LoggingUtil.logInfo("ApiServer", "Ordner erfolgreich gelöscht: ID=" + folderId);
-                        return "Ordner erfolgreich gelöscht.";
+                        return "Ordner erfolgreich geloescht.";
                     } else {
-                        return "Ordner nicht gefunden.";
+                        return "Ordner konnte nicht geloescht werden.";
                     }
                 }
             } catch (SQLException e) {
                 LoggingUtil.logError("ApiServer", "Datenbankfehler beim Löschen des Ordners: " + e.getMessage());
-                return "Datenbankfehler beim Löschen des Ordners: " + e.getMessage();
+                
+                if (e.getMessage().contains("foreign key constraint")) {
+                    return "Ordner mit Inhalt koennen nicht über die API geloescht werden. Bitte verwende die grafische Benutzeroberfläche (GUI), um Ordner mit Unterordnern oder Dateien zu loeschen.";
+                }
+                
+                return "Datenbankfehler beim Loeschen des Ordners: " + e.getMessage();
             } catch (NumberFormatException e) {
                 LoggingUtil.logError("ApiServer", "Ungültige Ordner-ID: " + e.getMessage());
                 return "Ungültige Ordner-ID: " + e.getMessage();
@@ -364,20 +485,35 @@ public class ApiServer {
             LoggingUtil.logInfo("FileHandler", "Verarbeite Anfrage an /api/files mit Methode: " + method);
 
             String response;
-
+            
             switch (method) {
                 case "GET" -> {
                     response = listFiles();
                     exchange.sendResponseHeaders(200, response.getBytes().length);
                 }
-                case "POST", "PUT", "DELETE" -> {
-                    response = "Diese Aktion ist nicht erlaubt.";
-                    LoggingUtil.logWarning("FileHandler", "Methode nicht erlaubt: " + method);
-                    exchange.sendResponseHeaders(405, response.getBytes().length);
+                case "POST" -> {
+                    try {
+                        response = uploadFile(exchange);
+                        exchange.sendResponseHeaders(201, response.getBytes().length);
+                    } finally {
+                        // Benachrichtige über Änderung, selbst wenn ein Fehler auftritt
+                        LoggingUtil.logInfo("FileHandler", "POST Anfrage für Datei abgeschlossen - sende Änderungsbenachrichtigung");
+                        notifyChangeListeners("upload_file");
+                    }
+                }
+                case "DELETE" -> {
+                    try {
+                        response = deleteFile(exchange);
+                        exchange.sendResponseHeaders(200, response.getBytes().length);
+                    } finally {
+                        // Benachrichtige über Änderung, selbst wenn ein Fehler auftritt
+                        LoggingUtil.logInfo("FileHandler", "DELETE Anfrage für Datei abgeschlossen - sende Änderungsbenachrichtigung");
+                        notifyChangeListeners("delete_file");
+                    }
                 }
                 default -> {
-                    response = "Methode nicht unterstützt.";
-                    LoggingUtil.logWarning("FileHandler", "Methode nicht unterstützt: " + method);
+                    response = "Methode nicht erlaubt.";
+                    LoggingUtil.logWarning("FileHandler", "Methode nicht erlaubt: " + method);
                     exchange.sendResponseHeaders(405, response.getBytes().length);
                 }
             }
@@ -417,6 +553,18 @@ public class ApiServer {
                 LoggingUtil.logError("FileHandler", "Fehler beim Abrufen aller Dateien: " + e.getMessage());
                 return "Fehler beim Abrufen aller Dateien: " + e.getMessage();
             }
+        }
+
+        private String uploadFile(HttpExchange exchange) throws IOException {
+            // Implementierung für das Hochladen von Dateien
+            LoggingUtil.logInfo("ApiServer", "Implementierung für uploadFile fehlt");
+            return "{\"success\": false, \"message\": \"Not implemented\"}";
+        }
+        
+        private String deleteFile(HttpExchange exchange) throws IOException {
+            // Implementierung für das Löschen von Dateien
+            LoggingUtil.logInfo("ApiServer", "Implementierung für deleteFile fehlt");
+            return "{\"success\": false, \"message\": \"Not implemented\"}";
         }
     }
 

@@ -261,7 +261,7 @@ public class FolderManager {
                 return true;
             }
         } catch (SQLException e) {
-            System.err.println("Fehler beim Umbenennen des Ordners: " + e.getMessage());
+            LoggingUtil.logError("FolderManager", "Fehler beim Umbenennen des Ordners: " + e.getMessage());
         }
         return false;
     }
@@ -491,5 +491,42 @@ public class FolderManager {
      */
     public List<VirtualFolder> getAllFolders() {
         return new ArrayList<>(folders);
+    }
+
+    /**
+     * Lädt die Ordnerdaten aus der Datenbank neu, ohne eine neue Grundstruktur zu erstellen.
+     * Wird verwendet, um Aktualisierungen zu erhalten, die von externen Quellen (z.B. API) vorgenommen wurden.
+     */
+    public void reloadFromDatabase() {
+        LoggingUtil.logInfo("FolderManager", "Reloading folders from database");
+        folders.clear();
+        loadFoldersFromDatabase();
+        
+        // Stell sicher, dass currentFolder auf einen gültigen Ordner zeigt
+        if (folders.isEmpty()) {
+            LoggingUtil.logInfo("FolderManager", "No folders found after reload");
+            currentFolder = null;
+        } else if (currentFolder != null) {
+            // Versuche, den aktuellen Ordner wiederzufinden
+            boolean found = false;
+            for (VirtualFolder folder : folders) {
+                if (folder.getId() == currentFolder.getId()) {
+                    currentFolder = folder;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                // Wenn der aktuelle Ordner nicht mehr existiert, setze auf den ersten verfügbaren
+                currentFolder = folders.get(0);
+                LoggingUtil.logInfo("FolderManager", "Current folder not found after reload, using first available folder");
+            }
+        } else {
+            // Wenn kein aktueller Ordner gesetzt war, setze auf den ersten verfügbaren
+            currentFolder = folders.get(0);
+        }
+        
+        LoggingUtil.logInfo("FolderManager", "Folder reload from database completed");
     }
 }
