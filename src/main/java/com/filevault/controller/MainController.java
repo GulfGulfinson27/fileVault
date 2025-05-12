@@ -131,6 +131,9 @@ public class MainController {
             }
         });
 
+        // Initialize button effects
+        setupButtonEffects();
+        
         // Set up file table columns
         fileNameColumn.setCellValueFactory(data -> {
             if (data.getValue() instanceof VirtualFolder virtualFolder) {
@@ -239,6 +242,70 @@ public class MainController {
         
         // Initialize refresh button
         initializeRefreshButton();
+    }
+
+    /**
+     * Initialize button animation effects.
+     */
+    private void setupButtonEffects() {
+        LoggingUtil.logInfo("MainController", "Setting up button effects.");
+        
+        // Find all buttons in the scene and add hover effects
+        Platform.runLater(() -> {
+            if (fileTableView == null || fileTableView.getScene() == null) {
+                LoggingUtil.logError("MainController", "Scene not yet available for button effects");
+                return;
+            }
+            
+            fileTableView.getScene().getRoot().lookupAll(".button").forEach(node -> {
+                if (node instanceof Button button) {
+                    // Skip the refreshButton as it already has animations
+                    if (button == refreshButton || button == themeToggleButton) {
+                        return;
+                    }
+                    
+                    // Create subtle scale transition for hover
+                    javafx.animation.ScaleTransition scaleIn = new javafx.animation.ScaleTransition(
+                            Duration.millis(200), button);
+                    scaleIn.setToX(1.05);
+                    scaleIn.setToY(1.05);
+                    scaleIn.setInterpolator(Interpolator.EASE_OUT);
+                    
+                    javafx.animation.ScaleTransition scaleOut = new javafx.animation.ScaleTransition(
+                            Duration.millis(150), button);
+                    scaleOut.setToX(1.0);
+                    scaleOut.setToY(1.0);
+                    scaleOut.setInterpolator(Interpolator.EASE_IN);
+                    
+                    // Apply slight brightness effect on hover for better icon visibility
+                    button.setOnMouseEntered(e -> {
+                        scaleIn.playFromStart();
+                        // Find icon label inside button
+                        button.lookupAll(".icon").forEach(iconNode -> {
+                            if (iconNode instanceof Label iconLabel) {
+                                FadeTransition fadeIn = new FadeTransition(Duration.millis(200), iconLabel);
+                                fadeIn.setToValue(1.0);
+                                fadeIn.setInterpolator(Interpolator.EASE_OUT);
+                                fadeIn.play();
+                            }
+                        });
+                    });
+                    
+                    button.setOnMouseExited(e -> {
+                        scaleOut.playFromStart();
+                        // Reset icon label
+                        button.lookupAll(".icon").forEach(iconNode -> {
+                            if (iconNode instanceof Label iconLabel) {
+                                FadeTransition fadeOut = new FadeTransition(Duration.millis(150), iconLabel);
+                                fadeOut.setToValue(0.8);
+                                fadeOut.setInterpolator(Interpolator.EASE_IN);
+                                fadeOut.play();
+                            }
+                        });
+                    });
+                }
+            });
+        });
     }
 
     /**
@@ -469,8 +536,10 @@ public class MainController {
         Object selectedItem = fileTableView.getSelectionModel().getSelectedItem();
         if (selectedItem instanceof EncryptedFile file) {
             handleRenameFile(file);
+        } else if (selectedItem instanceof VirtualFolder folder) {
+            handleRenameFolder(folder);
         } else {
-            showAlert(Alert.AlertType.WARNING, "Keine Datei ausgewählt", "Bitte wählen Sie eine Datei zum Umbenennen aus.");
+            showAlert(Alert.AlertType.WARNING, "Kein Element ausgewählt", "Bitte wählen Sie eine Datei oder einen Ordner zum Umbenennen aus.");
         }
     }
     

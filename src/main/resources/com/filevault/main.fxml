@@ -59,27 +59,46 @@
             </MenuBar>
             <ToolBar>
               <items>
-                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Datei importieren" styleClass="import-button">
+                <Button mnemonicParsing="false" onAction="#handleImportFile" text="Importieren" styleClass="import-button">
+                  <graphic>
+                    <Label styleClass="icon, import-icon" text="⬆️" />
+                  </graphic>
                   <tooltip>
                     <Tooltip text="Eine Datei in den Tresor importieren" />
                   </tooltip>
                 </Button>
                 <Button mnemonicParsing="false" onAction="#handleExportFile" text="Exportieren" styleClass="export-button">
+                  <graphic>
+                    <Label styleClass="icon, export-icon" text="⬇️" />
+                  </graphic>
                   <tooltip>
                     <Tooltip text="Die ausgewählte Datei exportieren" />
                   </tooltip>
                 </Button>
                 <Button mnemonicParsing="false" onAction="#handleRenameFile" text="Umbenennen" styleClass="rename-button">
+                  <graphic>
+                    <Label styleClass="icon, rename-icon" text="✏️" />
+                  </graphic>
                   <tooltip>
-                    <Tooltip text="Die ausgewählte Datei umbenennen" />
+                    <Tooltip text="Ausgewählte Datei oder Ordner umbenennen" />
                   </tooltip>
                 </Button>
                 <Button mnemonicParsing="false" onAction="#handleDeleteFile" text="Löschen" styleClass="delete-button">
+                  <graphic>
+                    <Label styleClass="icon, delete-icon" text="🗑️" />
+                  </graphic>
                   <tooltip>
-                    <Tooltip text="Die ausgewählte Datei löschen" />
+                    <Tooltip text="Ausgewählte Datei oder Ordner löschen" />
                   </tooltip>
                 </Button>
                 <Button mnemonicParsing="false" onAction="#handleNewFolder" text="Neuer Ordner" styleClass="new-folder-button">
+                  <graphic>
+                    <Label styleClass="icon, new-folder-icon, folder-text" text="🗀">
+                      <font>
+                        <Font name="System Bold" size="18.0" />
+                      </font>
+                    </Label>
+                  </graphic>
                   <tooltip>
                     <Tooltip text="Einen neuen Ordner erstellen" />
                   </tooltip>

@@ -2,6 +2,4 @@
     - doku in 3 Dateien splitten: gesamt, linux, windows
     - wenn nicht authorisiert, dann richtige ausgabe
 - auf deutsch alle kommentare
-- ordner rekursiv loeschen - falls das nicht geht, in der api fehlermeldung
 - ordner verschluesselts
-- gui buttons umbauen

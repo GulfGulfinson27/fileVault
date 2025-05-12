@@ -416,7 +416,7 @@ public class AuthController {
         try {
             // Check which operating system is running
             String os = System.getProperty("os.name").toLowerCase();
-            String repoUrl = "https://github.com/GulfGulfinson27/fileVault";
+            String repoUrl = "https://github.com/GulfGulfinson/fileVault";
             
             ProcessBuilder processBuilder;
             if (os.contains("win")) {

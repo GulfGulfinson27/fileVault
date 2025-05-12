@@ -33,18 +33,21 @@
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(three-pass-box, rgba(255, 107, 107, 0.4), 4, 0, 0, 1);
+    -fx-graphic-text-gap: 8;
 }
 
 .import-button:hover {
     -fx-background-color: #FF5252; /* Brighter red */
     -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.6), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .import-button:pressed {
     -fx-background-color: #E53935; /* Darker red */
     -fx-effect: dropshadow(three-pass-box, rgba(255, 107, 107, 0.2), 2, 0, 0, 0);
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
 }
 
 /* Action button styling - Export */
@@ -57,18 +60,21 @@
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(three-pass-box, rgba(78, 205, 196, 0.4), 4, 0, 0, 1);
+    -fx-graphic-text-gap: 8;
 }
 
 .export-button:hover {
     -fx-background-color: #26A69A; /* Darker turquoise */
     -fx-effect: dropshadow(gaussian, rgba(78, 205, 196, 0.6), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .export-button:pressed {
     -fx-background-color: #00897B; /* Even darker turquoise */
     -fx-effect: dropshadow(three-pass-box, rgba(78, 205, 196, 0.2), 2, 0, 0, 0);
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
 }
 
 /* Action button styling - New Folder */
@@ -81,18 +87,21 @@
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(three-pass-box, rgba(115, 103, 240, 0.4), 4, 0, 0, 1);
+    -fx-graphic-text-gap: 8;
 }
 
 .new-folder-button:hover {
     -fx-background-color: #5E50EE; /* Darker purple */
     -fx-effect: dropshadow(gaussian, rgba(115, 103, 240, 0.6), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .new-folder-button:pressed {
     -fx-background-color: #4839EA; /* Even darker purple */
     -fx-effect: dropshadow(three-pass-box, rgba(115, 103, 240, 0.2), 2, 0, 0, 0);
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
 }
 
 /* Action button styling - Delete */
@@ -105,18 +114,21 @@
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(three-pass-box, rgba(240, 116, 39, 0.4), 4, 0, 0, 1);
+    -fx-graphic-text-gap: 8;
 }
 
 .delete-button:hover {
     -fx-background-color: #E65100; /* Darker orange */
     -fx-effect: dropshadow(gaussian, rgba(240, 116, 39, 0.6), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .delete-button:pressed {
     -fx-background-color: #BF360C; /* Even darker orange */
     -fx-effect: dropshadow(three-pass-box, rgba(240, 116, 39, 0.2), 2, 0, 0, 0);
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
 }
 
 /* Action button styling - Rename */
@@ -129,18 +141,21 @@
     -fx-padding: 10px 18px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(three-pass-box, rgba(108, 99, 255, 0.4), 4, 0, 0, 1);
+    -fx-graphic-text-gap: 8;
 }
 
 .rename-button:hover {
     -fx-background-color: #5A52E0; /* Darker indigo */
     -fx-effect: dropshadow(gaussian, rgba(108, 99, 255, 0.6), 15, 0.6, 0, 0);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 .rename-button:pressed {
     -fx-background-color: #4A42D0; /* Even darker indigo */
     -fx-effect: dropshadow(three-pass-box, rgba(108, 99, 255, 0.2), 2, 0, 0, 0);
-    -fx-scale-x: 0.98;
-    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
 }
 
 /* Enhanced refresh button style */
@@ -593,4 +608,54 @@
 .delete-context-item:hover {
     -fx-background-color: rgba(240, 116, 39, 0.3);
     -fx-effect: dropshadow(gaussian, rgba(240, 116, 39, 0.5), 10, 0.5, 0, 0);
+}
+
+/* Button Icons */
+.icon {
+    -fx-font-family: 'FontAwesome';
+    -fx-font-size: 16px;
+    -fx-opacity: 0.8;
+    -fx-transition: all 0.2s ease;
+}
+
+.import-icon {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 1, 1, 0, 0);
+}
+
+.export-icon {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 1, 1, 0, 0);
+}
+
+.rename-icon {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 1, 1, 0, 0);
+}
+
+.delete-icon {
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 1, 1, 0, 0);
+}
+
+.new-folder-icon {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.5), 1, 1.0, 0, 0);
+    -fx-stroke: white;
+    -fx-stroke-width: 0.5;
+    -fx-stroke-type: outside;
+}
+
+/* Folder icon special styling */
+.folder-text {
+    -fx-font-weight: bold;
+    -fx-font-family: 'System';
+    -fx-font-size: 19px;
+    -fx-text-fill: #FFFFFF;
+    -fx-stroke: #FFFFFF;
+    -fx-stroke-width: 0.3;
+    -fx-stroke-type: outside;
+    -fx-effect: dropshadow(gaussian, rgba(255,255,255,0.4), 1, 0.6, 0, 0);
 }
