@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Maven-Abhängigkeiten überprüfen
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # GitHub Actions-Abhängigkeiten überprüfen
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github_actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope" 

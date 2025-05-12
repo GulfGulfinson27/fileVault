@@ -1,0 +1,56 @@
+GitHub Actions Workflows
+Automatisierte Build-Pipelines für Java mit Maven
+Automatisierte Tests nach jedem Push
+Automatisches Erstellen von Release-Versionen
+Code-Qualitätsprüfungen mit SonarQube
+GitHub Packages
+Veröffentlichen Sie Ihre JAR-Dateien als Maven-Pakete
+Container-Images für einfache Bereitstellung
+GitHub Pages
+Erstellen Sie eine schöne Projektwebsite
+Hosten Sie Ihre Dokumentation (aus Markdown-Dateien generiert)
+Live-Demo der Anwendung (falls möglich mit WebAssembly)
+GitHub Codespaces
+Vorkonfigurierte Entwicklungsumgebung für Ihr Projekt
+Ermöglicht einfachen Einstieg für neue Mitwirkende
+GitHub Issues & Projektmanagement
+Verwenden Sie Issues für Featureanfragen und Bugmeldungen
+Erstellen Sie Projektboards für die Entwicklungsphasen
+Meilensteine für Releases definieren
+Labels zur Klassifizierung von Issues verwenden
+GitHub Discussions
+Community-Diskussionsforum für Ihr Projekt
+FAQ-Bereich für häufig gestellte Fragen
+Branch-Protection & Code-Review
+Schutzregeln für den Hauptbranch einrichten
+Code-Reviews erzwingen
+Status-Checks vor Merges erfordern
+GitHub Dependabot
+Automatische Updates für Abhängigkeiten
+Sicherheitsupdates für veraltete Pakete
+GitHub Wikis
+Erweiterte Dokumentation für Entwickler und Benutzer
+Installationsanleitungen, API-Referenzen etc.
+GitHub Releases
+Strukturierte Releases mit Versionsnummern
+Automatisch generierte Changelogs
+Binärdateien für verschiedene Plattformen
+Git LFS (Large File Storage)
+Für große Binärdateien und Assets
+GitHub Sponsors
+Einrichten von Sponsoring, falls Sie Unterstützung erhalten möchten
+GitHub Security Features
+Dependabot-Sicherheitswarnungen aktivieren
+Code-Scanning mit CodeQL für Sicherheitsprobleme
+Secret-Scanning zum Schutz vor versehentlich eingecheckten Zugangsdaten
+Internationalisierung
+Nutzen Sie GitHub Translation für README-Dateien und Dokumentation
+Integration von Badges
+Build-Status, Testabdeckung, Dependency-Status etc. für Ihren README
+Semantic Versioning
+Strukturierte Versionierung Ihrer Software (major.minor.patch)
+Community-Standards
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+LICENSE-Datei (falls noch nicht vorhanden)
+SECURITY.md für Sicherheitsrichtlinien
