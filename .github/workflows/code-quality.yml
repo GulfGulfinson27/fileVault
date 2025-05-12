@@ -1,8 +1,7 @@
 name: Code Quality with SonarCloud
 
 on:
-  push:
-    branches: [ main, master ]
+  # Aktiviere den Workflow nur auf Pull Requests, nicht bei Pushes
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -27,13 +26,6 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get install -y xvfb
       
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -44,7 +36,9 @@ jobs:
       - name: Build with Maven
         run: xvfb-run --auto-servernum mvn -B verify
       
-      - name: SonarCloud Analysis
+      # Führe SonarCloud nur für Pull Requests aus
+      - name: SonarCloud Scan
+        if: github.event_name == 'pull_request'
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,10 +47,11 @@ jobs:
           args: >
             -Dsonar.projectKey=GulfGulfinson_fileVault
             -Dsonar.organization=gulfgulfinson
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
             -Dsonar.sources=src/main/java
             -Dsonar.tests=src/test/java
             -Dsonar.java.binaries=target/classes
             -Dsonar.java.test.binaries=target/test-classes
-            -Dsonar.scm.disabled=true
-            -Dsonar.qualitygate.wait=true
-            -Dsonar.scanner.force-deprecated-ci-on-auto-enabled=true 
+            -Dsonar.scm.disabled=false 
