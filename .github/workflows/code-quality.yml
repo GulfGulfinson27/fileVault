@@ -24,6 +24,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
+      - name: Install xvfb
+        run: sudo apt-get install -y xvfb
+      
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
@@ -42,4 +45,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Benötigt für PR-Deko usw.
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Muss in GitHub Secrets gesetzt werden
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GulfGulfinson_fileVault 
+        run: xvfb-run --auto-servernum mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=GulfGulfinson_fileVault 

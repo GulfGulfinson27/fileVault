@@ -12,9 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import com.filevault.model.EncryptedFile;
 import com.filevault.model.VirtualFolder;
+import com.filevault.util.TestApplicationHelper;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -27,6 +29,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.stage.Stage;
 
+@ExtendWith(TestApplicationHelper.class)
 class MainControllerTest {
 
     /**
@@ -167,18 +170,6 @@ class MainControllerTest {
         // Return current folder for testing
         public VirtualFolder getCurrentFolder() {
             return currentFolder;
-        }
-    }
-
-    @BeforeAll
-    static void initToolkit() {
-        try {
-            Platform.startup(() -> {
-                // Initialize JavaFX toolkit
-                new Stage();
-            });
-        } catch (IllegalStateException e) {
-            // Toolkit is already running, which is fine
         }
     }
 
