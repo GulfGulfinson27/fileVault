@@ -43,6 +43,10 @@ jobs:
           cp start-api.sh release/
           chmod +x release/*.sh
           
+          # JavaFX lib-Ordner für direkte Ausführung kopieren
+          mkdir -p release/lib
+          cp -r lib/* release/lib/
+          
           # Erstellen einer Anleitung zur Ausführung
           cat > release/AUSFÜHRUNG.md << 'EOL'
           # Anleitung zur Ausführung von FileVault
@@ -72,6 +76,10 @@ jobs:
           ```
           java -jar FileVault-shaded-*.jar --api-port=9090
           ```
+
+          ## WICHTIG: JavaFX-Abhängigkeiten
+          Der lib-Ordner mit den JavaFX-Bibliotheken ist erforderlich, damit die Anwendung korrekt läuft.
+          Die Start-Skripte sind so konfiguriert, dass sie den lib-Ordner im aktuellen Verzeichnis verwenden.
 
           ## Erste Schritte
           1. Bei der ersten Ausführung wird ein neuer Benutzer angelegt
