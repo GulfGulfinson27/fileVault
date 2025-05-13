@@ -71,7 +71,14 @@ jobs:
           # Copy the Docusaurus output to our build directory
           cp -r build/* ../build-output/docs/
       
-      - name: Upload artifact
+      - name: Create artifact for dependency
+        uses: actions/upload-artifact@v3
+        with:
+          name: temp-artifact
+          path: ./build-output
+          retention-days: 1
+      
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./build-output
