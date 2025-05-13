@@ -36,16 +36,46 @@ jobs:
           mkdir -p release
           cp target/FileVault-shaded.jar release/
           cp README.md release/
-          cp LICENSE release/ || echo "LICENSE file not found"
+          
+          # Create LICENSE file if it doesn't exist
+          if [ ! -f LICENSE ]; then
+            echo "Creating a simple LICENSE file"
+            cat > release/LICENSE << 'EOL'
+          MIT License
+
+          Copyright (c) 2024 FileVault Phillip Schneider
+
+          Permission is hereby granted, free of charge, to any person obtaining a copy
+          of this software and associated documentation files (the "Software"), to deal
+          in the Software without restriction, including without limitation the rights
+          to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+          copies of the Software, and to permit persons to whom the Software is
+          furnished to do so, subject to the following conditions:
+
+          The above copyright notice and this permission notice shall be included in all
+          copies or substantial portions of the Software.
+
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+          IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+          FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+          AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+          LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+          OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+          SOFTWARE. ~Phillip Schneider
+          EOL
+          else
+            cp LICENSE release/
+          fi
+          
           cp start.bat release/
           cp start.sh release/
           cp start-api.bat release/
           cp start-api.sh release/
           chmod +x release/*.sh
           
-          # JavaFX lib-Ordner für direkte Ausführung kopieren
+          # Create lib directory for JavaFX - we'll include a placeholder
           mkdir -p release/lib
-          cp -r lib/* release/lib/
+          echo "This directory should contain JavaFX library files for standalone execution." > release/lib/README.txt
           
           # Erstellen einer Anleitung zur Ausführung
           cat > release/AUSFÜHRUNG.md << 'EOL'
@@ -74,7 +104,7 @@ jobs:
 
           ## Direkte Ausführung der JAR (Alternative)
           ```
-          java -jar FileVault-shaded-*.jar --api-port=9090
+          java -jar FileVault-shaded.jar --api-port=9090
           ```
 
           ## WICHTIG: JavaFX-Abhängigkeiten
