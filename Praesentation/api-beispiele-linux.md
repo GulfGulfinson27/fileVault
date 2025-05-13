@@ -8,7 +8,7 @@ Die folgenden Beispiele gehen davon aus, dass der FileVault API-Server unter `lo
 
 ## Authentifizierung
 
-### Bei der API anmelden
+### Anmeldung
 
 ```sh
 curl -X POST http://localhost:9090/api/auth \
