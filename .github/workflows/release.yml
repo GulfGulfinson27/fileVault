@@ -34,7 +34,7 @@ jobs:
       - name: Prepare release files
         run: |
           mkdir -p release
-          cp target/FileVault-shaded-*.jar release/
+          cp target/FileVault-shaded.jar release/
           cp README.md release/
           cp LICENSE release/ || echo "LICENSE file not found"
           cp start.bat release/
@@ -102,7 +102,7 @@ jobs:
           generate_release_notes: true
           files: |
             FileVault-${{ steps.get_version.outputs.VERSION }}.zip
-            target/FileVault-shaded-*.jar
+            target/FileVault-shaded.jar
             release/AUSFÜHRUNG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
