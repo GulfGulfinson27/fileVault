@@ -1,0 +1,88 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Generate JavaDoc
+        run: |
+          mkdir -p docs/javadoc
+          mvn javadoc:javadoc
+          cp -r target/site/apidocs/* docs/javadoc/
+          
+      - name: Install Dependencies
+        run: |
+          npm install -g @docusaurus/core @docusaurus/preset-classic
+          
+      - name: Build Site
+        run: |
+          # Copy our static HTML files
+          mkdir -p build-output
+          cp -r docs/* build-output/
+          
+          # Process markdown files with Docusaurus
+          mkdir -p docs-site
+          cp README.md docs-site/index.md
+          # Extract documentation from src if available
+          find src -name "*.md" -exec cp {} docs-site/ \;
+          
+          # Create docusaurus project
+          npx create-docusaurus@latest website classic --typescript
+          
+          # Copy documentation
+          cp -r docs-site/* website/docs/
+          
+          # Build the Docusaurus site
+          cd website
+          npm install
+          npm run build
+          
+          # Copy the Docusaurus output to our build directory
+          cp -r build/* ../build-output/docs/
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./build-output
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1 

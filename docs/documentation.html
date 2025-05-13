@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileVault - Dokumentation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2980b9;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .nav {
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #eee;
+        }
+        .nav li {
+            margin-right: 20px;
+            padding-bottom: 10px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
+        .nav a:hover {
+            color: #2980b9;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>FileVault Dokumentation</h1>
+        <p>Umfassende Anleitung zur Verwendung und Konfiguration</p>
+    </header>
+
+    <ul class="nav">
+        <li><a href="index.html">Startseite</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#verwendung">Verwendung</a></li>
+        <li><a href="#technische-details">Technische Details</a></li>
+        <li><a href="#api">API</a></li>
+    </ul>
+
+    <main>
+        <section id="installation">
+            <h2>Installation</h2>
+            <p>Folgen Sie diesen Schritten, um FileVault auf Ihrem System zu installieren:</p>
+            
+            <h3>Voraussetzungen</h3>
+            <ul>
+                <li>Java 11 oder höher (empfohlen: Java 17 oder 21)</li>
+                <li>Maven für die Erstellung</li>
+            </ul>
+            
+            <h3>Standardinstallation</h3>
+            <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
+cd fileVault
+mvn clean package
+./start.sh   # Unter Linux/Mac
+start.bat    # Unter Windows</code></pre>
+            
+            <h3>Docker-Installation</h3>
+            <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
+        </section>
+        
+        <section id="verwendung">
+            <h2>Verwendung</h2>
+            <p>Nach dem Start der Anwendung können Sie folgende Aktionen durchführen:</p>
+            
+            <h3>Erster Start</h3>
+            <p>Bei der ersten Ausführung werden Sie aufgefordert, ein Passwort zu erstellen. Dieses Passwort wird zur Verschlüsselung Ihrer Dateien verwendet.</p>
+            
+            <h3>Ordner erstellen</h3>
+            <p>Klicken Sie auf "Neuer Ordner" und geben Sie einen Namen ein, um einen virtuellen Ordner zu erstellen.</p>
+            
+            <h3>Dateien importieren</h3>
+            <p>Wählen Sie einen Ordner aus und klicken Sie auf "Datei importieren", um eine Datei zu verschlüsseln und in den Tresor zu importieren.</p>
+            
+            <h3>Dateien exportieren</h3>
+            <p>Wählen Sie eine Datei aus und klicken Sie auf "Exportieren", um die Datei zu entschlüsseln und an einem gewünschten Ort zu speichern.</p>
+        </section>
+        
+        <section id="technische-details">
+            <h2>Technische Details</h2>
+            
+            <h3>Verschlüsselung</h3>
+            <ul>
+                <li>Algorithmus: AES-256-GCM (Galois/Counter Mode)</li>
+                <li>Schlüsselableitung: PBKDF2 mit HMAC-SHA256</li>
+                <li>Schlüssellänge: 256 Bit</li>
+                <li>Iterationen: 65.536</li>
+                <li>IV-Länge: 96 Bit</li>
+                <li>Authentifizierungs-Tag: 128 Bit</li>
+            </ul>
+            
+            <h3>Datenspeicherung</h3>
+            <p>Die verschlüsselten Dateien werden in <code>~/.filevault/data/</code> gespeichert, während die Metadaten in einer SQLite-Datenbank unter <code>~/.filevault/vault.db</code> abgelegt werden.</p>
+        </section>
+        
+        <section id="api">
+            <h2>API-Dokumentation</h2>
+            <p>Die API-Dokumentation wird automatisch aus dem Quellcode generiert. Sie können die vollständige JavaDoc-Dokumentation im Verzeichnis <code>docs/javadoc/</code> des Projekts finden.</p>
+            
+            <a href="javadoc/index.html" class="btn">JavaDoc ansehen</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>FileVault ist ein Projekt von Phillip Schneider. Entwickelt im Rahmen des Kurses "Objektorientierte Programmierung II".</p>
+    </footer>
+</body>
+</html> 

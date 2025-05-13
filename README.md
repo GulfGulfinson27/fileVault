@@ -4,6 +4,7 @@ Dieses Projekt ist eine Anwendung zur sicheren Verwaltung und Verschluesselung v
 Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über zur Einbindung einer Datenbank bis hin zum Anlegen eines Frontends durchlaufen.
 --Phillip Schneider
 
+🔗 **Projektwebsite**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
 
 ## 1. Hauptfunktionen
 
@@ -90,3 +91,11 @@ Das FileVault-Projekt wird in GitHub Packages als Maven-Paket bereitgestellt:
 - `security`: Verschlüsselung und Passwort
 - `storage`: Datenspeicherung und Datenbank
 - `util`: Utility Klassen
+
+## 6. Dokumentation
+
+Die vollständige Dokumentation finden Sie auf unserer [GitHub Pages-Website](https://GulfGulfinson.github.io/fileVault).
+
+## 7. Beitragen
+
+Wenn Sie zum Projekt beitragen möchten, folgen Sie bitte unseren Richtlinien in der [CONTRIBUTING.md](CONTRIBUTING.md) Datei.

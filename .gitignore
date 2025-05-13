@@ -45,3 +45,12 @@ logs/
 
 # User-spezifische Dateien
 .filevault/
+
+# GitHub Pages build Dateien
+_site/
+website/build/
+website/node_modules/
+build-output/
+.docusaurus/
+.cache-loader/
+docs-site/
