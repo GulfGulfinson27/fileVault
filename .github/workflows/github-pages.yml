@@ -83,6 +83,12 @@ jobs:
             cp SECURITY.md build-output/
           fi
           
+          # Force using the main README.md, not .github/README.md
+          # Copy the top-level README.md to be used later
+          if [ -f "README.md" ]; then
+            cp README.md build-output/project-readme.md
+          fi
+          
           # Convert README to index.html if not already exists
           if [ ! -f "build-output/index.html" ]; then
             echo '<!DOCTYPE html>
@@ -118,9 +124,16 @@ jobs:
                 <main>' > build-output/index.html
                 
                 # Convert README.md content to HTML (basic conversion)
+                # Explicitly use the top-level README.md that we copied earlier
                 echo "<div class=\"readme-content\">" >> build-output/index.html
                 echo "<h2>Projekt Übersicht</h2>" >> build-output/index.html
-                cat README.md | sed 's/# /\<h1\>/g' | sed 's/## /\<h2\>/g' | sed 's/### /\<h3\>/g' | sed 's/\*\*/\<strong\>/g' | sed 's/\*\*/\<\/strong\>/g' | sed 's/`/\<code\>/g' | sed 's/`/\<\/code\>/g' >> build-output/index.html
+                if [ -f "build-output/project-readme.md" ]; then
+                  # Use the top-level README we copied earlier
+                  cat build-output/project-readme.md | sed 's/# /\<h1\>/g' | sed 's/## /\<h2\>/g' | sed 's/### /\<h3\>/g' | sed 's/\*\*/\<strong\>/g' | sed 's/\*\*/\<\/strong\>/g' | sed 's/`/\<code\>/g' | sed 's/`/\<\/code\>/g' >> build-output/index.html
+                else
+                  # Fallback to the repository root README.md
+                  cat README.md | sed 's/# /\<h1\>/g' | sed 's/## /\<h2\>/g' | sed 's/### /\<h3\>/g' | sed 's/\*\*/\<strong\>/g' | sed 's/\*\*/\<\/strong\>/g' | sed 's/`/\<code\>/g' | sed 's/`/\<\/code\>/g' >> build-output/index.html
+                fi
                 echo "</div>" >> build-output/index.html
                 
                 echo '

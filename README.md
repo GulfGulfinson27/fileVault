@@ -1,62 +1,80 @@
-# Projekt für Java-II: FileVault
+# FileVault
 
-Dieses Projekt ist eine Anwendung zur sicheren Verwaltung und Verschluesselung von Dateien. Die Anwendung basiert auf Java (mit etwas CSS) und bietet Oberfläche für dieVerwaltung verschlüsselter Dateien in virtuellen Ordnern. Dieses Projekt ist im Rahmen des Kurses "Objektorientierte Programmierung II: Datenstrukturen und Java-Klassenbibliothek" entstanden.
-Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über zur Einbindung einer Datenbank bis hin zum Anlegen eines Frontends durchlaufen.
---Phillip Schneider
+FileVault ist eine moderne Java-Anwendung zur sicheren Dateiverschlüsselung und -verwaltung. Mit einer benutzerfreundlichen Oberfläche können Sie vertrauliche Dateien in virtuellen Ordnern organisieren und mit starker Verschlüsselung schützen.
 
-🔗 **Projektwebsite**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
+Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: Datenstrukturen und Java-Klassenbibliothek" und durchlief mehrere Entwicklungsphasen von der grundlegenden Verschlüsselung über Datenbankintegration bis hin zum JavaFX-Interface.
 
-## 1. Hauptfunktionen
+🔗 **Live Demo & Dokumentation**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
 
-- Sichere Verschlüsselung von Dateien mit AES-256-GCM
-- Organisierte Dateiverwaltung in virtuellen Ordnern
-- Plattformübergreifende Kompatibilität
-- Benutzerfreundliche grafische Oberfläche mit JavaFx
-- Sichere Passwort-basierte Authentifizierung
+## 🔐 Hauptfunktionen
 
-## 2. Technische Details
+- **Sichere Verschlüsselung** mit AES-256-GCM für maximalen Datenschutz
+- **Intuitive Dateiverwaltung** in virtuellen Ordnern mit Drag & Drop
+- **Cross-Platform Kompatibilität** für Windows, macOS und Linux
+- **Responsive UI** mit modernem JavaFX-Design und Dark Mode
+- **Passwort-basierte Authentifizierung** mit sicherer Schlüsselableitung
+- **Integritätsschutz** durch GCM-Authentifizierung
 
-### 2.1 Verschlüsselung
-- Algorithmus: AES-256-GCM (Galois/Counter Mode)
-- Schlüsselableitung: PBKDF2 mit HMAC-SHA256
-- Schlüssellänge: 256 Bit
-- Iterationen: 65.536
-- IV-Länge: 96 Bit
-- Authentifizierungs-Tag: 128 Bit
+## 🔧 Technische Details
 
-### 2.2 Datenspeicherung
-- Verschlüsselte Dateien: `~/.filevault/data/`
-- Datenbank: `~/.filevault/vault.db`
-- Die Pfade werden automatisch an das jeweilige Betriebssystem angepasst
+### Sicherheitsfunktionen
+- **Verschlüsselungsalgorithmus**: AES-256-GCM (Galois/Counter Mode)
+- **Schlüsselableitung**: PBKDF2 mit HMAC-SHA256, 65.536 Iterationen
+- **Zufallszahlengenerierung**: Kryptografisch sicher für IV (96 Bit) und Salts
+- **Authentifizierung**: 128-Bit Auth-Tag zur Integritätsprüfung
+- **Datenschutz**: Keine Speicherung von Klartextpasswörtern
 
-### 2.3 Sicherheitsmerkmale
-- Sichere Zufallszahlengenerierung für IVs und Salts
-- Integritätsschutz durch GCM-Modus
-- Passwort-basierte Authentifizierung
-- Sichere Schlüsselableitung
-- Keine Speicherung von Klartextpasswörtern
+### Datenspeicherung
+- **Verschlüsselte Daten**: `~/.filevault/data/` (plattformunabhängig)
+- **Metadaten**: SQLite-Datenbank in `~/.filevault/vault.db`
+- **Backups**: Automatische Datensicherung (konfigurierbar)
 
-## 3. Installation
-1. Java 11 oder höher (am Besten 17 oder 21)
-2. Maven installieren
-3. Einmalig: mvn clean package
-4. Projekt bauen: .bat/.sh -Datei ausführen oder bash: "mvn javafx:run"
-! Bei der ersten Ausführung wird ein neuer Benutzer angelegt
-(Für einen neuen User muss die Datenbank gelöscht werden)
+## 💻 Installation
 
-### 3.1 Installation mit Docker
-Sie können FileVault auch als Docker-Container ausführen:
+### Option 1: Release herunterladen (empfohlen)
+1. Laden Sie die [neueste Version](https://github.com/GulfGulfinson/fileVault/releases) herunter
+2. Entpacken Sie die ZIP-Datei
+3. Starten Sie die Anwendung:
+   ```
+   ./start.sh    # Für Linux/Mac
+   start.bat     # Für Windows
+   ```
 
+### Option 2: Aus dem Quellcode bauen
+1. Voraussetzungen:
+   - Java 17+ (OpenJDK oder Oracle JDK)
+   - Maven 3.8+
+
+2. Repository klonen:
+   ```bash
+   git clone https://github.com/GulfGulfinson/fileVault.git
+   cd fileVault
+   ```
+
+3. Bauen und Starten:
+   ```bash
+   mvn clean package
+   ./start.sh   # Linux/Mac
+   start.bat    # Windows
+   ```
+   
+   Alternativ:
+   ```bash
+   mvn javafx:run
+   ```
+
+> **Hinweis**: Bei der ersten Ausführung wird automatisch ein neuer Benutzer angelegt. 
+> Für einen neuen Benutzer muss die bestehende Datenbank (`~/.filevault/vault.db`) gelöscht werden.
+
+### Zukünftige Installationsmethoden (in Entwicklung)
+
+#### Docker Container
 ```bash
 docker pull ghcr.io/GulfGulfinson/fileVault:latest
 docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
 ```
 
-### 3.2 Installation über GitHub Packages
-Das FileVault-Projekt wird in GitHub Packages als Maven-Paket bereitgestellt:
-
-1. Fügen Sie in Ihrer `pom.xml` das GitHub Package Repository hinzu:
-
+#### GitHub Packages
 ```xml
 <repositories>
     <repository>
@@ -65,11 +83,7 @@ Das FileVault-Projekt wird in GitHub Packages als Maven-Paket bereitgestellt:
         <url>https://maven.pkg.github.com/GulfGulfinson/fileVault</url>
     </repository>
 </repositories>
-```
 
-2. Fügen Sie die Abhängigkeit hinzu:
-
-```xml
 <dependency>
     <groupId>com.filevault</groupId>
     <artifactId>FileVault</artifactId>
@@ -77,25 +91,40 @@ Das FileVault-Projekt wird in GitHub Packages als Maven-Paket bereitgestellt:
 </dependency>
 ```
 
-## 4. Verwendung
-1. Anmeldung mit Passwort
-2. Erstellen von virtuellen Ordnern
-3. Importieren von Dateien in die Ordner
-4. Dateien können jederzeit exportiert und entschlüsselt werden
+## 🚀 Verwendung
 
-## 5. Projekt Struktur
+1. **Anmeldung**: Starten Sie die App und erstellen Sie ein sicheres Master-Passwort
+2. **Dateien importieren**: Ziehen Sie Dateien in die App oder nutzen Sie den Import-Dialog
+3. **Ordnerstruktur**: Erstellen Sie virtuelle Ordner zur Organisation
+4. **Verschlüsselung**: Alle importierten Dateien werden automatisch verschlüsselt
+5. **Entschlüsselung**: Exportieren Sie Dateien, um sie im Originalformat zu nutzen
 
-- `controller`: Anwendungs-Controller
-- `model`: Daten Modelle
-- `GUI`: JavaFX-GUI-Dateien
-- `security`: Verschlüsselung und Passwort
-- `storage`: Datenspeicherung und Datenbank
-- `util`: Utility Klassen
+## 📂 Projektstruktur
 
-## 6. Dokumentation
+```
+src/main/java/com/filevault/
+├── controller/     # UI-Controller und Anwendungslogik
+├── model/          # Datenmodelle und Objektstrukturen
+├── view/           # JavaFX FXML und UI-Komponenten
+├── security/       # Verschlüsselung und Authentifizierung
+├── storage/        # Datei- und Datenbankverwaltung
+└── util/           # Hilfsfunktionen und Utilities
+```
 
-Die vollständige Dokumentation finden Sie auf unserer [GitHub Pages-Website](https://GulfGulfinson.github.io/fileVault).
+## 📖 Dokumentation
 
-## 7. Beitragen
+- **Website**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
+- **JavaDoc**: [Vollständige API-Dokumentation](https://GulfGulfinson.github.io/fileVault/javadoc/)
+- **Live Demo**: [WebAssembly-Demo im Browser](https://GulfGulfinson.github.io/fileVault#wasm-demo-container)
 
-Wenn Sie zum Projekt beitragen möchten, folgen Sie bitte unseren Richtlinien in der [CONTRIBUTING.md](CONTRIBUTING.md) Datei.
+## 🤝 Beitragen
+
+Beiträge zum Projekt sind willkommen! Weitere Informationen finden Sie in der [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## 📄 Lizenz
+
+Dieses Projekt steht unter der MIT-Lizenz. Details finden Sie in der [LICENSE](LICENSE) Datei.
+
+---
+
+Entwickelt von Phillip Schneider | [GitHub Profil](https://github.com/GulfGulfinson)
