@@ -469,7 +469,22 @@
             margin-bottom: 15px;
             fill: var(--text-color);
         }
+
+        .demo-note {
+            background-color: rgba(255, 193, 7, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-top: 20px;
+            border-left: 4px solid #FFC107;
+        }
+        
+        [data-theme="dark"] .demo-note {
+            background-color: rgba(255, 193, 7, 0.05);
+        }
     </style>
+    <!-- WebAssembly Demo Styles -->
+    <link rel="stylesheet" href="js/wasm-demo.css">
 </head>
 <body>
     <div class="theme-switch-wrapper">
@@ -602,28 +617,117 @@
             <!-- Demo Section -->
             <div class="demo-section verification-section">
                 <h2>Live Demo</h2>
-                <p>Eine interaktive Live-Demo wird in Kürze verfügbar sein. Wir arbeiten daran, eine WebAssembly-Version von FileVault bereitzustellen, mit der Sie die Anwendung direkt im Browser ausprobieren können.</p>
-                <div class="coming-soon-demo">
-                    <h3>FileVault WebAssembly Demo</h3>
-                    <div class="wasm-container">
-                        <div class="wasm-placeholder">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M17,11A1,1 0 0,0 16,10H8V11H16V13H10V15H16A1,1 0 0,0 17,14V11M13,16V15H14V16H13Z" />
-                            </svg>
-                            <h4>WebAssembly Demo - Coming Soon</h4>
-                            <p>Wir arbeiten an einer WebAssembly-Version, die es Ihnen ermöglicht, FileVault direkt im Browser auszuprobieren, ohne Installation.</p>
-                            <p>Geplante Funktionen der Demo:</p>
-                            <ul style="text-align: left; display: inline-block;">
-                                <li>Verschlüsselung von Dateien direkt im Browser</li>
-                                <li>Demonstration der Benutzeroberfläche</li>
-                                <li>Testen des Theme-Wechsels (Hell/Dunkel)</li>
-                                <li>Anzeige einer virtuellen Ordnerstruktur</li>
-                            </ul>
-                            <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                <p>Eine interaktive Live-Demo von FileVault im Browser:</p>
+                
+                <div id="wasm-demo-container" class="wasm-demo-container">
+                    <!-- Demo Header -->
+                    <div class="wasm-demo-header">
+                        <h3>FileVault Demo</h3>
+                        <button id="wasm-theme-toggle" class="theme-toggle-btn">🌙 Dark Mode</button>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="wasm-loading" class="wasm-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Lade FileVault Demo...</p>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="wasm-error" class="wasm-error">
+                        <h4>Fehler beim Laden</h4>
+                        <p>WebAssembly wird von diesem Browser nicht unterstützt oder das Modul konnte nicht geladen werden.</p>
+                    </div>
+                    
+                    <!-- Demo Content -->
+                    <div id="wasm-content" class="wasm-content">
+                        <!-- File Upload Section -->
+                        <div class="file-upload-section">
+                            <h4>Datei verschlüsseln</h4>
+                            <div id="file-drop-zone" class="file-drop-zone">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+                                </svg>
+                                <p>Datei hier ablegen oder klicken, um auszuwählen</p>
+                                <small>Maximal 10 MB</small>
+                            </div>
+                            <input type="file" id="file-input" class="file-input">
+                            <div id="selected-file-info" class="selected-file-info"></div>
+                        </div>
+                        
+                        <!-- Encryption Process Section -->
+                        <div class="encryption-section">
+                            <h4>Verschlüsselung</h4>
+                            <p>Wählen Sie eine Datei aus und klicken Sie auf "Verschlüsseln", um den Prozess zu starten.</p>
+                            
+                            <div class="progress-container">
+                                <div id="encryption-progress" class="progress-bar"></div>
+                            </div>
+                            <div id="encryption-status" class="encryption-status"></div>
+                            
+                            <button id="encrypt-file-btn" class="encrypt-button" disabled>Datei verschlüsseln</button>
+                            
+                            <div id="encryption-result" class="encryption-result"></div>
+                        </div>
+                        
+                        <!-- Folder Structure Example -->
+                        <div class="folder-structure-section">
+                            <h4>Ordnerstruktur Beispiel</h4>
+                            <p>So werden Ihre verschlüsselten Dateien organisiert:</p>
+                            
+                            <div class="folder-tree">
+                                <div class="folder-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                                    </svg>
+                                    <span class="item-name">Dokumente</span>
+                                </div>
+                                
+                                <div class="subfolder">
+                                    <div class="folder-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                                        </svg>
+                                        <span class="item-name">Persönlich</span>
+                                    </div>
+                                    
+                                    <div class="subfolder">
+                                        <div class="file-item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                                            </svg>
+                                            <span class="item-name">Gehaltsabrechnung.pdf.enc</span>
+                                            <span class="item-size">256 KB</span>
+                                        </div>
+                                        
+                                        <div class="file-item">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                                            </svg>
+                                            <span class="item-name">Ausweiskopie.jpg.enc</span>
+                                            <span class="item-size">1.2 MB</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="folder-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                            <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                                        </svg>
+                                        <span class="item-name">Finanzen</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="folder-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+                                    </svg>
+                                    <span class="item-name">Arbeit</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p>Die Live-Demo wird in einem zukünftigen Update verfügbar sein.</p>
                 </div>
+                
+                <p class="demo-note"><strong>Hinweis:</strong> Diese Demo simuliert die Funktionalität von FileVault im Browser. In der vollständigen Anwendung werden Dateien lokal auf Ihrem Computer verschlüsselt und sind niemals für Dritte zugänglich.</p>
             </div>
 
             <div class="cta">
@@ -718,5 +822,8 @@
             console.log('WebAssembly support: ' + webAssemblySupported);
         });
     </script>
+    
+    <!-- WebAssembly Demo Script -->
+    <script src="js/wasm-loader.js"></script>
 </body>
 </html> 
