@@ -335,6 +335,35 @@
                 right: 10px;
             }
         }
+
+        /* Status and Note styling */
+        .pending-note {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+            padding: 8px 12px;
+            border-left: 4px solid #FFC107;
+            border-radius: 0 8px 8px 0;
+            display: block;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .status-text {
+            font-weight: bold;
+        }
+        
+        .pending-text {
+            color: #FFC107;
+        }
+        
+        [data-theme="dark"] .pending-note {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #FFC107;
+        }
+        
+        [data-theme="dark"] .pending-text {
+            color: #FFC107;
+        }
     </style>
 </head>
 <body>
@@ -367,27 +396,23 @@
         <main>
             <section id="installation">
                 <h2>Installation</h2>
-                <p>Folgen Sie diesen Schritten, um FileVault auf Ihrem System zu installieren:</p>
-                
-                <h3>Voraussetzungen</h3>
-                <ul>
-                    <li>Java 11 oder höher (empfohlen: Java 17 oder 21)</li>
-                    <li>Maven für die Erstellung</li>
-                </ul>
-                
-                <h3>Standardinstallation</h3>
+                <p>FileVault wird in Zukunft über verschiedene Installationsmethoden verfügbar sein. <span class="pending-note">⚠️ Hinweis: Die folgenden Installationsmethoden werden derzeit implementiert und sind noch nicht vollständig verfügbar.</span></p>
+
+                <h3>Vom Quellcode (derzeit empfohlen)</h3>
+                <p>Um FileVault direkt vom Quellcode zu installieren, benötigen Sie Java 11+ und Maven:</p>
                 <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
 cd fileVault
 mvn clean package
-./start.sh   # Unter Linux/Mac
-start.bat    # Unter Windows</code></pre>
-                
-                <h3>Docker-Installation</h3>
+./start.sh    # Für Linux/Mac
+start.bat     # Für Windows</code></pre>
+
+                <h3>Mit Docker (in Entwicklung)</h3>
+                <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Docker-Container werden derzeit vorbereitet:</p>
                 <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
 docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
-                
-                <h3>Maven-Installation über GitHub Packages</h3>
-                <p>Fügen Sie in Ihrer pom.xml die folgende Repository- und Abhängigkeitskonfiguration hinzu:</p>
+
+                <h3>Mit GitHub Packages (in Entwicklung)</h3>
+                <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - GitHub Packages Integration wird vorbereitet:</p>
                 <pre><code>&lt;repositories&gt;
     &lt;repository&gt;
         &lt;id&gt;github&lt;/id&gt;
@@ -400,6 +425,12 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
     &lt;artifactId&gt;FileVault&lt;/artifactId&gt;
     &lt;version&gt;1.0.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
+
+                <h3>Ausführung nach der Installation</h3>
+                <p>Nach der Installation können Sie FileVault starten mit:</p>
+                <pre><code>java -jar FileVault-shaded.jar</code></pre>
+                <p>Oder für den Headless-API-Modus:</p>
+                <pre><code>java -jar FileVault-shaded.jar --api-port=9090</code></pre>
             </section>
             
             <section id="verwendung">

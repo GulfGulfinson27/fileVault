@@ -421,6 +421,54 @@
         .error-text {
             color: #F44336;
         }
+        
+        /* Demo Section Styles */
+        .demo-section {
+            margin-top: 40px;
+        }
+        
+        .coming-soon-demo {
+            text-align: center;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px var(--card-shadow);
+        }
+        
+        .coming-soon-demo img {
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .coming-soon-demo img:hover {
+            transform: scale(1.02);
+        }
+        
+        .wasm-container {
+            margin-top: 30px;
+            position: relative;
+            min-height: 350px;
+            background: var(--code-bg);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .wasm-placeholder {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .wasm-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            fill: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -462,12 +510,12 @@
             </div>
 
             <h2>Installation</h2>
-            <p>FileVault kann auf verschiedene Arten installiert werden:</p>
+            <p>FileVault wird in Zukunft über verschiedene Installationsmethoden verfügbar sein:</p>
             
             <div class="installation-methods">
                 <div class="installation-card">
                     <h3>JAR-Datei mit Maven</h3>
-                    <p>Benötigt Java 11+ und Maven:</p>
+                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
                     <div class="code-container">
                         <div class="code-block" id="maven-code">
                             git clone https://github.com/GulfGulfinson/fileVault.git
@@ -483,7 +531,7 @@
                 
                 <div class="installation-card">
                     <h3>Docker Container</h3>
-                    <p>Container-basierte Installation:</p>
+                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
                     <div class="code-container">
                         <div class="code-block" id="docker-code">
                             docker pull ghcr.io/GulfGulfinson/fileVault:latest
@@ -496,7 +544,7 @@
                 
                 <div class="installation-card">
                     <h3>GitHub Packages</h3>
-                    <p>Maven-Paket aus GitHub Packages:</p>
+                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
                     <div class="code-container">
                         <div class="code-block" id="github-packages-code">
                             <!-- pom.xml Einträge -->
@@ -520,37 +568,61 @@
             </div>
             
             <div class="verification-section">
-                <h2>Installations-Verifikation</h2>
-                <p>Überprüfen Sie, ob die verschiedenen Installationsmethoden in Ihrer Umgebung funktionieren:</p>
+                <h2>Status der Installationsmethoden</h2>
+                <p>Aktueller Implementierungsstatus der verschiedenen Installationsmethoden:</p>
                 
                 <div id="maven-verification">
                     <h3>Maven Installation</h3>
                     <div>
                         <span class="status-indicator pending"></span>
-                        <span class="status-text pending-text">Überprüfung läuft...</span>
-                        <button class="button" onclick="verifyMavenInstallation()">Überprüfen</button>
+                        <span class="status-text pending-text">In Entwicklung</span>
                     </div>
-                    <div id="maven-result"></div>
+                    <div id="maven-result">Maven-Integration wird derzeit implementiert und in Kürze verfügbar sein.</div>
                 </div>
                 
                 <div id="docker-verification">
                     <h3>Docker Installation</h3>
                     <div>
                         <span class="status-indicator pending"></span>
-                        <span class="status-text pending-text">Überprüfung läuft...</span>
-                        <button class="button" onclick="verifyDockerInstallation()">Überprüfen</button>
+                        <span class="status-text pending-text">In Entwicklung</span>
                     </div>
-                    <div id="docker-result"></div>
+                    <div id="docker-result">Docker-Container werden derzeit vorbereitet und in Kürze bereitgestellt.</div>
                 </div>
                 
                 <div id="github-packages-verification">
                     <h3>GitHub Packages Installation</h3>
                     <div>
                         <span class="status-indicator pending"></span>
-                        <span class="status-text pending-text">Überprüfung läuft...</span>
-                        <button class="button" onclick="verifyGitHubPackagesInstallation()">Überprüfen</button>
+                        <span class="status-text pending-text">In Entwicklung</span>
                     </div>
-                    <div id="github-packages-result"></div>
+                    <div id="github-packages-result">GitHub Packages Integration wird gerade eingerichtet und bald verfügbar sein.</div>
+                </div>
+            </div>
+
+            <!-- Demo Section -->
+            <div class="demo-section verification-section">
+                <h2>Live Demo</h2>
+                <p>Eine interaktive Live-Demo wird in Kürze verfügbar sein. Wir arbeiten daran, eine WebAssembly-Version von FileVault bereitzustellen, mit der Sie die Anwendung direkt im Browser ausprobieren können.</p>
+                <div class="coming-soon-demo">
+                    <h3>FileVault WebAssembly Demo</h3>
+                    <div class="wasm-container">
+                        <div class="wasm-placeholder">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M17,11A1,1 0 0,0 16,10H8V11H16V13H10V15H16A1,1 0 0,0 17,14V11M13,16V15H14V16H13Z" />
+                            </svg>
+                            <h4>WebAssembly Demo - Coming Soon</h4>
+                            <p>Wir arbeiten an einer WebAssembly-Version, die es Ihnen ermöglicht, FileVault direkt im Browser auszuprobieren, ohne Installation.</p>
+                            <p>Geplante Funktionen der Demo:</p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>Verschlüsselung von Dateien direkt im Browser</li>
+                                <li>Demonstration der Benutzeroberfläche</li>
+                                <li>Testen des Theme-Wechsels (Hell/Dunkel)</li>
+                                <li>Anzeige einer virtuellen Ordnerstruktur</li>
+                            </ul>
+                            <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                        </div>
+                    </div>
+                    <p>Die Live-Demo wird in einem zukünftigen Update verfügbar sein.</p>
                 </div>
             </div>
 
@@ -603,69 +675,48 @@
             document.body.removeChild(textArea);
             
             // Show feedback
-            const container = element.closest('.code-container');
-            const feedback = container.querySelector('.copy-feedback');
+            const feedback = element.parentNode.querySelector('.copy-feedback');
             feedback.classList.add('show-feedback');
-            
             setTimeout(() => {
                 feedback.classList.remove('show-feedback');
             }, 2000);
         }
 
-        // Installation verification functionality
+        // Deactivate verification functions and show development status instead
         function verifyMavenInstallation() {
-            const indicator = document.querySelector('#maven-verification .status-indicator');
-            const statusText = document.querySelector('#maven-verification .status-text');
-            const resultDiv = document.getElementById('maven-result');
-            
-            indicator.className = 'status-indicator pending';
-            statusText.className = 'status-text pending-text';
-            statusText.textContent = 'Überprüfung läuft...';
-            
-            // Simulate verification check (in a real scenario, this would make an API call)
-            setTimeout(() => {
-                indicator.className = 'status-indicator success';
-                statusText.className = 'status-text success-text';
-                statusText.textContent = 'Maven-Installation verfügbar';
-                resultDiv.innerHTML = '<p>Die Maven-Installation funktioniert. Java-Version 11+ und Maven sind korrekt installiert.</p>';
-            }, 1500);
+            alert('Maven-Integration befindet sich in der Entwicklung und wird bald verfügbar sein.');
         }
-
+        
         function verifyDockerInstallation() {
-            const indicator = document.querySelector('#docker-verification .status-indicator');
-            const statusText = document.querySelector('#docker-verification .status-text');
-            const resultDiv = document.getElementById('docker-result');
-            
-            indicator.className = 'status-indicator pending';
-            statusText.className = 'status-text pending-text';
-            statusText.textContent = 'Überprüfung läuft...';
-            
-            // Simulate verification check
-            setTimeout(() => {
-                indicator.className = 'status-indicator success';
-                statusText.className = 'status-text success-text';
-                statusText.textContent = 'Docker-Image verfügbar';
-                resultDiv.innerHTML = '<p>Das Docker-Image ist verfügbar und kann heruntergeladen werden. Das Container-Image wurde zuletzt am 01.05.2025 aktualisiert.</p>';
-            }, 1800);
+            alert('Docker-Container werden derzeit vorbereitet und werden in Kürze bereitgestellt.');
+        }
+        
+        function verifyGitHubPackagesInstallation() {
+            alert('GitHub Packages Integration wird gerade eingerichtet und bald verfügbar sein.');
         }
 
-        function verifyGitHubPackagesInstallation() {
-            const indicator = document.querySelector('#github-packages-verification .status-indicator');
-            const statusText = document.querySelector('#github-packages-verification .status-text');
-            const resultDiv = document.getElementById('github-packages-result');
-            
-            indicator.className = 'status-indicator pending';
-            statusText.className = 'status-text pending-text';
-            statusText.textContent = 'Überprüfung läuft...';
-            
-            // Simulate verification check
-            setTimeout(() => {
-                indicator.className = 'status-indicator success';
-                statusText.className = 'status-text success-text';
-                statusText.textContent = 'GitHub Packages verfügbar';
-                resultDiv.innerHTML = '<p>Das Maven-Paket ist über GitHub Packages verfügbar. Aktuelle Version: 1.0.0</p>';
-            }, 2000);
+        // Placeholder for WebAssembly demo that will be implemented later
+        function loadWebAssemblyDemo() {
+            console.log('WebAssembly demo will be implemented in a future update');
+            // Will contain initialization code for WebAssembly demo
         }
+
+        // Check if the browser supports WebAssembly
+        function checkWebAssemblySupport() {
+            try {
+                if (typeof WebAssembly === 'object') {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check WebAssembly support for future demo
+            const webAssemblySupported = checkWebAssemblySupport();
+            console.log('WebAssembly support: ' + webAssemblySupported);
+        });
     </script>
 </body>
 </html> 
