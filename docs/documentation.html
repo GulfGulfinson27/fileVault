@@ -1,167 +1,505 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FileVault - Dokumentation</title>
     <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-gradient: linear-gradient(to bottom right, #FFEEFF, #F8E1FF, #F0D4FF);
+            --text-color: #6D2E80;
+            --title-color: #6D2E80;
+            --button-bg: rgba(255, 230, 255, 0.85);
+            --button-text: #9146B0;
+            --button-border: #D0A6E5;
+            --button-shadow: rgba(210, 160, 255, 0.3);
+            --button-hover-bg: #B675D5;
+            --button-hover-border: #9146B0;
+            --button-hover-text: white;
+            --card-bg: rgba(255, 235, 255, 0.7);
+            --card-border: rgba(210, 160, 255, 0.4);
+            --secondary-text: #BB8FCE;
+            --link-color: #7367F0;
+            --code-bg: #f5f5f5;
+            --card-shadow: rgba(170, 110, 200, 0.3);
+            --header-bg: rgba(245, 230, 255, 0.8);
+            --footer-text: #BB8FCE;
+            --divider-color: #eee;
+            --nav-bg: rgba(255, 240, 255, 0.9);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-gradient: linear-gradient(to bottom right, #080D30, #0A0F3D, #0C134F);
+            --text-color: #E0C3FC;
+            --title-color: #E0C3FC;
+            --button-bg: rgba(26, 31, 109, 0.8);
+            --button-text: #E0C3FC;
+            --button-border: #6A4BAF;
+            --button-shadow: rgba(224, 195, 252, 0.5);
+            --button-hover-bg: #6A4BAF;
+            --button-hover-border: #E0C3FC;
+            --button-hover-text: #FFFFFF;
+            --card-bg: rgba(29, 38, 125, 0.7);
+            --card-border: rgba(106, 75, 175, 0.3);
+            --secondary-text: #D4ADFC;
+            --link-color: #7367F0;
+            --code-bg: rgba(26, 31, 109, 0.7);
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --header-bg: rgba(29, 38, 125, 0.8);
+            --footer-text: #A08BEF;
+            --divider-color: #1A1F6D;
+            --nav-bg: rgba(26, 31, 109, 0.9);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
+            color: var(--text-color);
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
             padding: 20px;
         }
+
         header {
+            background-color: var(--header-bg);
             text-align: center;
             margin-bottom: 40px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
+            border-radius: 0 0 20px 20px;
+            padding: 30px 20px;
+            box-shadow: 0 5px 15px var(--card-shadow);
         }
+
         h1 {
-            color: #2c3e50;
+            color: var(--title-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
         }
+
         h2 {
-            color: #3498db;
-            margin-top: 30px;
+            color: var(--title-color);
+            margin-top: 40px;
+            font-size: 1.8em;
+            border-bottom: 1px solid var(--divider-color);
+            padding-bottom: 10px;
         }
+
         h3 {
-            color: #2980b9;
+            color: var(--title-color);
+            font-size: 1.4em;
+            margin-top: 25px;
         }
+
+        p, li {
+            color: var(--text-color);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: var(--text-color);
+        }
+
         pre {
-            background: #f5f5f5;
+            background-color: var(--code-bg);
             padding: 15px;
             border-radius: 5px;
             overflow-x: auto;
+            color: var(--text-color);
         }
-        code {
-            font-family: 'Courier New', Courier, monospace;
+
+        .button {
+            display: inline-block;
+            background: var(--button-bg);
+            color: var(--button-text);
+            padding: 12px 24px;
+            border-radius: 12px;
+            margin: 10px 5px;
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid var(--button-border);
+            box-shadow: 0 5px 15px var(--button-shadow);
+            transition: all 0.3s ease;
         }
+
+        .button:hover {
+            background: var(--button-hover-bg);
+            color: var(--button-hover-text);
+            border-color: var(--button-hover-border);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px var(--button-shadow);
+            text-decoration: none;
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        nav.top-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0 30px;
+        }
+
         .nav {
-            margin: 20px 0;
-            padding: 0;
+            margin: 30px 0;
+            padding: 15px;
             list-style: none;
             display: flex;
             flex-wrap: wrap;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
+            background: var(--nav-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--card-shadow);
         }
+
         .nav li {
-            margin-right: 20px;
-            padding-bottom: 10px;
+            margin: 0 15px;
+            padding: 0 5px 10px;
         }
+
         .nav a {
             text-decoration: none;
-            color: #3498db;
+            color: var(--title-color);
             font-weight: bold;
+            font-size: 1.1em;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
+
         .nav a:hover {
-            color: #2980b9;
+            background: var(--button-hover-bg);
+            color: var(--button-hover-text);
+            text-decoration: none;
         }
+
+        section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px var(--card-shadow);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--card-shadow);
+        }
+
         .btn {
             display: inline-block;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+            background: var(--button-bg);
+            color: var(--button-text);
+            padding: 12px 24px;
+            border-radius: 12px;
             margin: 10px 0;
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid var(--button-border);
+            transition: all 0.3s ease;
         }
+
         .btn:hover {
-            background: #2980b9;
+            background: var(--button-hover-bg);
+            color: var(--button-hover-text);
+            border-color: var(--button-hover-border);
+            text-decoration: none;
         }
+
         footer {
             text-align: center;
-            margin-top: 40px;
+            margin-top: 60px;
             padding-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--divider-color);
             font-size: 0.9em;
-            color: #777;
+            color: var(--footer-text);
+        }
+
+        /* Theme Switcher */
+        .theme-switch-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav li {
+                margin: 5px 0;
+                width: 100%;
+                text-align: center;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .theme-switch-wrapper {
+                top: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>FileVault Dokumentation</h1>
-        <p>Umfassende Anleitung zur Verwendung und Konfiguration</p>
-    </header>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider"></div>
+        </label>
+    </div>
 
-    <ul class="nav">
-        <li><a href="index.html">Startseite</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#verwendung">Verwendung</a></li>
-        <li><a href="#technische-details">Technische Details</a></li>
-        <li><a href="#api">API</a></li>
-    </ul>
+    <div class="container">
+        <header>
+            <h1>FileVault Dokumentation</h1>
+            <p>Umfassende Anleitung zur Verwendung und Konfiguration</p>
+        </header>
 
-    <main>
-        <section id="installation">
-            <h2>Installation</h2>
-            <p>Folgen Sie diesen Schritten, um FileVault auf Ihrem System zu installieren:</p>
-            
-            <h3>Voraussetzungen</h3>
-            <ul>
-                <li>Java 11 oder höher (empfohlen: Java 17 oder 21)</li>
-                <li>Maven für die Erstellung</li>
-            </ul>
-            
-            <h3>Standardinstallation</h3>
-            <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
+        <nav class="top-nav">
+            <a href="index.html" class="button">Startseite</a>
+            <a href="javadoc/index.html" class="button">JavaDoc</a>
+            <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
+        </nav>
+
+        <ul class="nav">
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#verwendung">Verwendung</a></li>
+            <li><a href="#technische-details">Technische Details</a></li>
+            <li><a href="#api">API</a></li>
+        </ul>
+
+        <main>
+            <section id="installation">
+                <h2>Installation</h2>
+                <p>Folgen Sie diesen Schritten, um FileVault auf Ihrem System zu installieren:</p>
+                
+                <h3>Voraussetzungen</h3>
+                <ul>
+                    <li>Java 11 oder höher (empfohlen: Java 17 oder 21)</li>
+                    <li>Maven für die Erstellung</li>
+                </ul>
+                
+                <h3>Standardinstallation</h3>
+                <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
 cd fileVault
 mvn clean package
 ./start.sh   # Unter Linux/Mac
 start.bat    # Unter Windows</code></pre>
-            
-            <h3>Docker-Installation</h3>
-            <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
+                
+                <h3>Docker-Installation</h3>
+                <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
 docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
-        </section>
-        
-        <section id="verwendung">
-            <h2>Verwendung</h2>
-            <p>Nach dem Start der Anwendung können Sie folgende Aktionen durchführen:</p>
-            
-            <h3>Erster Start</h3>
-            <p>Bei der ersten Ausführung werden Sie aufgefordert, ein Passwort zu erstellen. Dieses Passwort wird zur Verschlüsselung Ihrer Dateien verwendet.</p>
-            
-            <h3>Ordner erstellen</h3>
-            <p>Klicken Sie auf "Neuer Ordner" und geben Sie einen Namen ein, um einen virtuellen Ordner zu erstellen.</p>
-            
-            <h3>Dateien importieren</h3>
-            <p>Wählen Sie einen Ordner aus und klicken Sie auf "Datei importieren", um eine Datei zu verschlüsseln und in den Tresor zu importieren.</p>
-            
-            <h3>Dateien exportieren</h3>
-            <p>Wählen Sie eine Datei aus und klicken Sie auf "Exportieren", um die Datei zu entschlüsseln und an einem gewünschten Ort zu speichern.</p>
-        </section>
-        
-        <section id="technische-details">
-            <h2>Technische Details</h2>
-            
-            <h3>Verschlüsselung</h3>
-            <ul>
-                <li>Algorithmus: AES-256-GCM (Galois/Counter Mode)</li>
-                <li>Schlüsselableitung: PBKDF2 mit HMAC-SHA256</li>
-                <li>Schlüssellänge: 256 Bit</li>
-                <li>Iterationen: 65.536</li>
-                <li>IV-Länge: 96 Bit</li>
-                <li>Authentifizierungs-Tag: 128 Bit</li>
-            </ul>
-            
-            <h3>Datenspeicherung</h3>
-            <p>Die verschlüsselten Dateien werden in <code>~/.filevault/data/</code> gespeichert, während die Metadaten in einer SQLite-Datenbank unter <code>~/.filevault/vault.db</code> abgelegt werden.</p>
-        </section>
-        
-        <section id="api">
-            <h2>API-Dokumentation</h2>
-            <p>Die API-Dokumentation wird automatisch aus dem Quellcode generiert. Sie können die vollständige JavaDoc-Dokumentation im Verzeichnis <code>docs/javadoc/</code> des Projekts finden.</p>
-            
-            <a href="javadoc/index.html" class="btn">JavaDoc ansehen</a>
-        </section>
-    </main>
+                
+                <h3>Maven-Installation über GitHub Packages</h3>
+                <p>Fügen Sie in Ihrer pom.xml die folgende Repository- und Abhängigkeitskonfiguration hinzu:</p>
+                <pre><code>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;github&lt;/id&gt;
+        &lt;url&gt;https://maven.pkg.github.com/GulfGulfinson/fileVault&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
 
-    <footer>
-        <p>FileVault ist ein Projekt von Phillip Schneider. Entwickelt im Rahmen des Kurses "Objektorientierte Programmierung II".</p>
-    </footer>
+&lt;dependency&gt;
+    &lt;groupId&gt;com.filevault&lt;/groupId&gt;
+    &lt;artifactId&gt;FileVault&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+            </section>
+            
+            <section id="verwendung">
+                <h2>Verwendung</h2>
+                <p>Nach dem Start der Anwendung können Sie folgende Aktionen durchführen:</p>
+                
+                <h3>Erster Start</h3>
+                <p>Bei der ersten Ausführung werden Sie aufgefordert, ein Passwort zu erstellen. Dieses Passwort wird zur Verschlüsselung Ihrer Dateien verwendet.</p>
+                
+                <h3>Ordner erstellen</h3>
+                <p>Klicken Sie auf "Neuer Ordner" und geben Sie einen Namen ein, um einen virtuellen Ordner zu erstellen. Sie können eine hierarchische Struktur erstellen, indem Sie Unterordner anlegen.</p>
+                
+                <h3>Dateien importieren</h3>
+                <p>Wählen Sie einen Ordner aus und klicken Sie auf "Datei importieren", um eine Datei zu verschlüsseln und in den Tresor zu importieren. Die Originaldatei bleibt unverändert.</p>
+                
+                <h3>Dateien exportieren</h3>
+                <p>Wählen Sie eine Datei aus und klicken Sie auf "Exportieren", um die Datei zu entschlüsseln und an einem gewünschten Ort zu speichern. Sie können dabei einen neuen Dateinamen wählen.</p>
+                
+                <h3>Dateien und Ordner umbenennen</h3>
+                <p>Rechtsklick auf eine Datei oder einen Ordner und Auswahl von "Umbenennen" ermöglicht das Ändern des Namens.</p>
+                
+                <h3>Dateien und Ordner löschen</h3>
+                <p>Rechtsklick auf eine Datei oder einen Ordner und Auswahl von "Löschen" entfernt das Element aus dem Tresor.</p>
+            </section>
+            
+            <section id="technische-details">
+                <h2>Technische Details</h2>
+                
+                <h3>Verschlüsselung</h3>
+                <ul>
+                    <li>Algorithmus: AES-256-GCM (Galois/Counter Mode)</li>
+                    <li>Schlüsselableitung: PBKDF2 mit HMAC-SHA256</li>
+                    <li>Schlüssellänge: 256 Bit</li>
+                    <li>Iterationen: 65.536</li>
+                    <li>IV-Länge: 96 Bit</li>
+                    <li>Authentifizierungs-Tag: 128 Bit</li>
+                </ul>
+                
+                <h3>Datenspeicherung</h3>
+                <p>Die verschlüsselten Dateien werden in <code>~/.filevault/data/</code> gespeichert, während die Metadaten in einer SQLite-Datenbank unter <code>~/.filevault/vault.db</code> abgelegt werden. Die Pfade werden automatisch an das jeweilige Betriebssystem angepasst.</p>
+                
+                <h3>Benutzeroberfläche</h3>
+                <p>Die Benutzeroberfläche basiert auf JavaFX und bietet sowohl ein helles als auch ein dunkles Thema. Das Design ist modern und benutzerfreundlich mit ansprechenden Animationen und Übergängen.</p>
+                
+                <h3>Systemanforderungen</h3>
+                <ul>
+                    <li>Betriebssystem: Windows, macOS oder Linux</li>
+                    <li>Java: Version 11 oder höher (empfohlen: Java 17 oder 21)</li>
+                    <li>Arbeitsspeicher: Mindestens 256 MB freier RAM</li>
+                    <li>Festplattenspeicher: Mindestens 50 MB für die Anwendung, plus Speicherplatz für Ihre verschlüsselten Dateien</li>
+                </ul>
+            </section>
+            
+            <section id="api">
+                <h2>API-Dokumentation</h2>
+                <p>Die API-Dokumentation wird automatisch aus dem Quellcode generiert. Sie können die vollständige JavaDoc-Dokumentation im Verzeichnis <code>docs/javadoc/</code> des Projekts finden.</p>
+                
+                <p>Wichtige Pakete in der FileVault-API:</p>
+                <ul>
+                    <li><strong>com.filevault.controller</strong>: Anwendungscontroller für die Benutzeroberfläche</li>
+                    <li><strong>com.filevault.model</strong>: Datenmodelle für Dateien und Ordner</li>
+                    <li><strong>com.filevault.security</strong>: Verschlüsselungs- und Sicherheitsmechanismen</li>
+                    <li><strong>com.filevault.storage</strong>: Datenspeicherung und Datenbankzugriff</li>
+                    <li><strong>com.filevault.util</strong>: Hilfsklassen und Utilities</li>
+                </ul>
+                
+                <p>Für eine vollständige Übersicht der verfügbaren Klassen und Methoden besuchen Sie die JavaDoc-Dokumentation:</p>
+                
+                <a href="javadoc/index.html" class="btn">JavaDoc ansehen</a>
+            </section>
+        </main>
+
+        <footer>
+            <p>FileVault ist ein Projekt von Phillip Schneider. Entwickelt im Rahmen des Kurses "Objektorientierte Programmierung II".</p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggler
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
 </body>
 </html> 
