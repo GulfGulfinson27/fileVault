@@ -17,6 +17,7 @@ target/
 
 #VsCode Dateien
 .vscode/
+
 # NetBeans Dateien
 nbproject/
 nbactions.xml
