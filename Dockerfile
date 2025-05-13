@@ -8,11 +8,9 @@ RUN apt-get update && apt-get install -y maven
 # Copy pom.xml and source code
 COPY pom.xml .
 COPY src/ src/
-# Copy lib directory if it contains required dependencies
-COPY lib/ lib/
 
 # Build the application
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 FROM eclipse-temurin:17-jre
 
