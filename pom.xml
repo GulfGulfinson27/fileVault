@@ -6,7 +6,7 @@
 
     <groupId>com.filevault</groupId>
     <artifactId>FileVault</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -141,8 +141,6 @@
                 <configuration>
                     <mainClass>com.filevault.FileVaultApp</mainClass>
                     <options>
-                        <option>--module-path</option>
-                        <option>${project.basedir}/lib/javafx-sdk-17.0.14/lib</option>
                         <option>--add-modules</option>
                         <option>javafx.controls,javafx.fxml</option>
                         <option>--add-opens</option>
