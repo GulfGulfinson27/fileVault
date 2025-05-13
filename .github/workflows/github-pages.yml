@@ -5,10 +5,16 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
+  # This is needed for enablement
+  actions: write
+  deployments: write
+  statuses: write
+  repository-projects: write
 
 concurrency:
   group: "pages"
@@ -25,6 +31,8 @@ jobs:
         uses: actions/configure-pages@v4
         with:
           enablement: true
+          # Optional: use a PAT if GITHUB_TOKEN doesn't have required permissions
+          # token: ${{ secrets.GH_PAGES_TOKEN }}
       
       - name: Setup Java
         uses: actions/setup-java@v3
