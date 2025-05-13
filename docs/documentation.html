@@ -364,6 +364,54 @@
         [data-theme="dark"] .pending-text {
             color: #FFC107;
         }
+        
+        /* Method cards for future installation methods */
+        .future-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .method-card {
+            flex: 1 1 300px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--divider-color);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .method-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .method-card h4 {
+            margin-top: 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--divider-color);
+        }
+        
+        [data-theme="dark"] .method-card {
+            border-color: rgba(106, 75, 175, 0.3);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        [data-theme="dark"] .method-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .future-methods {
+                flex-direction: column;
+            }
+            
+            .method-card {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -398,22 +446,51 @@
                 <h2>Installation</h2>
                 <p>FileVault wird in Zukunft über verschiedene Installationsmethoden verfügbar sein. <span class="pending-note">⚠️ Hinweis: Die folgenden Installationsmethoden werden derzeit implementiert und sind noch nicht vollständig verfügbar.</span></p>
 
-                <h3>Vom Quellcode (derzeit empfohlen)</h3>
-                <p>Um FileVault direkt vom Quellcode zu installieren, benötigen Sie Java 11+ und Maven:</p>
-                <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
-cd fileVault
-mvn clean package
-./start.sh    # Für Linux/Mac
+                <h3>Option 1: Release herunterladen</h3>
+                <p>Die einfachste Methode, FileVault zu nutzen:</p>
+                <ol>
+                    <li>Laden Sie die neueste Version von der <a href="https://github.com/GulfGulfinson/fileVault/releases">Release-Seite</a> herunter</li>
+                    <li>Entpacken Sie die ZIP-Datei in ein Verzeichnis Ihrer Wahl</li>
+                    <li>Starten Sie die Anwendung mit dem passenden Skript:
+                        <pre><code>./start.sh    # Für Linux/Mac
 start.bat     # Für Windows</code></pre>
+                    </li>
+                </ol>
 
-                <h3>Mit Docker (in Entwicklung)</h3>
-                <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Docker-Container werden derzeit vorbereitet:</p>
-                <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
+                <h3>Option 2: Aus dem Quellcode bauen</h3>
+                <p>Um FileVault direkt vom Quellcode zu installieren:</p>
+                <ol>
+                    <li>Klonen Sie das Repository:
+                        <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
+cd fileVault</code></pre>
+                    </li>
+                    <li>Bauen Sie das Projekt mit Maven:
+                        <pre><code>mvn clean package</code></pre>
+                    </li>
+                    <li>Starten Sie die Anwendung:
+                        <pre><code>./start.sh    # Für Linux/Mac
+start.bat     # Für Windows</code></pre>
+                    </li>
+                    <li>Alternativ können Sie die Anwendung auch direkt mit Maven starten:
+                        <pre><code>mvn javafx:run</code></pre>
+                    </li>
+                </ol>
+
+                <h3>Zukünftige Installationsmethoden</h3>
+                <p>Die folgenden Methoden werden in naher Zukunft implementiert:</p>
+                
+                <div class="future-methods">
+                    <div class="method-card">
+                        <h4>Docker Container</h4>
+                        <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                        <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
 docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
-
-                <h3>Mit GitHub Packages (in Entwicklung)</h3>
-                <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - GitHub Packages Integration wird vorbereitet:</p>
-                <pre><code>&lt;repositories&gt;
+                    </div>
+                    
+                    <div class="method-card">
+                        <h4>Maven Dependency über GitHub Packages</h4>
+                        <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                        <pre><code>&lt;repositories&gt;
     &lt;repository&gt;
         &lt;id&gt;github&lt;/id&gt;
         &lt;url&gt;https://maven.pkg.github.com/GulfGulfinson/fileVault&lt;/url&gt;
@@ -425,12 +502,29 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
     &lt;artifactId&gt;FileVault&lt;/artifactId&gt;
     &lt;version&gt;1.0.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
+                    </div>
+                    
+                    <div class="method-card">
+                        <h4>WebAssembly Demo im Browser</h4>
+                        <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                        <p>Eine eingeschränkte Version von FileVault wird direkt im Browser verfügbar sein.</p>
+                        <p>Sehen Sie sich die <a href="index.html#wasm-demo-container">Demo</a> auf der Startseite an.</p>
+                    </div>
+                </div>
 
                 <h3>Ausführung nach der Installation</h3>
                 <p>Nach der Installation können Sie FileVault starten mit:</p>
                 <pre><code>java -jar FileVault-shaded.jar</code></pre>
                 <p>Oder für den Headless-API-Modus:</p>
                 <pre><code>java -jar FileVault-shaded.jar --api-port=9090</code></pre>
+                
+                <h3>Systemanforderungen</h3>
+                <ul>
+                    <li>Java 17 oder höher</li>
+                    <li>4 GB RAM (empfohlen: 8 GB)</li>
+                    <li>50 MB freier Festplattenspeicher für die Anwendung</li>
+                    <li>Zusätzlicher Speicherplatz für verschlüsselte Dateien</li>
+                </ul>
             </section>
             
             <section id="verwendung">

@@ -198,6 +198,64 @@
     cursor: not-allowed;
 }
 
+/* Password input styling */
+.password-container {
+    margin: 15px 0;
+}
+
+.password-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.password-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid var(--demo-border);
+    background-color: var(--demo-input-bg);
+    color: var(--demo-text);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.password-input:focus {
+    border-color: var(--demo-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.3);
+}
+
+.password-strength-indicator {
+    height: 4px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    background-color: var(--demo-danger);
+    transition: all 0.3s ease;
+}
+
+.strength-bar.weak {
+    width: 30%;
+    background-color: var(--demo-danger);
+}
+
+.strength-bar.medium {
+    width: 70%;
+    background-color: var(--demo-warning);
+}
+
+.strength-bar.strong {
+    width: 100%;
+    background-color: var(--demo-success);
+}
+
 /* Progress bar */
 .progress-container {
     margin: 20px 0;
@@ -260,6 +318,40 @@
 .download-button:hover {
     opacity: 0.9;
     transform: translateY(-2px);
+}
+
+.decrypt-button {
+    background-color: var(--demo-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+.decrypt-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.button-group {
+    display: flex;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+@media (max-width: 500px) {
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .decrypt-button {
+        margin-left: 0;
+        margin-top: 10px;
+    }
 }
 
 /* Folder structure section */

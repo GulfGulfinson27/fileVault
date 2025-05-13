@@ -96,6 +96,14 @@ const FileVaultWASM = {
             });
         }
         
+        // Password input for strength indicator
+        const passwordInput = document.getElementById('encryption-password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', (e) => {
+                this.updatePasswordStrength(e.target.value);
+            });
+        }
+        
         // File selector and drag-drop zone
         this.initializeFileUpload();
     },
@@ -170,12 +178,20 @@ const FileVaultWASM = {
         const progressBar = document.getElementById('encryption-progress');
         const progressText = document.getElementById('encryption-status');
         const resultArea = document.getElementById('encryption-result');
+        const passwordInput = document.getElementById('encryption-password');
+        
+        // Validate password
+        const password = passwordInput ? passwordInput.value : '';
+        if (!password || password.length < 8) {
+            alert('Bitte geben Sie ein sicheres Passwort mit mindestens 8 Zeichen ein.');
+            return;
+        }
         
         if (progressBar && progressText && resultArea) {
             // Reset UI
             progressBar.style.width = '0%';
             progressBar.style.display = 'block';
-            progressText.textContent = 'Starting encryption...';
+            progressText.textContent = 'Starte Verschlüsselung...';
             resultArea.innerHTML = '';
             
             // Simulate encryption steps
@@ -184,19 +200,29 @@ const FileVaultWASM = {
                 progress += 5;
                 progressBar.style.width = progress + '%';
                 
-                if (progress < 30) {
-                    progressText.textContent = 'Initializing encryption...';
+                if (progress < 20) {
+                    progressText.textContent = 'Initialisiere AES-256-GCM...';
+                } else if (progress < 40) {
+                    progressText.textContent = 'Generiere Schlüssel mit PBKDF2 (10.000 Iterationen)...';
                 } else if (progress < 60) {
-                    progressText.textContent = 'Processing file...';
-                } else if (progress < 90) {
-                    progressText.textContent = 'Applying AES-256 encryption...';
+                    progressText.textContent = 'Verarbeite Datei...';
+                } else if (progress < 80) {
+                    progressText.textContent = 'Wende Verschlüsselung an...';
                 } else {
-                    progressText.textContent = 'Finalizing...';
+                    progressText.textContent = 'Erstelle Integritäts-Header...';
                 }
                 
                 if (progress >= 100) {
                     clearInterval(interval);
-                    progressText.textContent = 'Encryption complete!';
+                    progressText.textContent = 'Verschlüsselung abgeschlossen!';
+                    
+                    // Store information for decryption demo
+                    this.lastEncryptedFile = {
+                        originalName: this.selectedFile ? this.selectedFile.name : 'demo.txt',
+                        encryptedName: this.selectedFile ? this.selectedFile.name + '.enc' : 'demo.txt.enc',
+                        size: this.selectedFile ? this.formatFileSize(this.selectedFile.size) : '24 KB',
+                        password: password
+                    };
                     
                     // Display the result
                     resultArea.innerHTML = `
@@ -204,26 +230,182 @@ const FileVaultWASM = {
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                                 <path fill="currentColor" d="M9,16.17L4.83,12l-1.42,1.41L9,19 21,7l-1.41-1.41L9,16.17z"/>
                             </svg>
-                            <p>File encrypted successfully!</p>
+                            <p>Datei erfolgreich verschlüsselt!</p>
                         </div>
                         <div class="file-details">
-                            <p><strong>Original file:</strong> ${this.selectedFile ? this.selectedFile.name : 'demo.txt'}</p>
-                            <p><strong>Encrypted file:</strong> ${this.selectedFile ? this.selectedFile.name + '.enc' : 'demo.txt.enc'}</p>
-                            <p><strong>Encryption method:</strong> AES-256-GCM</p>
-                            <p><strong>Key derivation:</strong> PBKDF2 with 10,000 iterations</p>
+                            <p><strong>Originaldatei:</strong> ${this.lastEncryptedFile.originalName}</p>
+                            <p><strong>Verschlüsselte Datei:</strong> ${this.lastEncryptedFile.encryptedName}</p>
+                            <p><strong>Verschlüsselungsmethode:</strong> AES-256-GCM</p>
+                            <p><strong>Schlüsselableitung:</strong> PBKDF2 mit 10.000 Iterationen</p>
+                            <p><strong>Integrität:</strong> HMAC-SHA256</p>
+                            <p><strong>Erstellungsdatum:</strong> ${new Date().toLocaleString()}</p>
                         </div>
-                        <button id="download-btn" class="download-button">Download Encrypted File</button>
+                        <div class="button-group">
+                            <button id="download-btn" class="download-button">Verschlüsselte Datei herunterladen</button>
+                            <button id="decrypt-btn" class="decrypt-button">Datei entschlüsseln</button>
+                        </div>
                     `;
                     
-                    // Add event listener for the download button
+                    // Add event listeners for the buttons
                     const downloadBtn = document.getElementById('download-btn');
                     if (downloadBtn) {
                         downloadBtn.addEventListener('click', () => {
-                            alert('In a real implementation, this would download the encrypted file.');
+                            this.simulateFileDownload();
+                        });
+                    }
+                    
+                    const decryptBtn = document.getElementById('decrypt-btn');
+                    if (decryptBtn) {
+                        decryptBtn.addEventListener('click', () => {
+                            this.simulateFileDecryption();
+                        });
+                    }
+                    
+                    // Add the file to the folder structure
+                    this.addFileToFolderStructure();
+                }
+            }, 200);
+        }
+    },
+    
+    // Simulate downloading the encrypted file
+    simulateFileDownload: function() {
+        // Create a temporary download link
+        const filename = this.lastEncryptedFile ? this.lastEncryptedFile.encryptedName : 'demo.txt.enc';
+        
+        // Create a blob with some dummy content
+        const blob = new Blob(['This is a simulated encrypted file. In a real application, this would be encrypted data.'], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create and click a download link
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+    
+    // Simulate file decryption process
+    simulateFileDecryption: function() {
+        if (!this.lastEncryptedFile) {
+            alert('Keine verschlüsselte Datei gefunden. Bitte verschlüsseln Sie zuerst eine Datei.');
+            return;
+        }
+        
+        // Show password dialog
+        const password = prompt('Bitte geben Sie das Passwort ein, um die Datei zu entschlüsseln:', '');
+        
+        // Check if canceled
+        if (password === null) return;
+        
+        // Check password
+        if (password !== this.lastEncryptedFile.password) {
+            alert('Falsches Passwort. Entschlüsselung fehlgeschlagen.');
+            return;
+        }
+        
+        const progressBar = document.getElementById('encryption-progress');
+        const progressText = document.getElementById('encryption-status');
+        const resultArea = document.getElementById('encryption-result');
+        
+        if (progressBar && progressText && resultArea) {
+            // Reset UI
+            progressBar.style.width = '0%';
+            progressBar.style.display = 'block';
+            progressText.textContent = 'Starte Entschlüsselung...';
+            resultArea.innerHTML = '';
+            
+            // Simulate decryption steps
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                
+                if (progress < 20) {
+                    progressText.textContent = 'Verifiziere Integritäts-Header...';
+                } else if (progress < 40) {
+                    progressText.textContent = 'Generiere Schlüssel mit PBKDF2...';
+                } else if (progress < 60) {
+                    progressText.textContent = 'Initialisiere AES-256-GCM...';
+                } else if (progress < 80) {
+                    progressText.textContent = 'Entschlüssele Daten...';
+                } else {
+                    progressText.textContent = 'Speichere entschlüsselte Datei...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressText.textContent = 'Entschlüsselung abgeschlossen!';
+                    
+                    // Display the result
+                    resultArea.innerHTML = `
+                        <div class="success-message">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M9,16.17L4.83,12l-1.42,1.41L9,19 21,7l-1.41-1.41L9,16.17z"/>
+                            </svg>
+                            <p>Datei erfolgreich entschlüsselt!</p>
+                        </div>
+                        <div class="file-details">
+                            <p><strong>Verschlüsselte Datei:</strong> ${this.lastEncryptedFile.encryptedName}</p>
+                            <p><strong>Entschlüsselte Datei:</strong> ${this.lastEncryptedFile.originalName}</p>
+                            <p><strong>Integrität:</strong> Verifiziert</p>
+                        </div>
+                        <button id="open-btn" class="download-button">Entschlüsselte Datei öffnen</button>
+                    `;
+                    
+                    // Add event listener for the open button
+                    const openBtn = document.getElementById('open-btn');
+                    if (openBtn) {
+                        openBtn.addEventListener('click', () => {
+                            alert('In einer echten Anwendung würde jetzt die entschlüsselte Datei geöffnet werden.');
                         });
                     }
                 }
             }, 200);
+        }
+    },
+    
+    // Add the encrypted file to the folder structure visualization
+    addFileToFolderStructure: function() {
+        if (!this.lastEncryptedFile) return;
+        
+        const personalFolder = document.querySelector('.subfolder:first-of-type');
+        if (personalFolder) {
+            // Create new file item
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                </svg>
+                <span class="item-name">${this.lastEncryptedFile.encryptedName}</span>
+                <span class="item-size">${this.lastEncryptedFile.size}</span>
+            `;
+            
+            // Add animation
+            fileItem.style.animation = 'fadeIn 0.5s';
+            
+            // Add click handler
+            fileItem.addEventListener('click', () => {
+                this.simulateFileDecryption();
+            });
+            
+            // Add to folder
+            personalFolder.appendChild(fileItem);
+            
+            // Define animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
         }
     },
     
@@ -306,6 +488,42 @@ const FileVaultWASM = {
         
         // Initialize the demo with default values
         this.initializeDemo();
+    },
+    
+    // Update password strength indicator
+    updatePasswordStrength: function(password) {
+        const strengthBar = document.querySelector('.strength-bar');
+        if (!strengthBar) return;
+        
+        // Reset classes
+        strengthBar.classList.remove('weak', 'medium', 'strong');
+        
+        if (!password) {
+            strengthBar.style.width = '0';
+            return;
+        }
+        
+        // Simple password strength algorithm
+        let strength = 0;
+        
+        // Length check
+        if (password.length >= 8) strength += 1;
+        if (password.length >= 12) strength += 1;
+        
+        // Character diversity
+        if (/[A-Z]/.test(password)) strength += 1;  // Uppercase
+        if (/[a-z]/.test(password)) strength += 1;  // Lowercase
+        if (/[0-9]/.test(password)) strength += 1;  // Numbers
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;  // Special characters
+        
+        // Calculate strength level
+        if (strength <= 2) {
+            strengthBar.classList.add('weak');
+        } else if (strength <= 4) {
+            strengthBar.classList.add('medium');
+        } else {
+            strengthBar.classList.add('strong');
+        }
     }
 };
 

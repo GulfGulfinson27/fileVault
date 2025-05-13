@@ -659,6 +659,14 @@
                             <h4>Verschlüsselung</h4>
                             <p>Wählen Sie eine Datei aus und klicken Sie auf "Verschlüsseln", um den Prozess zu starten.</p>
                             
+                            <div class="password-container">
+                                <label for="encryption-password">Passwort für Verschlüsselung:</label>
+                                <input type="password" id="encryption-password" class="password-input" placeholder="Mindestens 8 Zeichen" minlength="8" required>
+                                <div class="password-strength-indicator">
+                                    <div class="strength-bar"></div>
+                                </div>
+                            </div>
+                            
                             <div class="progress-container">
                                 <div id="encryption-progress" class="progress-bar"></div>
                             </div>
