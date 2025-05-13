@@ -43,6 +43,39 @@ Dabei habe ich mehrere Iterationen von reiner Verschlüsselung von Dateien über
 ! Bei der ersten Ausführung wird ein neuer Benutzer angelegt
 (Für einen neuen User muss die Datenbank gelöscht werden)
 
+### 3.1 Installation mit Docker
+Sie können FileVault auch als Docker-Container ausführen:
+
+```bash
+docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
+```
+
+### 3.2 Installation über GitHub Packages
+Das FileVault-Projekt wird in GitHub Packages als Maven-Paket bereitgestellt:
+
+1. Fügen Sie in Ihrer `pom.xml` das GitHub Package Repository hinzu:
+
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <name>GitHub GulfGulfinson Apache Maven Packages</name>
+        <url>https://maven.pkg.github.com/GulfGulfinson/fileVault</url>
+    </repository>
+</repositories>
+```
+
+2. Fügen Sie die Abhängigkeit hinzu:
+
+```xml
+<dependency>
+    <groupId>com.filevault</groupId>
+    <artifactId>FileVault</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 ## 4. Verwendung
 1. Anmeldung mit Passwort
 2. Erstellen von virtuellen Ordnern
