@@ -36,7 +36,7 @@ jobs:
       - name: Build with Maven
         run: xvfb-run --auto-servernum mvn -B verify
       
-      # Führe SonarCloud nur für Pull Requests aus
+      # Führe SonarCloud nur für Pull Requests aus.
       - name: SonarCloud Scan
         if: github.event_name == 'pull_request'
         uses: SonarSource/sonarcloud-github-action@master
