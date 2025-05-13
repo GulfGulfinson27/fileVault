@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'  # Wird ausgeführt, wenn ein Tag gepusht wird, das mit 'v' beginnt
 
+# Add permissions for the GitHub token
+permissions:
+  contents: write
+  discussions: write
+
 jobs:
   build:
     name: Create Release
