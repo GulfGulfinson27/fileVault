@@ -525,32 +525,63 @@
             </div>
 
             <h2>Installation</h2>
-            <p>FileVault wird in Zukunft über verschiedene Installationsmethoden verfügbar sein:</p>
+            <p>FileVault kann auf verschiedene Arten installiert werden:</p>
             
             <div class="installation-methods">
                 <div class="installation-card">
-                    <h3>JAR-Datei mit Maven</h3>
-                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
+                    <h3>Option 1: Release herunterladen</h3>
+                    <p>Die einfachste Methode, FileVault zu nutzen:</p>
+                    <ol>
+                        <li>Laden Sie die neueste Version von der <a href="https://github.com/GulfGulfinson/fileVault/releases">Release-Seite</a> herunter</li>
+                        <li>Entpacken Sie die ZIP-Datei in ein Verzeichnis Ihrer Wahl</li>
+                        <li>Starten Sie die Anwendung mit dem passenden Skript:</li>
+                    </ol>
                     <div class="code-container">
-                        <div class="code-block" id="maven-code">
-                            git clone https://github.com/GulfGulfinson/fileVault.git
-                            cd fileVault
-                            mvn clean package
-                            ./start.sh   # Linux/Mac
-                            start.bat    # Windows
+                        <div class="code-block" id="release-code">
+./start.sh    # Für Linux/Mac
+start.bat     # Für Windows
                         </div>
-                        <button class="copy-button" onclick="copyToClipboard('maven-code')">Kopieren</button>
+                        <button class="copy-button" onclick="copyToClipboard('release-code')">Kopieren</button>
                         <div class="copy-feedback">Kopiert!</div>
                     </div>
                 </div>
                 
                 <div class="installation-card">
+                    <h3>Option 2: Aus dem Quellcode bauen</h3>
+                    <p>Um FileVault direkt vom Quellcode zu bauen:</p>
+                    <div class="code-container">
+                        <div class="code-block" id="source-code">
+# Repository klonen
+git clone https://github.com/GulfGulfinson/fileVault.git
+cd fileVault
+
+# Projekt bauen
+mvn clean package
+
+# Anwendung starten
+./start.sh   # Linux/Mac
+start.bat    # Windows
+
+# Alternative Startmethode
+mvn javafx:run
+                        </div>
+                        <button class="copy-button" onclick="copyToClipboard('source-code')">Kopieren</button>
+                        <div class="copy-feedback">Kopiert!</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Zukünftige Installationsmethoden</h3>
+            <p>Die folgenden Methoden werden in Kürze implementiert:</p>
+            
+            <div class="installation-methods">
+                <div class="installation-card">
                     <h3>Docker Container</h3>
                     <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
                     <div class="code-container">
                         <div class="code-block" id="docker-code">
-                            docker pull ghcr.io/GulfGulfinson/fileVault:latest
-                            docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
+docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
                         </div>
                         <button class="copy-button" onclick="copyToClipboard('docker-code')">Kopieren</button>
                         <div class="copy-feedback">Kopiert!</div>
@@ -562,7 +593,7 @@
                     <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
                     <div class="code-container">
                         <div class="code-block" id="github-packages-code">
-                            <!-- pom.xml Einträge -->
+<!-- pom.xml Einträge -->
 &lt;repositories&gt;
     &lt;repository&gt;
         &lt;id&gt;github&lt;/id&gt;
@@ -580,19 +611,36 @@
                         <div class="copy-feedback">Kopiert!</div>
                     </div>
                 </div>
+                
+                <div class="installation-card">
+                    <h3>WebAssembly (im Browser)</h3>
+                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Eine WASM-Demo ist bereits verfügbar:</p>
+                    <div class="button-container" style="text-align: center; margin-top: 15px;">
+                        <a href="#wasm-demo-container" class="button">WASM-Demo ausprobieren</a>
+                    </div>
+                </div>
             </div>
             
             <div class="verification-section">
                 <h2>Status der Installationsmethoden</h2>
                 <p>Aktueller Implementierungsstatus der verschiedenen Installationsmethoden:</p>
                 
-                <div id="maven-verification">
-                    <h3>Maven Installation</h3>
+                <div id="release-verification">
+                    <h3>Release Download</h3>
                     <div>
-                        <span class="status-indicator pending"></span>
-                        <span class="status-text pending-text">In Entwicklung</span>
+                        <span class="status-indicator success"></span>
+                        <span class="status-text success-text">Verfügbar</span>
                     </div>
-                    <div id="maven-result">Maven-Integration wird derzeit implementiert und in Kürze verfügbar sein.</div>
+                    <div id="release-result">Release-Pakete stehen auf der <a href="https://github.com/GulfGulfinson/fileVault/releases">GitHub Release-Seite</a> zum Download bereit.</div>
+                </div>
+                
+                <div id="source-verification">
+                    <h3>Source Code Build</h3>
+                    <div>
+                        <span class="status-indicator success"></span>
+                        <span class="status-text success-text">Verfügbar</span>
+                    </div>
+                    <div id="source-result">Das Repository kann geklont und mit Maven gebaut werden.</div>
                 </div>
                 
                 <div id="docker-verification">

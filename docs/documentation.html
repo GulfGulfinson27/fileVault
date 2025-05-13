@@ -444,7 +444,7 @@
         <main>
             <section id="installation">
                 <h2>Installation</h2>
-                <p>FileVault wird in Zukunft über verschiedene Installationsmethoden verfügbar sein. <span class="pending-note">⚠️ Hinweis: Die folgenden Installationsmethoden werden derzeit implementiert und sind noch nicht vollständig verfügbar.</span></p>
+                <p>FileVault kann auf zwei Hauptwegen installiert werden - entweder durch Herunterladen der neuesten Version oder durch direktes Bauen aus dem Quellcode:</p>
 
                 <h3>Option 1: Release herunterladen</h3>
                 <p>Die einfachste Methode, FileVault zu nutzen:</p>
@@ -460,6 +460,12 @@ start.bat     # Für Windows</code></pre>
                 <h3>Option 2: Aus dem Quellcode bauen</h3>
                 <p>Um FileVault direkt vom Quellcode zu installieren:</p>
                 <ol>
+                    <li>Voraussetzungen:
+                        <ul>
+                            <li>Java 17 oder höher (OpenJDK oder Oracle JDK)</li>
+                            <li>Maven 3.8 oder höher</li>
+                        </ul>
+                    </li>
                     <li>Klonen Sie das Repository:
                         <pre><code>git clone https://github.com/GulfGulfinson/fileVault.git
 cd fileVault</code></pre>
@@ -467,14 +473,17 @@ cd fileVault</code></pre>
                     <li>Bauen Sie das Projekt mit Maven:
                         <pre><code>mvn clean package</code></pre>
                     </li>
-                    <li>Starten Sie die Anwendung:
-                        <pre><code>./start.sh    # Für Linux/Mac
-start.bat     # Für Windows</code></pre>
-                    </li>
-                    <li>Alternativ können Sie die Anwendung auch direkt mit Maven starten:
-                        <pre><code>mvn javafx:run</code></pre>
+                    <li>Starten Sie die Anwendung mit einem der beiden Wege:
+                        <pre><code># Methode 1: Start-Skript verwenden
+./start.sh    # Für Linux/Mac
+start.bat     # Für Windows
+
+# Methode 2: Direktes Starten mit Maven
+mvn javafx:run</code></pre>
                     </li>
                 </ol>
+
+                <p>Bei der ersten Ausführung wird automatisch ein neuer Benutzer angelegt. Wenn Sie einen neuen Benutzer erstellen möchten, löschen Sie einfach die Datenbank-Datei (<code>~/.filevault/vault.db</code>).</p>
 
                 <h3>Zukünftige Installationsmethoden</h3>
                 <p>Die folgenden Methoden werden in naher Zukunft implementiert:</p>
@@ -505,10 +514,9 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
                     </div>
                     
                     <div class="method-card">
-                        <h4>WebAssembly Demo im Browser</h4>
+                        <h4>WebAssembly (Browser-Version)</h4>
                         <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
-                        <p>Eine eingeschränkte Version von FileVault wird direkt im Browser verfügbar sein.</p>
-                        <p>Sehen Sie sich die <a href="index.html#wasm-demo-container">Demo</a> auf der Startseite an.</p>
+                        <p>Eine Demo-Version ist bereits auf der <a href="index.html#wasm-demo-container">Startseite</a> verfügbar.</p>
                     </div>
                 </div>
 
