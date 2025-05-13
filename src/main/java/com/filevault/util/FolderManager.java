@@ -272,11 +272,11 @@ public class FolderManager {
      * @throws IllegalStateException wenn der Ordner Unterordner enthält
      */
     public void deleteFolder(VirtualFolder folder) {
-        LoggingUtil.logInfo("FolderManager", "Deleting folder: " + folder.getName());
         if (folder == null) {
             LoggingUtil.logError("FolderManager", "Folder deletion failed: Folder is null.");
             throw new IllegalArgumentException("Ordner darf nicht null sein");
         }
+        LoggingUtil.logInfo("FolderManager", "Deleting folder: " + folder.getName());
 
         // Prüfe auf Unterordner
         List<VirtualFolder> subfolders = getSubfolders(folder.getId());
@@ -340,11 +340,11 @@ public class FolderManager {
      * @param folder Der zu löschende Ordner
      */
     public void deleteFolderRecursive(VirtualFolder folder) {
-        LoggingUtil.logInfo("FolderManager", "Recursively deleting folder: " + folder.getName());
         if (folder == null) {
             LoggingUtil.logError("FolderManager", "Recursive folder deletion failed: Folder is null.");
             throw new IllegalArgumentException("Ordner darf nicht null sein");
         }
+        LoggingUtil.logInfo("FolderManager", "Recursively deleting folder: " + folder.getName());
 
         try {
             // Disable auto-commit mode
