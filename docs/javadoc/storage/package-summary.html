@@ -1,0 +1,373 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package com.filevault.storage</title>
+    <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --link-color: #7367F0;
+            --visited-link-color: #6A4BAF;
+            --hover-color: #5E50EE;
+            --header-bg: #F0D4FF;
+            --table-header-bg: #F0D4FF;
+            --table-row-bg: #ffffff;
+            --table-alt-row-bg: #f8f8f8;
+            --border-color: #dee2e6;
+            --code-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-color: #1a1f6d;
+            --text-color: #E0C3FC;
+            --link-color: #D4ADFC;
+            --visited-link-color: #A08BEF;
+            --hover-color: #7367F0;
+            --header-bg: #0C134F;
+            --table-header-bg: #0C134F;
+            --table-row-bg: #29307e;
+            --table-alt-row-bg: #1f2770;
+            --border-color: #29307e;
+            --code-bg: #0A0F3D;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-alt-row-bg);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--table-row-bg);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:visited {
+            color: var(--visited-link-color);
+        }
+
+        a:hover, a:focus {
+            color: var(--hover-color);
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .package-signature {
+            background-color: var(--code-bg);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .class-summary {
+            margin-top: 30px;
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        .class-description {
+            margin-bottom: 1rem;
+        }
+
+        .navigation {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider"></div>
+        </label>
+    </div>
+
+    <h1>Package com.filevault.storage</h1>
+    
+    <div class="package-signature">package com.filevault.storage</div>
+    
+    <p>
+        Dieses Paket enthält Klassen zur Verwaltung der Datenspeicherung und -persistenz in der FileVault-Anwendung.
+        Es stellt Schnittstellen und Implementierungen für den Zugriff auf verschiedene Speichersysteme bereit.
+    </p>
+    
+    <h2>Paket-Beschreibung</h2>
+    
+    <p>
+        Das <code>com.filevault.storage</code> Paket bietet eine abstrakte Schicht für den Zugriff auf verschiedene Speichersysteme,
+        darunter lokale Dateisysteme, Datenbanken und Cloud-Speicherdienste. Es folgt dem Data Access Object (DAO) Muster
+        und stellt einheitliche Schnittstellen bereit, die es den höheren Schichten der Anwendung ermöglichen,
+        mit verschiedenen Speichersystemen zu interagieren, ohne deren spezifische Details kennen zu müssen.
+    </p>
+    
+    <div class="class-summary">
+        <h2>Klassen-Zusammenfassung</h2>
+        
+        <table>
+            <tr>
+                <th>Klasse/Interface</th>
+                <th>Beschreibung</th>
+            </tr>
+            <tr>
+                <td><a href="StorageManager.html">StorageManager</a></td>
+                <td>
+                    <div class="class-description">
+                        Zentrale Klasse zur Koordination aller Speicheroperationen und zur Verwaltung der verschiedenen Speicher-Provider.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="StorageProvider.html">StorageProvider (Interface)</a></td>
+                <td>
+                    <div class="class-description">
+                        Schnittstelle, die von allen Speicher-Provider-Implementierungen implementiert werden muss,
+                        um grundlegende CRUD-Operationen bereitzustellen.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="LocalFileSystemProvider.html">LocalFileSystemProvider</a></td>
+                <td>
+                    <div class="class-description">
+                        Implementierung des StorageProvider-Interfaces für die Speicherung verschlüsselter Dateien im lokalen Dateisystem.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="DatabaseProvider.html">DatabaseProvider</a></td>
+                <td>
+                    <div class="class-description">
+                        Implementierung des StorageProvider-Interfaces für die Speicherung von Metadaten und kleinen Dateien in einer SQL-Datenbank.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="CloudStorageProvider.html">CloudStorageProvider</a></td>
+                <td>
+                    <div class="class-description">
+                        Implementierung des StorageProvider-Interfaces für die Integration mit Cloud-Speicherdiensten wie S3 oder Google Cloud Storage.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="StorageTransaction.html">StorageTransaction</a></td>
+                <td>
+                    <div class="class-description">
+                        Stellt transaktionale Funktionalität für Speicheroperationen bereit, die mehrere Schritte umfassen.
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <h2>Nutzungsbeispiel</h2>
+    
+    <p>Hier ist ein einfaches Beispiel, wie die Speicherklassen verwendet werden können:</p>
+    
+    <pre><code>// StorageManager initialisieren
+StorageManager storageManager = StorageManager.getInstance();
+
+// Konfiguration für lokalen Speicher erstellen
+StorageConfiguration localConfig = new StorageConfiguration();
+localConfig.setType(StorageType.LOCAL_FILE_SYSTEM);
+localConfig.setProperty("rootPath", "/home/user/filevault/storage");
+
+// Provider registrieren
+storageManager.registerProvider("local", localConfig);
+
+// Verschlüsselte Datei speichern
+EncryptedFile encryptedFile = new EncryptedFile("steuer2023.pdf.enc", 
+                                              vault, 
+                                              user);
+byte[] encryptedData = ...; // Bereits verschlüsselte Daten
+
+StorageProvider provider = storageManager.getProvider("local");
+String fileId = provider.storeFile(encryptedFile, encryptedData);
+
+// Später: Die Datei wieder abrufen
+EncryptedFile metadata = provider.getFileMetadata(fileId);
+byte[] retrievedData = provider.retrieveFile(fileId);
+
+// Transaktion für mehrere Operationen starten
+StorageTransaction transaction = storageManager.beginTransaction();
+try {
+    // Mehrere Operationen ausführen
+    transaction.storeFile(file1, data1);
+    transaction.storeFile(file2, data2);
+    transaction.updateMetadata(file3, newMetadata);
+    
+    // Transaktion abschließen
+    transaction.commit();
+} catch (Exception e) {
+    // Bei Fehler: Transaktion zurückrollen
+    transaction.rollback();
+    throw e;
+}</code></pre>
+    
+    <h2>Architekturdiagramm</h2>
+    
+    <p>
+        Die Speicherschicht ist wie folgt aufgebaut:
+    </p>
+    
+    <ul>
+        <li>Der <code>StorageManager</code> dient als Fassade für das gesamte Speichersystem</li>
+        <li>Verschiedene <code>StorageProvider</code>-Implementierungen kapseln den Zugriff auf spezifische Speichertechnologien</li>
+        <li>Ein Plugin-System ermöglicht die einfache Integration zusätzlicher Speicher-Provider</li>
+        <li>Die Speicherschicht interagiert mit dem <code>com.filevault.security</code> Paket, um die Verschlüsselung der gespeicherten Daten sicherzustellen</li>
+        <li>Ein ereignisbasiertes System ermöglicht die Benachrichtigung über wichtige Speicheroperationen (z.B. für Logging oder UI-Updates)</li>
+    </ul>
+    
+    <div class="navigation">
+        <a href="../index.html">Zurück zur Übersicht</a> |
+        <a href="../package-list.html">Alle Pakete</a>
+    </div>
+
+    <script>
+        // Theme toggler
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html> 

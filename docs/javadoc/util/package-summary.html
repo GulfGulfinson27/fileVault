@@ -1,0 +1,385 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package com.filevault.util</title>
+    <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --link-color: #7367F0;
+            --visited-link-color: #6A4BAF;
+            --hover-color: #5E50EE;
+            --header-bg: #F0D4FF;
+            --table-header-bg: #F0D4FF;
+            --table-row-bg: #ffffff;
+            --table-alt-row-bg: #f8f8f8;
+            --border-color: #dee2e6;
+            --code-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-color: #1a1f6d;
+            --text-color: #E0C3FC;
+            --link-color: #D4ADFC;
+            --visited-link-color: #A08BEF;
+            --hover-color: #7367F0;
+            --header-bg: #0C134F;
+            --table-header-bg: #0C134F;
+            --table-row-bg: #29307e;
+            --table-alt-row-bg: #1f2770;
+            --border-color: #29307e;
+            --code-bg: #0A0F3D;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-alt-row-bg);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--table-row-bg);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:visited {
+            color: var(--visited-link-color);
+        }
+
+        a:hover, a:focus {
+            color: var(--hover-color);
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .package-signature {
+            background-color: var(--code-bg);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .class-summary {
+            margin-top: 30px;
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        .class-description {
+            margin-bottom: 1rem;
+        }
+
+        .navigation {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider"></div>
+        </label>
+    </div>
+
+    <h1>Package com.filevault.util</h1>
+    
+    <div class="package-signature">package com.filevault.util</div>
+    
+    <p>
+        Dieses Paket enthält Hilfsfunktionen und allgemeine Dienstprogramme, die in der gesamten FileVault-Anwendung verwendet werden.
+        Es bietet eine Sammlung von wiederverwendbaren Komponenten und Werkzeugen, um häufig benötigte Funktionalitäten bereitzustellen.
+    </p>
+    
+    <h2>Paket-Beschreibung</h2>
+    
+    <p>
+        Das <code>com.filevault.util</code> Paket dient als Sammlung von Hilfsklassen und Utilities, die in mehreren Bereichen der Anwendung
+        eingesetzt werden. Die Klassen in diesem Paket sind so konzipiert, dass sie wiederverwendbare Funktionalitäten bereitstellen
+        und allgemeine Probleme lösen, ohne abhängig von spezifischen Geschäftslogik-Komponenten zu sein. Dieses Paket enthält
+        Hilfsfunktionen für Dateisystemoperationen, String-Manipulation, Datum/Zeit-Berechnungen, Validierungen und andere
+        allgemeine Funktionen.
+    </p>
+    
+    <div class="class-summary">
+        <h2>Klassen-Zusammenfassung</h2>
+        
+        <table>
+            <tr>
+                <th>Klasse</th>
+                <th>Beschreibung</th>
+            </tr>
+            <tr>
+                <td><a href="FileUtils.html">FileUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Stellt Hilfsmethoden für Dateioperationen bereit, wie das Kopieren, Verschieben und Löschen von Dateien,
+                        sowie das Erstellen von temporären Dateien und Verzeichnissen.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="StringUtils.html">StringUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Bietet Methoden für String-Operationen wie Überprüfung auf Null/Leerheit, Padding, Trimming und
+                        Formatierung von Strings.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="DateTimeUtils.html">DateTimeUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Stellt Funktionen für Datum- und Zeitberechnungen, Konvertierungen und Formatierungen bereit.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="ValidationUtils.html">ValidationUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Enthält Methoden zur Validierung von Eingabedaten, E-Mail-Adressen, Passwörtern und anderen
+                        benutzerdefinierten Formaten.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="LogUtils.html">LogUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Unterstützt einheitliches Logging in der gesamten Anwendung mit verschiedenen Logging-Ebenen.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="ConfigurationManager.html">ConfigurationManager</a></td>
+                <td>
+                    <div class="class-description">
+                        Verwaltet die Anwendungskonfiguration, lädt Einstellungen aus Dateien und bietet Zugriff auf Konfigurationswerte.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="ThreadUtils.html">ThreadUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Stellt Hilfsfunktionen für Thread-Management, Thread-Pools und asynchrone Operationen bereit.
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <h2>Nutzungsbeispiel</h2>
+    
+    <p>Hier sind einige Beispiele, wie die Utility-Klassen verwendet werden können:</p>
+    
+    <pre><code>// Dateiverwaltung mit FileUtils
+File tempDir = FileUtils.createTempDirectory("filevault_");
+File logFile = new File(tempDir, "application.log");
+FileUtils.ensureDirectoryExists(new File("/home/user/filevault/logs"));
+
+// String-Verarbeitung mit StringUtils
+String filename = StringUtils.isEmpty(userInput) ? "default.txt" : userInput;
+String safeFilename = StringUtils.sanitizeFilename(filename);
+String truncatedName = StringUtils.truncate(safeFilename, 50);
+
+// Datum/Zeit-Verarbeitung mit DateTimeUtils
+LocalDateTime now = DateTimeUtils.getCurrentDateTime();
+String formattedDate = DateTimeUtils.formatDateTime(now, "yyyy-MM-dd HH:mm:ss");
+LocalDateTime expirationDate = DateTimeUtils.addDays(now, 30);
+
+// Validierung mit ValidationUtils
+if (!ValidationUtils.isValidEmail(email)) {
+    throw new IllegalArgumentException("Ungültige E-Mail-Adresse");
+}
+ValidationUtils.validatePassword(password, ValidationUtils.PasswordStrength.STRONG);
+ValidationUtils.requireNonNull(user, "Der Benutzer darf nicht null sein");
+
+// Loggen mit LogUtils
+LogUtils.debug("Starte Verschlüsselungsvorgang für Datei: {}", file.getName());
+try {
+    // Operation ausführen
+} catch (Exception e) {
+    LogUtils.error("Fehler beim Verschlüsseln der Datei", e);
+}
+
+// Konfiguration abrufen
+ConfigurationManager config = ConfigurationManager.getInstance();
+int maxFileSize = config.getIntValue("upload.maxFileSize", 10485760); // 10 MB default
+String storagePath = config.getStringValue("storage.localPath");
+
+// Parallele Verarbeitung
+List&lt;File&gt; files = getFilesToProcess();
+ThreadUtils.executeInParallel(files, file -> {
+    processFile(file);
+}, 4); // Verwende 4 Threads</code></pre>
+    
+    <h2>Weitere Informationen</h2>
+    
+    <p>
+        Die Utility-Klassen in diesem Paket:
+    </p>
+    
+    <ul>
+        <li>Sind alle <code>final</code> deklariert und haben private Konstruktoren, da sie nicht instanziiert werden sollen</li>
+        <li>Bieten überwiegend statische Methoden an, um die Nutzung ohne Objekterzeugung zu ermöglichen</li>
+        <li>Enthalten umfangreiche Validierung von Eingabeparametern, um NullPointerExceptions und andere Fehler zu vermeiden</li>
+        <li>Sind gut dokumentiert und mit umfangreichen Javadoc-Kommentaren versehen</li>
+        <li>Werden durch Unit-Tests abgedeckt, um ihre Zuverlässigkeit zu gewährleisten</li>
+    </ul>
+    
+    <div class="navigation">
+        <a href="../index.html">Zurück zur Übersicht</a> |
+        <a href="../package-list.html">Alle Pakete</a>
+    </div>
+
+    <script>
+        // Theme toggler
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html> 

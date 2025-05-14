@@ -1,0 +1,326 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package com.filevault.security</title>
+    <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --link-color: #7367F0;
+            --visited-link-color: #6A4BAF;
+            --hover-color: #5E50EE;
+            --header-bg: #F0D4FF;
+            --table-header-bg: #F0D4FF;
+            --table-row-bg: #ffffff;
+            --table-alt-row-bg: #f8f8f8;
+            --border-color: #dee2e6;
+            --code-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-color: #1a1f6d;
+            --text-color: #E0C3FC;
+            --link-color: #D4ADFC;
+            --visited-link-color: #A08BEF;
+            --hover-color: #7367F0;
+            --header-bg: #0C134F;
+            --table-header-bg: #0C134F;
+            --table-row-bg: #29307e;
+            --table-alt-row-bg: #1f2770;
+            --border-color: #29307e;
+            --code-bg: #0A0F3D;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-alt-row-bg);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--table-row-bg);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:visited {
+            color: var(--visited-link-color);
+        }
+
+        a:hover, a:focus {
+            color: var(--hover-color);
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .package-signature {
+            background-color: var(--code-bg);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+
+        .class-summary {
+            margin-top: 30px;
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+
+        .class-description {
+            margin-bottom: 1rem;
+        }
+
+        .navigation {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider"></div>
+        </label>
+    </div>
+
+    <h1>Package com.filevault.security</h1>
+    
+    <div class="package-signature">package com.filevault.security</div>
+    
+    <p>
+        Dieses Paket enthält Klassen für die Verschlüsselung, Entschlüsselung und Verwaltung von Sicherheitsaspekten in FileVault.
+        Die Hauptkomponenten umfassen AES-Verschlüsselung, Passwort-Hashing und Schlüsselableitung mit PBKDF2.
+    </p>
+    
+    <h2>Paket-Beschreibung</h2>
+    
+    <p>
+        Das <code>com.filevault.security</code> Paket stellt die kryptografischen Funktionen bereit, die für die sichere Speicherung
+        und Verwaltung von Dateien in FileVault erforderlich sind. Es implementiert moderne Sicherheitsstandards wie:
+    </p>
+    
+    <ul>
+        <li>AES-256 im GCM-Modus (Galois/Counter Mode) für authentifizierte Verschlüsselung</li>
+        <li>PBKDF2 mit HMAC-SHA256 für sichere Passwort-basierte Schlüsselableitung</li>
+        <li>Sichere Zufallszahlengenerierung für Salts und Initialisierungsvektoren</li>
+        <li>Integritätsschutz für verschlüsselte Dateien</li>
+    </ul>
+    
+    <div class="class-summary">
+        <h2>Klassen-Zusammenfassung</h2>
+        
+        <table>
+            <tr>
+                <th>Klasse</th>
+                <th>Beschreibung</th>
+            </tr>
+            <tr>
+                <td><a href="AESEncryption.html">AESEncryption</a></td>
+                <td>
+                    <div class="class-description">
+                        Implementiert Methoden zur Datei-Verschlüsselung und -Entschlüsselung mit dem AES-256-GCM-Algorithmus.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="KeyDerivation.html">KeyDerivation</a></td>
+                <td>
+                    <div class="class-description">
+                        Bietet Funktionen zur Ableitung kryptografischer Schlüssel aus Passwörtern mittels PBKDF2.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="PasswordHasher.html">PasswordHasher</a></td>
+                <td>
+                    <div class="class-description">
+                        Stellt Methoden zum sicheren Hashen und Überprüfen von Passwörtern bereit.
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="SecurityUtils.html">SecurityUtils</a></td>
+                <td>
+                    <div class="class-description">
+                        Hilfsfunktionen für allgemeine kryptografische Operationen und Sicherheitsaufgaben.
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <h2>Nutzungsbeispiel</h2>
+    
+    <p>Hier ist ein einfaches Beispiel, wie die Klassen in diesem Paket zur Verschlüsselung einer Datei verwendet werden können:</p>
+    
+    <pre><code>// Passwort in einen Schlüssel umwandeln
+String password = "sicheresPasswort123";
+byte[] salt = KeyDerivation.generateSalt();
+int iterations = 65536;
+int keyLength = 256;
+SecretKey key = KeyDerivation.deriveKey(password, salt, iterations, keyLength);
+
+// Datei verschlüsseln
+File inputFile = new File("vertraulich.docx");
+File outputFile = new File("vertraulich.docx.enc");
+byte[] iv = AESEncryption.generateIV();
+AESEncryption.encryptFile(inputFile, outputFile, key, iv);
+
+// Später: Datei entschlüsseln
+File encryptedFile = new File("vertraulich.docx.enc");
+File decryptedFile = new File("vertraulich_entschlüsselt.docx");
+// Der gleiche Schlüssel und IV müssen verwendet werden
+AESEncryption.decryptFile(encryptedFile, decryptedFile, key, iv);</code></pre>
+    
+    <div class="navigation">
+        <a href="../index.html">Zurück zur Übersicht</a> |
+        <a href="../package-list.html">Alle Pakete</a>
+    </div>
+
+    <script>
+        // Theme toggler
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,795 @@
+<!DOCTYPE HTML>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileVault API Dokumentation</title>
+    <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --link-color: #7367F0;
+            --visited-link-color: #6A4BAF;
+            --hover-color: #5E50EE;
+            --header-bg: #F0D4FF;
+            --navbar-bg: #E0C3FC;
+            --table-header-bg: #F0D4FF;
+            --table-row-bg: #ffffff;
+            --table-alt-row-bg: #f8f8f8;
+            --border-color: #dee2e6;
+            --code-bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-color: #1a1f6d;
+            --text-color: #E0C3FC;
+            --link-color: #D4ADFC;
+            --visited-link-color: #A08BEF;
+            --hover-color: #7367F0;
+            --header-bg: #0C134F;
+            --navbar-bg: #1a1f6d;
+            --table-header-bg: #0C134F;
+            --table-row-bg: #29307e;
+            --table-alt-row-bg: #1f2770;
+            --border-color: #29307e;
+            --code-bg: #0A0F3D;
+            --card-bg: #29307e;
+            --card-shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .flex-box {
+            display: flex;
+            width: 100%;
+        }
+
+        .flex-content {
+            flex: 1;
+        }
+
+        .top-nav {
+            background-color: var(--header-bg);
+            color: var(--text-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-nav h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin-left: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--navbar-bg);
+            padding: 1rem;
+            overflow-y: auto;
+            position: sticky;
+            top: 60px; /* Height of the top nav */
+            max-height: calc(100vh - 60px);
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar .package {
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 0.75rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--table-alt-row-bg);
+        }
+
+        tr:nth-child(odd) {
+            background-color: var(--table-row-bg);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:visited {
+            color: var(--visited-link-color);
+        }
+
+        a:hover, a:focus {
+            color: var(--hover-color);
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+        
+        .packages-summary {
+            margin: 1.5rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .flex-box {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+            }
+            
+            .top-nav {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .nav-links {
+                margin-top: 1rem;
+                flex-wrap: wrap;
+            }
+            
+            .nav-links a {
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Additional JavaDoc-specific styles */
+        .method-name {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        .param-name {
+            font-style: italic;
+        }
+        
+        .return-type {
+            color: var(--link-color);
+        }
+        
+        .deprecated {
+            text-decoration: line-through;
+            color: #dc3545;
+        }
+        
+        .class-description {
+            margin-bottom: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: var(--header-bg);
+            border-radius: 8px;
+        }
+
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .package-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .package-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--card-shadow);
+        }
+
+        .package-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .package-card p {
+            margin-bottom: 1rem;
+        }
+
+        .package-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+
+        .overview-section {
+            margin-bottom: 2rem;
+        }
+
+        .overview-section p {
+            text-align: justify;
+        }
+
+        .version-info {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .navigation {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .navigation a {
+            margin: 0 10px;
+        }
+
+        .package-list-section {
+            margin-top: 2rem;
+        }
+
+        .package-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .package-list li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider"></div>
+        </label>
+    </div>
+
+    <div class="top-nav">
+        <h1>FileVault API Dokumentation</h1>
+        <div class="nav-links">
+            <a href="../index.html">Startseite</a>
+            <a href="../documentation.html">Dokumentation</a>
+            <a href="https://github.com/GulfGulfinson/fileVault">GitHub Repository</a>
+        </div>
+    </div>
+
+    <div class="flex-box">
+        <div class="sidebar">
+            <h2>Pakete</h2>
+            <ul>
+                <li class="package">com.filevault.controller</li>
+                <ul>
+                    <li><a href="#FileController">FileController</a></li>
+                    <li><a href="#FolderController">FolderController</a></li>
+                    <li><a href="#VaultController">VaultController</a></li>
+                </ul>
+                
+                <li class="package">com.filevault.model</li>
+                <ul>
+                    <li><a href="#EncryptedFile">EncryptedFile</a></li>
+                    <li><a href="#VirtualFolder">VirtualFolder</a></li>
+                    <li><a href="#User">User</a></li>
+                </ul>
+                
+                <li class="package">com.filevault.security</li>
+                <ul>
+                    <li><a href="#AESEncryption">AESEncryption</a></li>
+                    <li><a href="#PasswordHasher">PasswordHasher</a></li>
+                    <li><a href="#KeyDerivation">KeyDerivation</a></li>
+                </ul>
+                
+                <li class="package">com.filevault.storage</li>
+                <ul>
+                    <li><a href="#DatabaseManager">DatabaseManager</a></li>
+                    <li><a href="#FileStorage">FileStorage</a></li>
+                </ul>
+                
+                <li class="package">com.filevault.util</li>
+                <ul>
+                    <li><a href="#FileUtils">FileUtils</a></li>
+                    <li><a href="#PathResolver">PathResolver</a></li>
+                </ul>
+            </ul>
+        </div>
+
+        <div class="content">
+            <h2>FileVault API Übersicht</h2>
+            <p>
+                Die FileVault API bietet eine umfassende Schnittstelle zur Verwaltung, Verschlüsselung und Entschlüsselung von Dateien.
+                Sie ist in verschiedene Pakete unterteilt, die jeweils spezifische Funktionen bereitstellen.
+            </p>
+            
+            <div class="packages-summary">
+                <h3>Pakete</h3>
+                <table>
+                    <tr>
+                        <th>Paket</th>
+                        <th>Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>com.filevault.controller</code></td>
+                        <td>Controller-Klassen, die die Anwendungslogik implementieren und die verschiedenen Komponenten koordinieren.</td>
+                    </tr>
+                    <tr>
+                        <td><code>com.filevault.model</code></td>
+                        <td>Datenmodelle, die die Struktur der Anwendung definieren, einschließlich Dateien, Ordner und Benutzer.</td>
+                    </tr>
+                    <tr>
+                        <td><code>com.filevault.security</code></td>
+                        <td>Klassen für Verschlüsselung, Entschlüsselung, Passwort-Hashing und Schlüsselableitung.</td>
+                    </tr>
+                    <tr>
+                        <td><code>com.filevault.storage</code></td>
+                        <td>Komponenten für die Datei- und Datenbankinteraktion, wie das Speichern verschlüsselter Dateien und Metadaten.</td>
+                    </tr>
+                    <tr>
+                        <td><code>com.filevault.util</code></td>
+                        <td>Hilfsklassen und Dienstprogramme für allgemeine Funktionen wie Dateioperationen und Pfadauflösung.</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <h3 id="AESEncryption">AESEncryption</h3>
+            <div class="class-description">
+                <p>
+                    Die Klasse <code>AESEncryption</code> implementiert Methoden zur Verschlüsselung und Entschlüsselung von Dateien
+                    unter Verwendung des AES-256-GCM-Algorithmus (Advanced Encryption Standard mit Galois/Counter Mode).
+                </p>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Methode</th>
+                    <th>Beschreibung</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">encryptFile</span>(
+                        <span class="param-name">File inputFile</span>,
+                        <span class="param-name">File outputFile</span>,
+                        <span class="param-name">SecretKey key</span>,
+                        <span class="param-name">byte[] iv</span>
+                        ) : <span class="return-type">void</span>
+                    </td>
+                    <td>
+                        Verschlüsselt eine Datei mit dem angegebenen Schlüssel und Initialisierungsvektor.
+                        Die verschlüsselte Datei wird am angegebenen Ausgabepfad gespeichert.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">decryptFile</span>(
+                        <span class="param-name">File inputFile</span>,
+                        <span class="param-name">File outputFile</span>,
+                        <span class="param-name">SecretKey key</span>,
+                        <span class="param-name">byte[] iv</span>
+                        ) : <span class="return-type">void</span>
+                    </td>
+                    <td>
+                        Entschlüsselt eine Datei mit dem angegebenen Schlüssel und Initialisierungsvektor.
+                        Die entschlüsselte Datei wird am angegebenen Ausgabepfad gespeichert.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">generateIV</span>() : <span class="return-type">byte[]</span>
+                    </td>
+                    <td>
+                        Generiert einen kryptografisch sicheren Initialisierungsvektor (IV) für die AES-GCM-Verschlüsselung.
+                        Der IV ist 96 Bit (12 Bytes) lang.
+                    </td>
+                </tr>
+            </table>
+            
+            <h3 id="KeyDerivation">KeyDerivation</h3>
+            <div class="class-description">
+                <p>
+                    Die Klasse <code>KeyDerivation</code> bietet Methoden zur Ableitung von Verschlüsselungsschlüsseln
+                    aus Passwörtern unter Verwendung des PBKDF2-Algorithmus mit HMAC-SHA256.
+                </p>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Methode</th>
+                    <th>Beschreibung</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">deriveKey</span>(
+                        <span class="param-name">String password</span>,
+                        <span class="param-name">byte[] salt</span>,
+                        <span class="param-name">int iterations</span>,
+                        <span class="param-name">int keyLength</span>
+                        ) : <span class="return-type">SecretKey</span>
+                    </td>
+                    <td>
+                        Leitet einen Schlüssel aus einem Passwort ab. Der Salt-Wert sollte für jeden Schlüssel einzigartig sein.
+                        Die Anzahl der Iterationen sollte mindestens 65.536 betragen, und die Schlüssellänge sollte 256 Bit sein.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">generateSalt</span>() : <span class="return-type">byte[]</span>
+                    </td>
+                    <td>
+                        Generiert einen kryptografisch sicheren Salt-Wert für die Schlüsselableitung.
+                        Der Salt ist 256 Bit (32 Bytes) lang.
+                    </td>
+                </tr>
+            </table>
+            
+            <h3 id="VaultController">VaultController</h3>
+            <div class="class-description">
+                <p>
+                    Die Klasse <code>VaultController</code> ist die Hauptschnittstelle für die Interaktion mit dem FileVault.
+                    Sie koordiniert die verschiedenen Komponenten und bietet Methoden zum Importieren, Exportieren und Verwalten von Dateien.
+                </p>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Methode</th>
+                    <th>Beschreibung</th>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">importFile</span>(
+                        <span class="param-name">File sourceFile</span>,
+                        <span class="param-name">VirtualFolder targetFolder</span>
+                        ) : <span class="return-type">EncryptedFile</span>
+                    </td>
+                    <td>
+                        Importiert eine Datei in den Tresor, verschlüsselt sie und speichert sie im angegebenen virtuellen Ordner.
+                        Gibt das EncryptedFile-Objekt zurück, das die importierte Datei repräsentiert.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">exportFile</span>(
+                        <span class="param-name">EncryptedFile file</span>,
+                        <span class="param-name">File targetPath</span>
+                        ) : <span class="return-type">boolean</span>
+                    </td>
+                    <td>
+                        Exportiert eine verschlüsselte Datei aus dem Tresor, entschlüsselt sie und speichert sie am angegebenen Zielort.
+                        Gibt true zurück, wenn der Export erfolgreich war, andernfalls false.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">createFolder</span>(
+                        <span class="param-name">String folderName</span>,
+                        <span class="param-name">VirtualFolder parentFolder</span>
+                        ) : <span class="return-type">VirtualFolder</span>
+                    </td>
+                    <td>
+                        Erstellt einen neuen virtuellen Ordner mit dem angegebenen Namen im angegebenen übergeordneten Ordner.
+                        Gibt das neu erstellte VirtualFolder-Objekt zurück.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">deleteFile</span>(
+                        <span class="param-name">EncryptedFile file</span>
+                        ) : <span class="return-type">boolean</span>
+                    </td>
+                    <td>
+                        Löscht eine verschlüsselte Datei aus dem Tresor, einschließlich der physischen Datei und der Metadaten.
+                        Gibt true zurück, wenn das Löschen erfolgreich war, andernfalls false.
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="method-name">deleteFolder</span>(
+                        <span class="param-name">VirtualFolder folder</span>
+                        ) : <span class="return-type">boolean</span>
+                    </td>
+                    <td>
+                        Löscht einen virtuellen Ordner aus dem Tresor, einschließlich aller darin enthaltenen Dateien und Unterordner.
+                        Gibt true zurück, wenn das Löschen erfolgreich war, andernfalls false.
+                    </td>
+                </tr>
+            </table>
+            
+            <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <p>
+                    Diese Dokumentation ist eine vereinfachte Version der vollständigen JavaDoc-Dokumentation.
+                    Für die vollständige API-Dokumentation generieren Sie bitte die JavaDoc-Dateien aus dem Quellcode.
+                </p>
+                <pre><code>mvn javadoc:javadoc</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>FileVault API Dokumentation</h1>
+        <p>Eine sichere Anwendung zur Verschlüsselung und Verwaltung vertraulicher Dateien</p>
+    </div>
+
+    <div class="overview-section">
+        <h2>Übersicht</h2>
+        <p>
+            FileVault ist eine Java-basierte Anwendung, die entwickelt wurde, um eine sichere Umgebung für die Speicherung
+            und Verwaltung vertraulicher Dateien zu bieten. Die Anwendung verwendet moderne Verschlüsselungstechniken,
+            wie AES-256 im GCM-Modus, um die Vertraulichkeit und Integrität der gespeicherten Daten zu gewährleisten.
+        </p>
+        <p>
+            Die Architektur von FileVault folgt dem Model-View-Controller (MVC) Muster und ist in mehrere funktionale
+            Pakete unterteilt, die jeweils spezifische Aspekte der Anwendung abdecken. Diese API-Dokumentation bietet
+            einen detaillierten Überblick über die verschiedenen Komponenten und ihre Interaktionen.
+        </p>
+    </div>
+
+    <div class="package-list-section">
+        <h2>Alle Pakete</h2>
+        <ul class="package-list">
+            <li><a href="model/package-summary.html">com.filevault.model</a> - Datenmodelle und Geschäftsobjekte</li>
+            <li><a href="controller/package-summary.html">com.filevault.controller</a> - Controller für die Geschäftslogik</li>
+            <li><a href="security/package-summary.html">com.filevault.security</a> - Kryptografische Funktionen und Sicherheitskomponenten</li>
+            <li><a href="storage/package-summary.html">com.filevault.storage</a> - Datenspeicherung und Persistenz</li>
+            <li><a href="util/package-summary.html">com.filevault.util</a> - Hilfsfunktionen und allgemeine Utilities</li>
+        </ul>
+    </div>
+
+    <div class="package-grid">
+        <div class="package-card">
+            <h3>Model</h3>
+            <p>
+                Dieses Paket enthält die zentralen Datenmodelle und Geschäftsobjekte, die die grundlegenden Entitäten
+                und Datenstrukturen der Anwendung repräsentieren, wie Benutzer, Vaults und verschlüsselte Dateien.
+            </p>
+            <a href="model/package-summary.html" class="package-link">Zur Model-Dokumentation →</a>
+        </div>
+
+        <div class="package-card">
+            <h3>Controller</h3>
+            <p>
+                Die Controller-Klassen dienen als Vermittler zwischen der Benutzeroberfläche und den Modellen 
+                und implementieren die Geschäftslogik der Anwendung.
+            </p>
+            <a href="controller/package-summary.html" class="package-link">Zur Controller-Dokumentation →</a>
+        </div>
+
+        <div class="package-card">
+            <h3>Security</h3>
+            <p>
+                Dieses Paket enthält alle kryptografischen Funktionen und Sicherheitskomponenten, 
+                einschließlich Verschlüsselung, Passwort-Hashing und Schlüsselableitung.
+            </p>
+            <a href="security/package-summary.html" class="package-link">Zur Security-Dokumentation →</a>
+        </div>
+
+        <div class="package-card">
+            <h3>Storage</h3>
+            <p>
+                Die Storage-Komponenten verwalten die Datenspeicherung und -persistenz und bieten Schnittstellen 
+                für verschiedene Speichersysteme, wie lokale Dateisysteme oder Cloud-Storage.
+            </p>
+            <a href="storage/package-summary.html" class="package-link">Zur Storage-Dokumentation →</a>
+        </div>
+
+        <div class="package-card">
+            <h3>Utility</h3>
+            <p>
+                Das Utility-Paket bietet allgemeine Hilfsfunktionen und -klassen, die in der gesamten 
+                Anwendung verwendet werden, wie Datei-, String- und Datum/Zeit-Operationen.
+            </p>
+            <a href="util/package-summary.html" class="package-link">Zur Utility-Dokumentation →</a>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <a href="package-list.html">Alle Pakete</a> |
+        <a href="../index.html">Zurück zur Hauptseite</a>
+    </div>
+
+    <div class="version-info">
+        <p>FileVault Version 1.0.0 | Erstellt am 30.07.2023</p>
+    </div>
+
+    <script>
+        // Theme toggler
+        const toggleSwitch = document.querySelector('#checkbox');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                toggleSwitch.checked = true;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }    
+        }
+
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html> 
