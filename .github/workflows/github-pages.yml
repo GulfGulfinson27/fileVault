@@ -118,7 +118,8 @@ jobs:
                 </header>
                 <nav>
                     <a href="documentation.html" class="button">Dokumentation</a>
-                    <a href="javadoc/index.html" class="button">JavaDoc</a>
+                    <a href="javadoc/main.html" class="button">JavaDoc</a>
+                    <a href="api.html" class="button">API</a>
                     <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
                 </nav>
                 <main>' > build-output/index.html

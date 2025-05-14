@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileVault API Dokumentation</title>
+    <style>
+        :root {
+            /* Light theme variables (default) */
+            --bg-gradient: linear-gradient(to bottom right, #FFEEFF, #F8E1FF, #F0D4FF);
+            --text-color: #6D2E80;
+            --title-color: #6D2E80;
+            --button-bg: rgba(255, 230, 255, 0.85);
+            --button-text: #9146B0;
+            --button-border: #D0A6E5;
+            --button-shadow: rgba(210, 160, 255, 0.3);
+            --button-hover-bg: #B675D5;
+            --button-hover-border: #9146B0;
+            --button-hover-text: white;
+            --card-bg: rgba(255, 235, 255, 0.7);
+            --card-border: rgba(210, 160, 255, 0.4);
+            --secondary-text: #BB8FCE;
+            --link-color: #7367F0;
+            --code-bg: #f5f5f5;
+            --card-shadow: rgba(170, 110, 200, 0.3);
+            --header-bg: rgba(245, 230, 255, 0.8);
+            --footer-text: #BB8FCE;
+            --divider-color: #eee;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-gradient: linear-gradient(to bottom right, #080D30, #0A0F3D, #0C134F);
+            --text-color: #E0C3FC;
+            --title-color: #E0C3FC;
+            --button-bg: rgba(26, 31, 109, 0.8);
+            --button-text: #E0C3FC;
+            --button-border: #6A4BAF;
+            --button-shadow: rgba(224, 195, 252, 0.5);
+            --button-hover-bg: #6A4BAF;
+            --button-hover-border: #E0C3FC;
+            --button-hover-text: #FFFFFF;
+            --card-bg: rgba(29, 38, 125, 0.7);
+            --card-border: rgba(106, 75, 175, 0.3);
+            --secondary-text: #D4ADFC;
+            --link-color: #7367F0;
+            --code-bg: rgba(26, 31, 109, 0.7);
+            --card-shadow: rgba(0, 0, 0, 0.4);
+            --header-bg: rgba(29, 38, 125, 0.8);
+            --footer-text: #A08BEF;
+            --divider-color: #1A1F6D;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            text-align: center;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+            padding: 30px 20px;
+            box-shadow: 0 5px 15px var(--card-shadow);
+        }
+
+        h1 {
+            color: var(--title-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--title-color);
+            margin-top: 30px;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: var(--title-color);
+            font-size: 1.4em;
+        }
+
+        p {
+            color: var(--text-color);
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: var(--text-color);
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: var(--text-color);
+        }
+
+        .button {
+            display: inline-block;
+            background: var(--button-bg);
+            color: var(--button-text);
+            padding: 12px 24px;
+            border-radius: 12px;
+            margin: 10px 5px;
+            text-decoration: none;
+            font-weight: bold;
+            border: 2px solid var(--button-border);
+            box-shadow: 0 5px 15px var(--button-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: var(--button-hover-bg);
+            color: var(--button-hover-text);
+            border-color: var(--button-hover-border);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px var(--button-shadow);
+            text-decoration: none;
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .endpoint-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--card-shadow);
+            border: 1px solid var(--card-border);
+            padding: 25px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px var(--card-shadow);
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .method.get {
+            background-color: #61affe;
+            color: white;
+        }
+
+        .method.post {
+            background-color: #49cc90;
+            color: white;
+        }
+
+        .method.put {
+            background-color: #fca130;
+            color: white;
+        }
+
+        .method.delete {
+            background-color: #f93e3e;
+            color: white;
+        }
+
+        .theme-switch-wrapper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .theme-switch {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #6A4BAF;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #6A4BAF;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider:after {
+            content: '☀️';
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            font-size: 12px;
+            color: white;
+            opacity: 1;
+            transition: .4s;
+        }
+
+        input:checked + .slider:after {
+            content: '🌙';
+            left: 35px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>FileVault API Dokumentation</h1>
+            <p>Eine RESTful API zum Zugriff auf das FileVault-System</p>
+            <nav>
+                <a href="index.html" class="button">Startseite</a>
+                <a href="documentation.html" class="button">Dokumentation</a>
+                <a href="javadoc/main.html" class="button">JavaDoc</a>
+                <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
+            </nav>
+        </header>
+
+        <main>
+            <section>
+                <h2>Übersicht</h2>
+                <p>Die FileVault API ist eine RESTful API, die den Zugriff auf das FileVault-System ermöglicht. Sie bietet Funktionen zur Verwaltung von Ordnern und Dateien, die im FileVault-System gespeichert sind. Die API ist auf der Basis von Java implementiert und nutzt den integrierten HttpServer.</p>
+            </section>
+
+            <section>
+                <h2>Basiseinstellung</h2>
+                <p>Die folgenden Beispiele gehen davon aus, dass der FileVault API-Server unter <code>localhost:9090</code> läuft. Falls Sie einen anderen Host oder Port verwenden, passen Sie die Befehle entsprechend an.</p>
+            </section>
+
+            <section>
+                <h2>Authentifizierung</h2>
+                <p>Bevor Sie auf die meisten Endpunkte zugreifen können, müssen Sie sich bei der API authentifizieren.</p>
+                
+                <h3>Authentifizierungsprozess</h3>
+                <ol>
+                    <li>Senden Sie eine POST-Anfrage an den <code>/api/auth</code>-Endpunkt mit Ihrem Passwort.</li>
+                    <li>Bei erfolgreicher Authentifizierung erhalten Sie ein Token zurück.</li>
+                    <li>Dieses Token müssen Sie in allen nachfolgenden Anfragen im <code>Authorization</code>-Header mitschicken.</li>
+                </ol>
+                
+                <p>Das Master-Passwort für die Authentifizierung lautet: <code>11111111</code> (Hinweis: In einer Produktionsumgebung sollte ein sicheres Passwort verwendet werden)</p>
+                
+                <h3>Token-Verwaltung</h3>
+                <ul>
+                    <li>Tokens werden im Speicher verwaltet und bleiben gültig, bis die Anwendung neu gestartet wird oder Sie sich ausloggen.</li>
+                    <li>Sie können Ihr Token im lokalen Speicher Ihres Browsers speichern, um es zwischen Sitzungen beizubehalten.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>API-Endpunkte</h2>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method post">POST</span> /api/auth</h3>
+                    <p>Authentifiziert einen Benutzer und gibt ein Token zurück.</p>
+                    <ul>
+                        <li><strong>Anforderungsformat:</strong> JSON mit Passwort</li>
+                        <li><strong>Antwortformat:</strong> JSON mit Token</li>
+                        <li><strong>Auth erforderlich:</strong> Nein</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl -X POST http://localhost:9090/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"password":"11111111"}'</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>{"token":"d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8"}</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method get">GET</span> /api/folders</h3>
+                    <p>Listet alle verfügbaren Ordner auf.</p>
+                    <ul>
+                        <li><strong>Antwortformat:</strong> JSON-Array mit Ordnern</li>
+                        <li><strong>Auth erforderlich:</strong> Ja</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl -X GET http://localhost:9090/api/folders \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8"</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>[{"id":1,"name":"Persönlich","parentFolderId":0},{"id":2,"name":"Arbeit","parentFolderId":0},{"id":3,"name":"Dokumente","parentFolderId":1}]</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method post">POST</span> /api/folders</h3>
+                    <p>Erstellt einen neuen Ordner.</p>
+                    <ul>
+                        <li><strong>Anforderungsformat:</strong> JSON mit Ordnername und optionalem übergeordneten Ordner</li>
+                        <li><strong>Antwortformat:</strong> JSON mit Informationen zum erstellten Ordner</li>
+                        <li><strong>Auth erforderlich:</strong> Ja</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl) - Ordner in Root-Ebene:</h4>
+                    <pre><code>curl -X POST http://localhost:9090/api/folders \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Neuer Ordner"}'</code></pre>
+                    
+                    <h4>Linux-Beispiel (curl) - Unterordner erstellen:</h4>
+                    <pre><code>curl -X POST http://localhost:9090/api/folders \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Unterordner","parentFolderId":1}'</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>{"id":4,"name":"Unterordner","parentFolderId":1}</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method put">PUT</span> /api/folders</h3>
+                    <p>Aktualisiert einen bestehenden Ordner.</p>
+                    <ul>
+                        <li><strong>Anforderungsformat:</strong> JSON mit Ordner-ID und neuem Namen</li>
+                        <li><strong>Antwortformat:</strong> JSON mit aktualisierten Ordnerinformationen</li>
+                        <li><strong>Auth erforderlich:</strong> Ja</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl -X PUT http://localhost:9090/api/folders \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8" \
+  -H "Content-Type: application/json" \
+  -d '{"id":4,"name":"Umbenannter Ordner"}'</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>{"id":4,"name":"Umbenannter Ordner"}</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method delete">DELETE</span> /api/folders?id={id}</h3>
+                    <p>Löscht einen Ordner anhand seiner ID.</p>
+                    <ul>
+                        <li><strong>Antwortformat:</strong> JSON mit Erfolgs- oder Fehlermeldung</li>
+                        <li><strong>Auth erforderlich:</strong> Ja</li>
+                        <li><strong>Einschränkung:</strong> Über die API können nur leere Ordner gelöscht werden.</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl -X DELETE "http://localhost:9090/api/folders?id=4" \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8"</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>Ordner erfolgreich gelöscht.</code></pre>
+                    
+                    <h4>Mögliche Fehlermeldung (bei Ordner mit Inhalt):</h4>
+                    <pre><code>Ordner mit Inhalt können nicht über die API gelöscht werden. Bitte verwenden Sie die grafische Benutzeroberfläche (GUI), um Ordner mit Unterordnern oder Dateien zu löschen.</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method get">GET</span> /api/files</h3>
+                    <p>Listet alle verfügbaren Dateien auf.</p>
+                    <ul>
+                        <li><strong>Antwortformat:</strong> JSON-Array mit Dateien</li>
+                        <li><strong>Auth erforderlich:</strong> Ja</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl -X GET http://localhost:9090/api/files \
+  -H "Authorization: d123e4a4-5b6c-78d9-0e1f-2g3h4i56j7k8"</code></pre>
+                    
+                    <h4>Erwartete Antwort:</h4>
+                    <pre><code>[{"id":1,"name":"bericht.pdf","folderId":2},{"id":2,"name":"notizen.txt","folderId":1}]</code></pre>
+                </div>
+                
+                <div class="endpoint-card">
+                    <h3><span class="method get">GET</span> /</h3>
+                    <p>Bietet ein einfaches Web-Interface zum Testen der API.</p>
+                    <ul>
+                        <li><strong>Antwortformat:</strong> HTML</li>
+                        <li><strong>Auth erforderlich:</strong> Nein (aber Funktionalität innerhalb des Interfaces erfordert Authentifizierung)</li>
+                    </ul>
+                    
+                    <h4>Linux-Beispiel (curl):</h4>
+                    <pre><code>curl http://localhost:9090/</code></pre>
+                    
+                    <p>Dies gibt die HTML-Seite des Web-Interfaces zurück, die Sie in einem Browser öffnen können.</p>
+                </div>
+            </section>
+            
+            <section>
+                <h2>Fehlerbehandlung</h2>
+                <p>Die API gibt verschiedene HTTP-Statuscodes zurück, um den Erfolg oder Misserfolg einer Anfrage anzuzeigen:</p>
+                <ul>
+                    <li>200: Erfolgreiche Anfrage</li>
+                    <li>201: Ressource erfolgreich erstellt</li>
+                    <li>401: Nicht autorisiert (fehlende oder ungültige Authentifizierung)</li>
+                    <li>405: Methode nicht erlaubt (falsche HTTP-Methode für den Endpunkt)</li>
+                </ul>
+                
+                <p>Fehlermeldungen werden im JSON-Format zurückgegeben, um weitere Informationen über den Fehler zu liefern.</p>
+                
+                <h3>Beispiele für Fehlerbehandlung</h3>
+                
+                <h4>Beispiel für ungültige Authentifizierung:</h4>
+                <pre><code>curl -X POST http://localhost:9090/api/auth \
+  -H "Content-Type: application/json" \
+  -d '{"password":"falschespasswort"}'</code></pre>
+                
+                <h4>Erwartete Antwort:</h4>
+                <pre><code>{"error":"Ungültiges Passwort. Zugriff verweigert."}</code></pre>
+                
+                <h4>Beispiel für eine Anfrage ohne Token:</h4>
+                <pre><code>curl -X GET http://localhost:9090/api/folders</code></pre>
+                
+                <h4>Erwartete Antwort:</h4>
+                <pre><code>{"error":"Unauthorized: Invalid or missing authentication token."}</code></pre>
+                
+                <h4>Beispiel für eine Anfrage mit ungültigem Token:</h4>
+                <pre><code>curl -X GET http://localhost:9090/api/folders \
+  -H "Authorization: ungültigestoken"</code></pre>
+                
+                <h4>Erwartete Antwort:</h4>
+                <pre><code>{"error":"Unauthorized: Invalid or missing authentication token."}</code></pre>
+            </section>
+            
+            <section>
+                <h2>Bekannte Einschränkungen</h2>
+                <ul>
+                    <li><strong>Ordner mit Inhalt:</strong> Ordner, die Unterordner oder Dateien enthalten, können nicht über die API gelöscht werden. Verwenden Sie stattdessen die grafische Benutzeroberfläche (GUI) für diese Operation.</li>
+                    <li><strong>Datei-Upload:</strong> Die aktuelle API-Version unterstützt keine vollständige Datei-Upload-Funktionalität über die API. Dateien müssen über die GUI hochgeladen werden.</li>
+                </ul>
+            </section>
+            
+            <section>
+                <h2>Sicherheitsüberlegungen</h2>
+                <ul>
+                    <li>Die API verwendet eine einfache tokenbasierte Authentifizierung.</li>
+                    <li>Die Tokens werden im Speicher verwaltet und sind nicht persistent über Neustarts hinweg.</li>
+                    <li>In einer Produktionsumgebung sollten zusätzliche Sicherheitsmaßnahmen wie HTTPS, Token-Zeitlimits und sichere Passwörter implementiert werden.</li>
+                </ul>
+            </section>
+        </main>
+        
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="checkbox">
+                <input type="checkbox" id="checkbox" />
+                <div class="slider"></div>
+            </label>
+        </div>
+        
+        <script>
+            // Dark mode toggle
+            const toggleSwitch = document.querySelector('#checkbox');
+            const currentTheme = localStorage.getItem('theme');
+            
+            if (currentTheme) {
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                if (currentTheme === 'dark') {
+                    toggleSwitch.checked = true;
+                }
+            }
+            
+            function switchTheme(e) {
+                if (e.target.checked) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+            
+            toggleSwitch.addEventListener('change', switchTheme, false);
+        </script>
+    </div>
+</body>
+</html> 
