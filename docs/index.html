@@ -482,6 +482,18 @@
         [data-theme="dark"] .demo-note {
             background-color: rgba(255, 193, 7, 0.05);
         }
+
+        .highlight {
+            border: 2px solid gold;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        }
     </style>
     <!-- WebAssembly Demo Styles -->
     <link rel="stylesheet" href="js/wasm-demo.css">
@@ -503,7 +515,7 @@
         <nav>
             <a href="documentation.html" class="button">Dokumentation</a>
             <a href="javadoc/main.html" class="button">JavaDoc</a>
-            <a href="api.html" class="button">API</a>
+            <a href="api.html" class="button highlight">API</a>
             <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
             <a href="markdown/LICENSE.md" class="button">Lizenz</a>
         </nav>
@@ -793,6 +805,7 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
                 <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
                 <a href="https://github.com/GulfGulfinson/fileVault/releases" class="button">Releases</a>
                 <a href="documentation.html" class="button">Dokumentation</a>
+                <a href="api.html" class="button highlight">API</a>
             </div>
         </main>
 

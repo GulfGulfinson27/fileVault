@@ -59,7 +59,8 @@ jobs:
             cp -r target/javadoc/* docs/javadoc/ || echo "No files to copy from target/javadoc"
           else
             echo "JavaDoc files not found in expected locations, creating placeholder"
-            echo "<html><body><h1>JavaDoc will be available soon</h1></body></html>" > docs/javadoc/index.html
+            echo "<html><head><meta http-equiv=\"refresh\" content=\"0;url=main.html\"><script>window.location.href=\"main.html\";</script></head><body><h1>FileVault JavaDoc</h1><p>Redirecting to main documentation...</p></body></html>" > docs/javadoc/index.html
+            echo "<html><head><title>FileVault API Documentation</title></head><body><h1>FileVault API Documentation</h1><p><a href=\"../index.html\">Home</a> | <a href=\"../documentation.html\">Documentation</a> | <a href=\"../api.html\">API</a></p><p>JavaDoc will be available soon.</p></body></html>" > docs/javadoc/main.html
           fi
           
           # Verify javadoc directory has content

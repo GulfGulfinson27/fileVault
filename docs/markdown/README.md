@@ -13,5 +13,5 @@ Dieses Verzeichnis enthält wichtige Dokumente zum FileVault Projekt.
 
 - [Zurück zur Hauptseite](../index.html)
 - [Dokumentation](../documentation.html)
-- [JavaDoc](../javadoc/index.html)
+- [JavaDoc](../javadoc/main.html)
 - [GitHub Repository](https://github.com/GulfGulfinson/fileVault) 

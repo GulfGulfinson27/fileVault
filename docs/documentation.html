@@ -412,6 +412,18 @@
                 max-width: 100%;
             }
         }
+
+        .highlight {
+            border: 2px solid gold;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        }
     </style>
 </head>
 <body>
@@ -431,7 +443,7 @@
         <nav class="top-nav">
             <a href="index.html" class="button">Startseite</a>
             <a href="javadoc/main.html" class="button">JavaDoc</a>
-            <a href="api.html" class="button">API</a>
+            <a href="api.html" class="button highlight">API</a>
             <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
             <a href="markdown/LICENSE.md" class="button">Lizenz</a>
         </nav>
@@ -592,6 +604,9 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
             <section id="api">
                 <h2>API-Dokumentation</h2>
                 <p>Die API-Dokumentation wird automatisch aus dem Quellcode generiert. Sie können die vollständige JavaDoc-Dokumentation im Verzeichnis <code>docs/javadoc/</code> des Projekts finden.</p>
+                
+                <p>Die REST-API-Dokumentation bietet eine Übersicht aller verfügbaren Endpunkte und Beispiele für deren Verwendung:</p>
+                <a href="api.html" class="btn">REST API Dokumentation</a>
                 
                 <p>Wichtige Pakete in der FileVault-API:</p>
                 <ul>
