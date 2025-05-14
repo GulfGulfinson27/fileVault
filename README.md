@@ -114,7 +114,7 @@ src/main/java/com/filevault/
 ## 📖 Dokumentation
 
 - **Website**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
-- **JavaDoc**: [Vollständige API-Dokumentation](https://GulfGulfinson.github.io/fileVault/javadoc/)
+- **JavaDoc**: [Vollständige API-Dokumentation](https://GulfGulfinson.github.io/fileVault/javadoc/main.html)
 - **Live Demo**: [WebAssembly-Demo im Browser](https://GulfGulfinson.github.io/fileVault#wasm-demo-container)
 
 ## 🤝 Beitragen
