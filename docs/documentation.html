@@ -432,6 +432,7 @@
             <a href="index.html" class="button">Startseite</a>
             <a href="javadoc/index.html" class="button">JavaDoc</a>
             <a href="https://github.com/GulfGulfinson/fileVault" class="button">GitHub Repository</a>
+            <a href="markdown/LICENSE.md" class="button">Lizenz</a>
         </nav>
 
         <ul class="nav">
@@ -439,6 +440,7 @@
             <li><a href="#verwendung">Verwendung</a></li>
             <li><a href="#technische-details">Technische Details</a></li>
             <li><a href="#api">API</a></li>
+            <li><a href="#dokumente">Dokumente</a></li>
         </ul>
 
         <main>
@@ -603,10 +605,41 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
                 
                 <a href="javadoc/index.html" class="btn">JavaDoc ansehen</a>
             </section>
+            
+            <section id="dokumente">
+                <h2>Projektzusatzdokumente</h2>
+                <p>Hilfreiche Dokumente zum FileVault-Projekt:</p>
+                
+                <ul>
+                    <li><a href="markdown/CONTRIBUTING.md">Beitragsrichtlinien</a> - Wie Sie zum Projekt beitragen können</li>
+                    <li><a href="markdown/CODE_OF_CONDUCT.md">Verhaltenskodex</a> - Richtlinien für die Community</li>
+                    <li><a href="markdown/SECURITY.md">Sicherheitsrichtlinien</a> - Meldung von Sicherheitslücken</li>
+                    <li><a href="markdown/LICENSE.md">Lizenz</a> - MIT-Lizenz für FileVault</li>
+                </ul>
+            </section>
         </main>
 
         <footer>
             <p>FileVault ist ein Projekt von Phillip Schneider. Entwickelt im Rahmen des Kurses "Objektorientierte Programmierung II".</p>
+            <div class="footer-links">
+                <a href="markdown/CONTRIBUTING.md">Beitragen</a> | 
+                <a href="markdown/CODE_OF_CONDUCT.md">Verhaltenskodex</a> | 
+                <a href="markdown/SECURITY.md">Sicherheit</a> | 
+                <a href="markdown/LICENSE.md">Lizenz</a>
+            </div>
+            <style>
+                .footer-links {
+                    margin-top: 10px;
+                    font-size: 0.85em;
+                }
+                .footer-links a {
+                    margin: 0 5px;
+                    color: var(--secondary-text);
+                }
+                .footer-links a:hover {
+                    color: var(--title-color);
+                }
+            </style>
         </footer>
     </div>
 

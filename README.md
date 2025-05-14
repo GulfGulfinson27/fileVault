@@ -119,11 +119,11 @@ src/main/java/com/filevault/
 
 ## 🤝 Beitragen
 
-Beiträge zum Projekt sind willkommen! Weitere Informationen finden Sie in der [CONTRIBUTING.md](CONTRIBUTING.md).
+Beiträge zum Projekt sind willkommen! Weitere Informationen finden Sie in der [CONTRIBUTING.md](docs/markdown/CONTRIBUTING.md).
 
 ## 📄 Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz. Details finden Sie in der [LICENSE](LICENSE) Datei.
+Dieses Projekt steht unter der MIT-Lizenz. Details finden Sie in der [LICENSE](docs/markdown/LICENSE.md) Datei.
 
 ---
 
