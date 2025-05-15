@@ -27,5 +27,5 @@ COPY target/FileVault-shaded.jar /app/FileVault.jar
 # Port für die API freigeben
 EXPOSE 9090
 
-# Start-Befehl für die API
+# Start-Befehl für die API.
 ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"] 

@@ -90,7 +90,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+      
     steps:
       - name: Debug Job Start
         run: |
@@ -98,6 +98,7 @@ jobs:
           echo "GitHub Repository: ${{ github.repository }}"
           echo "GitHub Actor: ${{ github.actor }}"
           echo "GitHub Ref: ${{ github.ref }}"
+      
       - name: Checkout code
         uses: actions/checkout@v4
       
@@ -120,7 +121,31 @@ jobs:
           else
             echo "JAR file not found in target directory"
             find . -name "FileVault-shaded.jar" -type f
+            exit 1
           fi
+      
+      - name: Create simplified Dockerfile
+        run: |
+          cat > Dockerfile.simple << EOF
+          FROM eclipse-temurin:17-jre-alpine
+          
+          WORKDIR /app
+          
+          # JavaFX-Abhängigkeiten für Alpine Linux
+          RUN apk add --no-cache libxtst libxi libxrandr libxrender libxext libxfixes libx11 fontconfig ttf-dejavu
+          
+          # Kopiere die JAR-Datei
+          COPY ./target/FileVault-shaded.jar /app/FileVault.jar
+          
+          # Port für die API freigeben
+          EXPOSE 9090
+          
+          # Start-Befehl für die API
+          ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"]
+          EOF
+          
+          echo "Created simplified Dockerfile:"
+          cat Dockerfile.simple
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -136,7 +161,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: ./Dockerfile.simple
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/filevault:latest
