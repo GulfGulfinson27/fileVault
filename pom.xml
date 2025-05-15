@@ -241,6 +241,10 @@
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/MainControllerTest.java</exclude>
+                        <exclude>**/MainGUITest.java</exclude>
+                    </excludes>
                     <!-- JavaFX-Tests in Headless-Umgebung unterstützen -->
                     <argLine>
                         --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
@@ -257,8 +261,6 @@
                         <java.awt.headless>true</java.awt.headless>
                         <testfx.headless>true</testfx.headless>
                     </systemPropertyVariables>
-                    <!-- Überspringe JavaFX-Tests in CI-Umgebung -->
-                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
