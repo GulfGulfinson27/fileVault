@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -32,9 +34,53 @@ jobs:
       - name: Build and Test with Maven
         run: xvfb-run --auto-servernum mvn -B package --file pom.xml
 
-      - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Check if release exists and determine next version
+        id: check_version
+        run: |
+          # Extrahiere die gepushte Tag-Version
+          PUSHED_TAG=${GITHUB_REF#refs/tags/v}
+          echo "PUSHED_TAG=${PUSHED_TAG}" >> $GITHUB_OUTPUT
+          
+          # Prüfe ob ein Release mit diesem Tag bereits existiert mit curl
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${PUSHED_TAG}")
+          
+          if [ "$HTTP_STATUS" == "200" ]; then
+            echo "Release für v${PUSHED_TAG} existiert bereits, ermittle nächste verfügbare Version..."
+            
+            # Hole die Liste aller Releases
+            RELEASES=$(curl -s \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases" | \
+              grep -o '"tag_name": "v[^"]*"' | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*' | sort -V | tail -n1)
+            
+            if [ -z "$RELEASES" ]; then
+              # Fallback: Verwende git tags lokal
+              LATEST_TAG=$(git tag -l "v*" --sort=-v:refname | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*' | sort -V | tail -n1)
+            else
+              LATEST_TAG="$RELEASES"
+            fi
+            
+            LATEST_VERSION=${LATEST_TAG#v}
+            
+            # Version in Major.Minor.Patch aufteilen
+            MAJOR=$(echo "$LATEST_VERSION" | cut -d. -f1)
+            MINOR=$(echo "$LATEST_VERSION" | cut -d. -f2)
+            PATCH=$(echo "$LATEST_VERSION" | cut -d. -f3)
+            
+            # Patch-Version inkrementieren
+            NEW_PATCH=$((PATCH + 1))
+            NEXT_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+            
+            echo "Nächste zu verwendende Version: v${NEXT_VERSION}"
+            echo "VERSION=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "Verwende gepushte Version: v${PUSHED_TAG}"
+            echo "VERSION=${PUSHED_TAG}" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Prepare release files
         run: |
@@ -121,22 +167,25 @@ jobs:
           2. Für einen neuen Benutzer muss die Datenbank gelöscht werden (im ~/.filevault/ Verzeichnis)
           EOL
           
+          # Verwende die Version aus dem check_version Step
+          VERSION="${{ steps.check_version.outputs.VERSION }}"
+          
           # Erstellen eines ZIP-Archivs
           cd release
-          zip -r ../FileVault-${{ steps.get_version.outputs.VERSION }}.zip .
+          zip -r ../FileVault-${VERSION}.zip .
           cd ..
       
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ steps.get_version.outputs.VERSION }}
+          tag_name: v${{ steps.check_version.outputs.VERSION }}
+          name: Release ${{ steps.check_version.outputs.VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
           files: |
-            FileVault-${{ steps.get_version.outputs.VERSION }}.zip
+            FileVault-${{ steps.check_version.outputs.VERSION }}.zip
             target/FileVault-shaded.jar
             release/AUSFÜHRUNG.md
         env:
