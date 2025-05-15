@@ -66,20 +66,50 @@ Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: 
 > **Hinweis**: Bei der ersten Ausführung wird automatisch ein neuer Benutzer angelegt. 
 > Für einen neuen Benutzer muss die bestehende Datenbank (`~/.filevault/vault.db`) gelöscht werden.
 
-### Zukünftige Installationsmethoden (in Entwicklung)
+### Option 3: Docker Container
 
-#### Docker Container
+#### Docker-Befehl
 ```bash
-docker pull ghcr.io/GulfGulfinson/fileVault:latest
-docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
+# Container starten und API auf Port 9090 verfügbar machen
+docker pull ghcr.io/gulfgulfinson/filevault:latest
+docker run -d -p 9090:9090 -v filevault-data:/root/.filevault --name filevault ghcr.io/gulfgulfinson/filevault:latest
 ```
+
+#### Mit Docker Compose (empfohlen)
+1. Erstellen Sie eine `docker-compose.yml` Datei oder verwenden Sie die mitgelieferte:
+   ```yaml
+   version: '3.8'
+   
+   services:
+     filevault:
+       image: ghcr.io/gulfgulfinson/filevault:latest
+       container_name: filevault
+       ports:
+         - "9090:9090"
+       volumes:
+         - filevault-data:/root/.filevault
+       restart: unless-stopped
+   
+   volumes:
+     filevault-data:
+       name: filevault-data
+   ```
+
+2. Starten Sie FileVault mit Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Zugriff auf die Anwendung:
+   - Die FileVault-API ist unter http://localhost:9090 verfügbar
+   - Verwenden Sie einen REST-Client oder die Desktop-Anwendung, um mit der API zu interagieren
 
 #### GitHub Packages
 ```xml
 <repositories>
     <repository>
         <id>github</id>
-        <name>GitHub GulfGulfinson Apache Maven Packages</name>
+        <n>GitHub GulfGulfinson Apache Maven Packages</n>
         <url>https://maven.pkg.github.com/GulfGulfinson/fileVault</url>
     </repository>
 </repositories>

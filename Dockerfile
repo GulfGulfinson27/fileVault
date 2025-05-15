@@ -1,5 +1,5 @@
-# Basis-Image mit OpenJDK 17
-FROM eclipse-temurin:17-jre-alpine
+# Basis-Image mit OpenJDK 17 und JavaFX
+FROM eclipse-temurin:17-jdk-alpine
 
 # Metadaten
 LABEL org.opencontainers.image.source="https://github.com/GulfGulfinson/fileVault"
@@ -21,11 +21,14 @@ RUN apk add --no-cache \
     fontconfig \
     ttf-dejavu
 
+# JavaFX-Module installieren
+RUN apk add --no-cache openjfx --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
 # Kopiere die JAR-Datei
 COPY target/FileVault-shaded.jar /app/FileVault.jar
 
 # Port für die API freigeben
 EXPOSE 9090
 
-# Start-Befehl für die API.
-ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"] 
+# Start-Befehl für die API
+ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090", "--module-path", "/usr/share/openjfx/lib", "--add-modules", "javafx.controls,javafx.fxml"] 

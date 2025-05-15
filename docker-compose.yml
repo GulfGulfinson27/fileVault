@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  filevault:
+    image: ghcr.io/gulfgulfinson/filevault:latest
+    container_name: filevault
+    ports:
+      - "9090:9090"
+    volumes:
+      - filevault-data:/root/.filevault
+    restart: unless-stopped
+
+volumes:
+  filevault-data:
+    name: filevault-data 
