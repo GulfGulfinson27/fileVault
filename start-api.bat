@@ -1,33 +1,27 @@
 @echo off
 setlocal
 
-REM Standardport, falls keiner angegeben wird
-set PORT=9090
-if not "%~1"=="" set PORT=%~1
-
-REM Pfad zum JavaFX SDK festlegen
-set PATH_TO_FX=lib\javafx-sdk-17.0.14\lib
-
-REM Prüfen, ob die JAR-Datei existiert
-if exist "target\FileVault-shaded.jar" (
-    set JAR_PATH=target\FileVault-shaded.jar
-) else if exist "FileVault-shaded.jar" (
-    set JAR_PATH=FileVault-shaded.jar
-) else if exist "FileVault.jar" (
-    set JAR_PATH=FileVault.jar
-) else (
-    echo Fehler: Keine FileVault JAR-Datei gefunden.
+set "JAVA_HOME=%JAVA_HOME%"
+if "%JAVA_HOME%"=="" (
+    echo JAVA_HOME ist nicht gesetzt. Bitte setzen Sie JAVA_HOME auf Ihr JDK-Verzeichnis.
     exit /b 1
 )
 
-REM Prüfen, ob das JavaFX SDK vorhanden ist
-if not exist "%PATH_TO_FX%" (
-    echo Fehler: JavaFX SDK nicht gefunden in %PATH_TO_FX%
+set "JAVAFX_LIB=lib\javafx-sdk-17.0.14\lib"
+set "JAVAFX_MODULES=javafx.controls,javafx.fxml"
+
+if not exist "%JAVAFX_LIB%" (
+    echo JavaFX-Bibliotheken nicht gefunden in %JAVAFX_LIB%
     exit /b 1
 )
 
-REM Starte nur die API ohne GUI
-java -Djava.awt.headless=true --module-path "%PATH_TO_FX%" --add-modules javafx.controls,javafx.fxml -jar "%JAR_PATH%" --api-port=%PORT%
+echo Starte FileVault API...
+"%JAVA_HOME%\bin\java" ^
+    --module-path "%JAVAFX_LIB%" ^
+    --add-modules %JAVAFX_MODULES% ^
+    -jar target\FileVault-shaded.jar --api-only
 
-REM Falls Sie die Konsole offen halten möchten, entkommentieren Sie die folgende Zeile
-REM pause
+if errorlevel 1 (
+    echo Fehler beim Starten der API.
+    exit /b 1
+)

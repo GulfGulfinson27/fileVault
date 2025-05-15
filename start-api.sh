@@ -1,28 +1,25 @@
 #!/bin/bash
 
-# Standardport, falls keiner angegeben wird
-PORT=${1:-9090}
-
-# Pfad zum JavaFX SDK festlegen
-PATH_TO_FX="lib/javafx-sdk-17.0.14/lib"
-
-# Prüfen, ob die JAR-Datei existiert
-if [ -f "target/FileVault-shaded.jar" ]; then
-    JAR_PATH="target/FileVault-shaded.jar"
-elif [ -f "FileVault-shaded.jar" ]; then
-    JAR_PATH="FileVault-shaded.jar"
-elif [ -f "FileVault.jar" ]; then
-    JAR_PATH="FileVault.jar"
-else
-    echo "Fehler: Keine FileVault JAR-Datei gefunden."
+if [ -z "$JAVA_HOME" ]; then
+    echo "JAVA_HOME ist nicht gesetzt. Bitte setzen Sie JAVA_HOME auf Ihr JDK-Verzeichnis."
     exit 1
 fi
 
-# Prüfen, ob das JavaFX SDK vorhanden ist
-if [ ! -d "$PATH_TO_FX" ]; then
-    echo "Fehler: JavaFX SDK nicht gefunden in $PATH_TO_FX"
+JAVAFX_LIB="lib/javafx-sdk-17.0.14/lib"
+JAVAFX_MODULES="javafx.controls,javafx.fxml"
+
+if [ ! -d "$JAVAFX_LIB" ]; then
+    echo "JavaFX-Bibliotheken nicht gefunden in $JAVAFX_LIB"
     exit 1
 fi
 
-# Starte nur die API ohne GUI
-java -Djava.awt.headless=true --module-path "$PATH_TO_FX" --add-modules javafx.controls,javafx.fxml -jar "$JAR_PATH" --api-port=$PORT
+echo "Starte FileVault API..."
+"$JAVA_HOME/bin/java" \
+    --module-path "$JAVAFX_LIB" \
+    --add-modules "$JAVAFX_MODULES" \
+    -jar target/FileVault-shaded.jar --api-only
+
+if [ $? -ne 0 ]; then
+    echo "Fehler beim Starten der API."
+    exit 1
+fi
