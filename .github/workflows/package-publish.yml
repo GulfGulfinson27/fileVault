@@ -84,60 +84,42 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-docker:
+    name: Build and Push Docker Image
     needs: build-and-publish
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      
+    
     steps:
+      - name: Debug Job Start
+        run: |
+          echo "Docker build job started"
+          echo "GitHub Repository: ${{ github.repository }}"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "GitHub Ref: ${{ github.ref }}"
       - name: Checkout code
         uses: actions/checkout@v4
-        
-      - name: Download built JAR
-        uses: actions/download-artifact@v4
+      
+      - name: Setup Maven
+        uses: actions/setup-java@v4
         with:
-          name: FileVault-shaded-${{ needs.build-and-publish.outputs.version }}
-          path: ./target/
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
       
-      - name: List files to verify JAR download
-        run: |
-          ls -la
-          ls -la target/ || true
-          # Debug: Zeige den Inhalt des target-Verzeichnisses
-          find . -name "*.jar" || true
+      - name: Build with Maven (to ensure JAR exists)
+        run: mvn -B package --file pom.xml
       
-      - name: Ensure JAR file exists in correct location
+      - name: Check if JAR exists
         run: |
-          # Erstelle target-Verzeichnis, falls es nicht existiert
-          mkdir -p target
-          
-          # Wenn die JAR-Datei im Root-Verzeichnis liegt, verschiebe sie ins target-Verzeichnis
-          if [ -f "FileVault-shaded.jar" ]; then
-            mv FileVault-shaded.jar target/
-          fi
-          
-          # Wenn die Datei unter einem anderen Namen existiert, kopiere sie in das richtige Format
-          if [ ! -f "target/FileVault-shaded.jar" ]; then
-            find . -name "*.jar" -type f -exec cp {} target/FileVault-shaded.jar \; -quit
-          fi
-          
-          # Überprüfen, ob die Datei jetzt existiert
+          echo "Checking if JAR exists in target directory"
+          ls -la target/
           if [ -f "target/FileVault-shaded.jar" ]; then
-            echo "JAR-Datei wurde gefunden/erstellt im target-Verzeichnis"
-            ls -la target/
+            echo "JAR file found!"
           else
-            echo "Konnte die JAR-Datei nicht finden oder erstellen"
-            exit 1
-          fi
-      
-      - name: Extract version
-        id: get_version
-        run: |
-          if [[ "${{ github.ref }}" =~ ^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
-            echo "VERSION=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
-          else
-            echo "VERSION=latest" >> $GITHUB_OUTPUT
+            echo "JAR file not found in target directory"
+            find . -name "FileVault-shaded.jar" -type f
           fi
       
       - name: Login to GitHub Container Registry
@@ -147,12 +129,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Build Docker image
-        run: |
-          echo "Building Docker image ghcr.io/${{ github.repository_owner }}/filevault:${{ steps.get_version.outputs.VERSION }}"
-          docker build -t ghcr.io/${{ github.repository_owner }}/filevault:${{ steps.get_version.outputs.VERSION }} -t ghcr.io/${{ github.repository_owner }}/filevault:latest .
-          
-      - name: Push Docker image
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/filevault:${{ steps.get_version.outputs.VERSION }}
-          docker push ghcr.io/${{ github.repository_owner }}/filevault:latest 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/filevault:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max 
