@@ -257,6 +257,8 @@
                         <java.awt.headless>true</java.awt.headless>
                         <testfx.headless>true</testfx.headless>
                     </systemPropertyVariables>
+                    <!-- Überspringe JavaFX-Tests in CI-Umgebung -->
+                    <skipTests>${skipTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>
