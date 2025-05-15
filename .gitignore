@@ -54,3 +54,6 @@ build-output/
 .docusaurus/
 .cache-loader/
 docs-site/
+
+# JavaFX SDK verwenden (nicht ignorieren)
+!lib/javafx-sdk-17.0.14/

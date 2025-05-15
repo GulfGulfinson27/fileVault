@@ -1,4 +1,4 @@
-# Basis-Image mit OpenJDK 17 und JavaFX
+# Basis-Image mit OpenJDK 17
 FROM openjdk:17-jdk-slim
 
 # Metadaten
@@ -24,18 +24,14 @@ RUN apt-get update && \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
 
-# JavaFX SDK herunterladen und installieren (Linux version)
-RUN apt-get update && apt-get install -y --no-install-recommends wget unzip && \
-    mkdir -p /opt/javafx && \
-    wget -q https://download2.gluonhq.com/openjfx/17.0.14/openjfx-17.0.14_linux-x64_bin-sdk.zip && \
-    unzip openjfx-17.0.14_linux-x64_bin-sdk.zip -d /opt && \
-    rm openjfx-17.0.14_linux-x64_bin-sdk.zip && \
-    apt-get purge -y wget unzip && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
+# Pfad für JavaFX erstellen
+RUN mkdir -p /app/lib
+
+# JavaFX SDK aus lokalem Projektverzeichnis kopieren
+COPY lib/javafx-sdk-17.0.14 /app/lib/javafx-sdk-17.0.14
 
 # JavaFX-Modulpfad setzen
-ENV PATH_TO_FX=/opt/javafx-sdk-17.0.14/lib
+ENV PATH_TO_FX=/app/lib/javafx-sdk-17.0.14/lib
 
 # Kopiere die JAR-Datei
 COPY target/FileVault-shaded.jar /app/FileVault.jar

@@ -13,6 +13,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <javafx.version>17.0.14</javafx.version>
+        <javafx.sdk.path>${project.basedir}/lib/javafx-sdk-17.0.14</javafx.sdk.path>
     </properties>
 
     <!-- GitHub Packages Repository Configuration -->
@@ -37,16 +38,34 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- JavaFX -->
+        <!-- JavaFX - Lokale Installation verwenden -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
+            <scope>system</scope>
+            <systemPath>${javafx.sdk.path}/lib/javafx.controls.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
+            <scope>system</scope>
+            <systemPath>${javafx.sdk.path}/lib/javafx.fxml.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+            <scope>system</scope>
+            <systemPath>${javafx.sdk.path}/lib/javafx.base.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <scope>system</scope>
+            <systemPath>${javafx.sdk.path}/lib/javafx.graphics.jar</systemPath>
         </dependency>
         
         <!-- JUnit -->
@@ -150,6 +169,8 @@
                 <configuration>
                     <mainClass>com.filevault.FileVaultApp</mainClass>
                     <options>
+                        <option>--module-path</option>
+                        <option>${javafx.sdk.path}/lib</option>
                         <option>--add-modules</option>
                         <option>javafx.controls,javafx.fxml</option>
                         <option>--add-opens</option>

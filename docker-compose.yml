@@ -3,6 +3,10 @@ version: '3.8'
 services:
   filevault:
     image: ghcr.io/gulfgulfinson/filevault:latest
+    # Alternativ lokal bauen (bevorzugt während der Entwicklung):
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: filevault
     ports:
       - "9090:9090"

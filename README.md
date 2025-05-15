@@ -40,6 +40,8 @@ Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: 
    start.bat     # Für Windows
    ```
 
+> **Wichtig**: Die Anwendung benötigt JavaFX, das im Release-Paket im Ordner `lib/javafx-sdk-17.0.14` enthalten ist. Falls dieser Ordner fehlt, laden Sie das passende [JavaFX SDK 17.0.14](https://gluonhq.com/products/javafx/) herunter und entpacken Sie es in den `lib`-Ordner.
+
 ### Option 2: Aus dem Quellcode bauen
 1. Voraussetzungen:
    - Java 17+ (OpenJDK oder Oracle JDK)
