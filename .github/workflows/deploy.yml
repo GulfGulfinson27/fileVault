@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,4 +28,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/site
-          publish_branch: gh-pages 
+          publish_branch: gh-pages
+          commit_message: "Deploy to GitHub Pages" 
