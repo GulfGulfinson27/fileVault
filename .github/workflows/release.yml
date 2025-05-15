@@ -311,14 +311,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Build and push Docker image with Docker CLI
+      - name: Build and push Docker image
         run: |
           # Zum Build-Verzeichnis wechseln
           cd docker-build
           
-          # Docker-Image bauen
-          docker build -t ghcr.io/${{ github.repository_owner }}/filevault:${{ needs.build.outputs.version }} -t ghcr.io/${{ github.repository_owner }}/filevault:latest .
+          # Repository-Owner in Kleinbuchstaben konvertieren
+          REPO_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "Using repository owner: $REPO_OWNER"
+          
+          # Docker-Image bauen (mit Repository-Name in Kleinbuchstaben)
+          docker build -t ghcr.io/${REPO_OWNER}/filevault:${{ needs.build.outputs.version }} -t ghcr.io/${REPO_OWNER}/filevault:latest .
           
           # Docker-Image pushen
-          docker push ghcr.io/${{ github.repository_owner }}/filevault:${{ needs.build.outputs.version }}
-          docker push ghcr.io/${{ github.repository_owner }}/filevault:latest 
+          docker push ghcr.io/${REPO_OWNER}/filevault:${{ needs.build.outputs.version }}
+          docker push ghcr.io/${REPO_OWNER}/filevault:latest 
