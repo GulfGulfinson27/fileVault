@@ -22,7 +22,7 @@ RUN apk add --no-cache \
     ttf-dejavu
 
 # Kopiere die JAR-Datei
-COPY FileVault-shaded.jar /app/FileVault.jar
+COPY target/FileVault-shaded.jar FileVault.jar
 
 # Port für die API freigeben
 EXPOSE 9090
