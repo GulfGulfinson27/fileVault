@@ -38,34 +38,26 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- JavaFX - Lokale Installation verwenden -->
+        <!-- JavaFX -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-            <scope>system</scope>
-            <systemPath>${javafx.sdk.path}/lib/javafx.controls.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
-            <scope>system</scope>
-            <systemPath>${javafx.sdk.path}/lib/javafx.fxml.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
-            <scope>system</scope>
-            <systemPath>${javafx.sdk.path}/lib/javafx.base.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
-            <scope>system</scope>
-            <systemPath>${javafx.sdk.path}/lib/javafx.graphics.jar</systemPath>
         </dependency>
         
         <!-- JUnit -->
@@ -212,6 +204,12 @@
                             <shadedClassifierName>shaded</shadedClassifierName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <minimizeJar>false</minimizeJar>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.openjfx:*</include>
+                                    <include>com.filevault:*</include>
+                                </includes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>
