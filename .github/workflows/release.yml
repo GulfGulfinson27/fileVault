@@ -282,14 +282,18 @@ jobs:
           # Kopiere die JAR-Datei in das Build-Verzeichnis
           cp target/FileVault-shaded.jar docker-build/FileVault.jar
           
-          # Erstelle eine einfache Dockerfile im Build-Verzeichnis
+          # Erstelle eine verbesserte Dockerfile im Build-Verzeichnis
           cat > docker-build/Dockerfile << EOF
-          FROM eclipse-temurin:17-jre-alpine
+          # Basis-Image mit OpenJDK 17 und JavaFX
+          FROM eclipse-temurin:17-jdk-alpine
           
           WORKDIR /app
           
           # JavaFX-Abhängigkeiten für Alpine Linux
           RUN apk add --no-cache libxtst libxi libxrandr libxrender libxext libxfixes libx11 fontconfig ttf-dejavu
+          
+          # JavaFX-Module installieren
+          RUN apk add --no-cache openjfx --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
           
           # Kopiere die JAR-Datei (bereits im Build-Kontext)
           COPY FileVault.jar /app/FileVault.jar
@@ -298,7 +302,7 @@ jobs:
           EXPOSE 9090
           
           # Start-Befehl für die API
-          ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"]
+          ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090", "--module-path", "/usr/share/openjfx/lib", "--add-modules", "javafx.controls,javafx.fxml"]
           EOF
           
           echo "Contents of docker-build directory:"
