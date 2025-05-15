@@ -261,9 +261,29 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
       
-      - name: Create simplified Dockerfile
+      - name: Verify target/FileVault-shaded.jar exists
         run: |
-          cat > Dockerfile.simple << EOF
+          echo "Contents of target directory:"
+          ls -la target/
+          if [ ! -f "target/FileVault-shaded.jar" ]; then
+            echo "ERROR: target/FileVault-shaded.jar not found!"
+            exit 1
+          else
+            echo "✅ target/FileVault-shaded.jar exists"
+            file_size=$(stat -c %s "target/FileVault-shaded.jar")
+            echo "File size: $file_size bytes"
+          fi
+      
+      - name: Create Docker build directory
+        run: |
+          # Erstelle ein temporäres Verzeichnis für den Docker-Build
+          mkdir -p docker-build
+          
+          # Kopiere die JAR-Datei in das Build-Verzeichnis
+          cp target/FileVault-shaded.jar docker-build/FileVault.jar
+          
+          # Erstelle eine einfache Dockerfile im Build-Verzeichnis
+          cat > docker-build/Dockerfile << EOF
           FROM eclipse-temurin:17-jre-alpine
           
           WORKDIR /app
@@ -271,8 +291,8 @@ jobs:
           # JavaFX-Abhängigkeiten für Alpine Linux
           RUN apk add --no-cache libxtst libxi libxrandr libxrender libxext libxfixes libx11 fontconfig ttf-dejavu
           
-          # Kopiere die JAR-Datei
-          COPY ./target/FileVault-shaded.jar /app/FileVault.jar
+          # Kopiere die JAR-Datei (bereits im Build-Kontext)
+          COPY FileVault.jar /app/FileVault.jar
           
           # Port für die API freigeben
           EXPOSE 9090
@@ -280,6 +300,9 @@ jobs:
           # Start-Befehl für die API
           ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"]
           EOF
+          
+          echo "Contents of docker-build directory:"
+          ls -la docker-build/
       
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -288,12 +311,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.simple
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/filevault:${{ needs.build.outputs.version }}
-            ghcr.io/${{ github.repository_owner }}/filevault:latest 
+      - name: Build and push Docker image with Docker CLI
+        run: |
+          # Zum Build-Verzeichnis wechseln
+          cd docker-build
+          
+          # Docker-Image bauen
+          docker build -t ghcr.io/${{ github.repository_owner }}/filevault:${{ needs.build.outputs.version }} -t ghcr.io/${{ github.repository_owner }}/filevault:latest .
+          
+          # Docker-Image pushen
+          docker push ghcr.io/${{ github.repository_owner }}/filevault:${{ needs.build.outputs.version }}
+          docker push ghcr.io/${{ github.repository_owner }}/filevault:latest 
