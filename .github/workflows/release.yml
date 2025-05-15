@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'  # Wird ausgeführt, wenn ein Tag gepusht wird, das mit 'v' beginnt
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version für den Release (z.B. 1.0.2)'
+        required: true
+        default: '1.0.2'
 
 # Add permissions for the GitHub token
 permissions:
@@ -37,17 +43,33 @@ jobs:
       - name: Check if release exists and determine next version
         id: check_version
         run: |
-          # Extrahiere die gepushte Tag-Version
-          PUSHED_TAG=${GITHUB_REF#refs/tags/v}
-          echo "PUSHED_TAG=${PUSHED_TAG}" >> $GITHUB_OUTPUT
+          # Unterscheidung zwischen Tag-Push und manuellem Trigger
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manueller Trigger - verwende den Eingabewert
+            MANUAL_VERSION="${{ github.event.inputs.version }}"
+            echo "Manuell angegebene Version: v${MANUAL_VERSION}"
+            echo "PUSHED_TAG=${MANUAL_VERSION}" >> $GITHUB_OUTPUT
+          else
+            # Tag-Push - extrahiere die gepushte Tag-Version
+            PUSHED_TAG=${GITHUB_REF#refs/tags/v}
+            echo "Gepushte Tag-Version: v${PUSHED_TAG}"
+            echo "PUSHED_TAG=${PUSHED_TAG}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Definieren der Version für den Check (entweder aus Tag oder manuell angegeben)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CHECK_VERSION="${{ github.event.inputs.version }}"
+          else
+            CHECK_VERSION=${GITHUB_REF#refs/tags/v}
+          fi
           
           # Prüfe ob ein Release mit diesem Tag bereits existiert mit curl
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${PUSHED_TAG}")
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v${CHECK_VERSION}")
           
           if [ "$HTTP_STATUS" == "200" ]; then
-            echo "Release für v${PUSHED_TAG} existiert bereits, ermittle nächste verfügbare Version..."
+            echo "Release für v${CHECK_VERSION} existiert bereits, ermittle nächste verfügbare Version..."
             
             # Hole die Liste aller Releases
             RELEASES=$(curl -s \
@@ -76,8 +98,8 @@ jobs:
             echo "Nächste zu verwendende Version: v${NEXT_VERSION}"
             echo "VERSION=${NEXT_VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "Verwende gepushte Version: v${PUSHED_TAG}"
-            echo "VERSION=${PUSHED_TAG}" >> $GITHUB_OUTPUT
+            echo "Verwende Version: v${CHECK_VERSION}"
+            echo "VERSION=${CHECK_VERSION}" >> $GITHUB_OUTPUT
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -174,6 +196,24 @@ jobs:
           cd release
           zip -r ../FileVault-${VERSION}.zip .
           cd ..
+      
+      - name: Create Git tag if workflow was manually triggered
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          VERSION="${{ steps.check_version.outputs.VERSION }}"
+          echo "Erstelle neues Git-Tag v${VERSION}..."
+          
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Überprüfen, ob das Tag bereits existiert
+          if git show-ref --tags | grep -q "refs/tags/v${VERSION}"; then
+            echo "Tag v${VERSION} existiert bereits, kein neues Tag erforderlich"
+          else
+            echo "Erstelle neues Tag v${VERSION}"
+            git tag -a "v${VERSION}" -m "Release v${VERSION}"
+            git push origin "v${VERSION}"
+          fi
       
       - name: Create Release
         id: create_release

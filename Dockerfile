@@ -1,29 +1,31 @@
-FROM eclipse-temurin:17-jdk AS build
+# Basis-Image mit OpenJDK 17
+FROM eclipse-temurin:17-jre-alpine
 
+# Metadaten
+LABEL org.opencontainers.image.source="https://github.com/GulfGulfinson/fileVault"
+LABEL org.opencontainers.image.description="FileVault - Sichere Dateiverwaltung"
+LABEL org.opencontainers.image.licenses=MIT
+
+# Arbeitsverzeichnis setzen
 WORKDIR /app
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven
+# JavaFX-Abhängigkeiten für Alpine Linux
+RUN apk add --no-cache \
+    libxtst \
+    libxi \
+    libxrandr \
+    libxrender \
+    libxext \
+    libxfixes \
+    libx11 \
+    fontconfig \
+    ttf-dejavu
 
-# Copy pom.xml and source code
-COPY pom.xml .
-COPY src/ src/
+# Kopiere die JAR-Datei
+COPY FileVault-shaded.jar /app/FileVault.jar
 
-# Build the application (skip tests)
-RUN mvn clean package -DskipTests
+# Port für die API freigeben
+EXPOSE 9090
 
-FROM eclipse-temurin:17-jre
-
-WORKDIR /app
-
-# Copy the built jar from the build stage
-COPY --from=build /app/target/FileVault-shaded.jar /app/filevault.jar
-
-# Create necessary directories
-RUN mkdir -p /root/.filevault/data
-
-# Set volume for FileVault data directory
-VOLUME /root/.filevault
-
-# Run the application
-CMD ["java", "-jar", "/app/filevault.jar"] 
+# Start-Befehl für die API
+ENTRYPOINT ["java", "-Djava.awt.headless=true", "-jar", "/app/FileVault.jar", "--api-port=9090"] 

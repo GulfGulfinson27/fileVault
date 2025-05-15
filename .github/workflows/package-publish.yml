@@ -10,6 +10,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      version: ${{ steps.get_tag_version.outputs.TAG_VERSION }}
     
     steps:
       - name: Checkout code
@@ -35,13 +37,26 @@ jobs:
         id: get_version
         run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
       
-      - name: Update version if needed
+      - name: Extract release tag version
+        id: get_tag_version
         run: |
-          # If this is a GitHub release with a tag v1.2.3, extract the version number
           if [[ "${{ github.ref }}" =~ ^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
             RELEASE_VERSION="${BASH_REMATCH[1]}"
-            echo "Updating version in pom.xml from ${{ steps.get_version.outputs.VERSION }} to ${RELEASE_VERSION}"
-            mvn versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
+            echo "TAG_VERSION=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_VERSION=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version if needed
+        run: |
+          POM_VERSION="${{ steps.get_version.outputs.VERSION }}"
+          TAG_VERSION="${{ steps.get_tag_version.outputs.TAG_VERSION }}"
+          
+          if [ "$POM_VERSION" != "$TAG_VERSION" ]; then
+            echo "Updating version in pom.xml from $POM_VERSION to $TAG_VERSION"
+            mvn versions:set -DnewVersion=$TAG_VERSION -DgenerateBackupPoms=false
+          else
+            echo "Version in pom.xml ($POM_VERSION) already matches tag version"
           fi
       
       - name: Copy settings.xml
@@ -66,4 +81,50 @@ jobs:
           files: |
             target/FileVault-shaded.jar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download built JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: FileVault-shaded-${{ needs.build-and-publish.outputs.version }}
+          path: ./
+      
+      - name: Extract version
+        id: get_version
+        run: |
+          if [[ "${{ github.ref }}" =~ ^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            echo "VERSION=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=latest" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/filevault:${{ steps.get_version.outputs.VERSION }}
+            ghcr.io/${{ github.repository_owner }}/filevault:latest 
