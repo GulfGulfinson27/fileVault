@@ -25,3 +25,14 @@ Wenn Sie eine benutzerdefinierte Domain verwenden möchten:
 ## Inhalt
 
 Der Inhalt dieser Website wird automatisch aus dem Markdown-Dateien des Projekts und den statischen HTML-Dateien in diesem Verzeichnis generiert. 
+
+## Docker Support
+
+FileVault bietet jetzt Docker-Unterstützung für die API-Funktionalität. Bitte beachten Sie, dass nur die API im Container funktioniert und das Hauptprojekt weiterhin benötigt wird. Um den Docker Container zu verwenden:
+
+```
+docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault -p 9090:9090 ghcr.io/GulfGulfinson/fileVault:latest
+```
+
+Die Website wurde aktualisiert, um die Docker-Verfügbarkeit zu reflektieren. 

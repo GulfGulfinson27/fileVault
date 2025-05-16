@@ -506,9 +506,9 @@ mvn javafx:run</code></pre>
                 <div class="future-methods">
                     <div class="method-card">
                         <h4>Docker Container</h4>
-                        <p><span class="status-text pending-text">⚠️ In Entwicklung</span></p>
+                        <p><span class="status-text success-text">✓ Verfügbar</span> - Hinweis: Nur die API ist im Docker-Container funktionsfähig</p>
                         <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
-docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
+docker run -v ~/.filevault:/root/.filevault -p 9090:9090 ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
                     </div>
                     
                     <div class="method-card">

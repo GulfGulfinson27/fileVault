@@ -591,11 +591,11 @@ mvn javafx:run
             <div class="installation-methods">
                 <div class="installation-card">
                     <h3>Docker Container</h3>
-                    <p><span class="status-text pending-text">⚠️ In Entwicklung</span> - Diese Methode wird noch implementiert:</p>
+                    <p><span class="status-text success-text">✓ Verfügbar</span> - Hinweis: Nur die API ist im Docker-Container funktionsfähig:</p>
                     <div class="code-container">
                         <div class="code-block" id="docker-code">
 docker pull ghcr.io/GulfGulfinson/fileVault:latest
-docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault -p 9090:9090 ghcr.io/GulfGulfinson/fileVault:latest
                         </div>
                         <button class="copy-button" onclick="copyToClipboard('docker-code')">Kopieren</button>
                         <div class="copy-feedback">Kopiert!</div>
@@ -660,10 +660,10 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
                 <div id="docker-verification">
                     <h3>Docker Installation</h3>
                     <div>
-                        <span class="status-indicator pending"></span>
-                        <span class="status-text pending-text">In Entwicklung</span>
+                        <span class="status-indicator success"></span>
+                        <span class="status-text success-text">Verfügbar</span>
                     </div>
-                    <div id="docker-result">Docker-Container werden derzeit vorbereitet und in Kürze bereitgestellt.</div>
+                    <div id="docker-result">Docker-Container ist verfügbar. Bitte beachten Sie, dass nur die API im Container funktioniert. Das Projekt selbst wird weiterhin benötigt.</div>
                 </div>
                 
                 <div id="github-packages-verification">
@@ -882,7 +882,7 @@ docker run -v ~/.filevault:/root/.filevault ghcr.io/GulfGulfinson/fileVault:late
         }
         
         function verifyDockerInstallation() {
-            alert('Docker-Container werden derzeit vorbereitet und werden in Kürze bereitgestellt.');
+            alert('Docker-Container ist verfügbar. Bitte beachten Sie, dass nur die API im Container funktioniert. Das Projekt selbst wird weiterhin benötigt.');
         }
         
         function verifyGitHubPackagesInstallation() {

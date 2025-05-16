@@ -23,6 +23,15 @@ Die Projektwebsite wird automatisch aus den Dokumentationsdateien im Repository 
 - HTML-Dateien im docs/-Verzeichnis
 - JavaDoc-Dokumentation aus dem Quellcode
 
+## Docker Container
+
+FileVault bietet einen Docker Container für die API-Funktionalität. Beachten Sie, dass nur die API im Container funktioniert und das Hauptprojekt weiterhin benötigt wird. Der Container kann wie folgt verwendet werden:
+
+```
+docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault -p 9090:9090 ghcr.io/GulfGulfinson/fileVault:latest
+```
+
 ## Dependabot
 
 Dependabot ist konfiguriert, um Abhängigkeiten automatisch zu aktualisieren und Sicherheitsupdates zu liefern. Die Konfiguration befindet sich in der `dependabot.yml` Datei.

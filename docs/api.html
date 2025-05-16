@@ -26,6 +26,14 @@
             --header-bg: rgba(245, 230, 255, 0.8);
             --footer-text: #BB8FCE;
             --divider-color: #eee;
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --bg-color: #f5f7fa;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --pending-color: #f39c12;
         }
 
         [data-theme="dark"] {
@@ -49,6 +57,14 @@
             --header-bg: rgba(29, 38, 125, 0.8);
             --footer-text: #A08BEF;
             --divider-color: #1A1F6D;
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --bg-color: #1a1a1a;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --pending-color: #f39c12;
         }
 
         body {
@@ -285,6 +301,24 @@
             50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
             100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         }
+
+        /* Info box styling */
+        .info-box {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .info-box h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        .info-box pre {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -309,6 +343,13 @@
             <section>
                 <h2>Basiseinstellung</h2>
                 <p>Die folgenden Beispiele gehen davon aus, dass der FileVault API-Server unter <code>localhost:9090</code> läuft. Falls Sie einen anderen Host oder Port verwenden, passen Sie die Befehle entsprechend an.</p>
+                
+                <div class="info-box">
+                    <h3>Docker-Unterstützung</h3>
+                    <p>Die FileVault API kann jetzt auch in einem Docker-Container ausgeführt werden. Bitte beachten Sie, dass nur die API im Container funktionsfähig ist. Das Hauptprojekt wird weiterhin benötigt.</p>
+                    <pre><code>docker pull ghcr.io/GulfGulfinson/fileVault:latest
+docker run -v ~/.filevault:/root/.filevault -p 9090:9090 ghcr.io/GulfGulfinson/fileVault:latest</code></pre>
+                </div>
             </section>
 
             <section>
