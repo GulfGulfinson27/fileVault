@@ -1,25 +1,38 @@
 @echo off
-setlocal
-
-set "JAVA_HOME=%JAVA_HOME%"
-if "%JAVA_HOME%"=="" (
-    echo JAVA_HOME ist nicht gesetzt. Bitte setzen Sie JAVA_HOME auf Ihr JDK-Verzeichnis.
-    exit /b 1
-)
-
-set "JAVAFX_LIB=lib\javafx-sdk-17.0.14\lib"
-set "JAVAFX_MODULES=javafx.controls,javafx.fxml"
-
-if not exist "%JAVAFX_LIB%" (
-    echo JavaFX-Bibliotheken nicht gefunden in %JAVAFX_LIB%
-    exit /b 1
-)
+setlocal EnableDelayedExpansion
 
 echo Starte FileVault...
-"%JAVA_HOME%\bin\java" ^
-    --module-path "%JAVAFX_LIB%" ^
+
+REM Get JavaFX path from Maven
+set "JAVA_FX_VERSION=17.0.14"
+set "M2_REPO=%USERPROFILE%\.m2\repository\org\openjfx"
+
+REM Include both generic and platform-specific JavaFX JARs
+set "JAVAFX_PATH="
+for %%m in (javafx-base javafx-graphics javafx-controls javafx-fxml) do (
+    if "!JAVAFX_PATH!"=="" (
+        set "JAVAFX_PATH=!M2_REPO!\%%m\%JAVA_FX_VERSION%\%%m-%JAVA_FX_VERSION%.jar;!M2_REPO!\%%m\%JAVA_FX_VERSION%\%%m-%JAVA_FX_VERSION%-win.jar"
+    ) else (
+        set "JAVAFX_PATH=!JAVAFX_PATH!;!M2_REPO!\%%m\%JAVA_FX_VERSION%\%%m-%JAVA_FX_VERSION%.jar;!M2_REPO!\%%m\%JAVA_FX_VERSION%\%%m-%JAVA_FX_VERSION%-win.jar"
+    )
+)
+set "JAVAFX_MODULES=javafx.controls,javafx.fxml,javafx.base,javafx.graphics"
+
+REM Generate classpath for other dependencies
+call mvn dependency:build-classpath -Dmdep.outputFile=cp.txt -q -DincludeScope=runtime -DexcludeGroupIds=org.openjfx
+set /p CLASSPATH=<cp.txt
+set "CLASSPATH=%CLASSPATH%;target\FileVault-shaded.jar"
+del cp.txt
+
+REM Run the application
+java ^
+    --module-path "!JAVAFX_PATH!" ^
     --add-modules %JAVAFX_MODULES% ^
-    -jar target\FileVault-shaded.jar
+    --add-opens java.base/java.lang=javafx.base ^
+    --add-opens java.base/java.nio=javafx.base ^
+    -Dprism.order=sw ^
+    -cp "!CLASSPATH!" ^
+    com.filevault.FileVaultApp
 
 if errorlevel 1 (
     echo Fehler beim Starten der Anwendung.

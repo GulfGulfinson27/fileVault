@@ -1,4 +1,0 @@
-- API
-    - doku in 3 Dateien splitten: gesamt, linux, windows
-- auf deutsch alle kommentare
-- ordner verschluesselts

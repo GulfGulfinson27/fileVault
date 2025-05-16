@@ -1,25 +1,31 @@
 #!/bin/bash
 
-if [ -z "$JAVA_HOME" ]; then
-    echo "JAVA_HOME ist nicht gesetzt. Bitte setzen Sie JAVA_HOME auf Ihr JDK-Verzeichnis."
-    exit 1
-fi
-
-JAVAFX_LIB="lib/javafx-sdk-17.0.14/lib"
-JAVAFX_MODULES="javafx.controls,javafx.fxml"
-
-if [ ! -d "$JAVAFX_LIB" ]; then
-    echo "JavaFX-Bibliotheken nicht gefunden in $JAVAFX_LIB"
-    exit 1
-fi
-
 echo "Starte FileVault..."
-"$JAVA_HOME/bin/java" \
-    --module-path "$JAVAFX_LIB" \
-    --add-modules "$JAVAFX_MODULES" \
-    -jar target/FileVault-shaded.jar
 
-if [ $? -ne 0 ]; then
-    echo "Fehler beim Starten der Anwendung."
-    exit 1
-fi
+# Get JavaFX path from Maven
+JAVA_FX_VERSION="17.0.14"
+M2_REPO="$HOME/.m2/repository/org/openjfx"
+
+# Include both generic and platform-specific JavaFX JARs
+JAVAFX_PATH=""
+for module in javafx-base javafx-graphics javafx-controls javafx-fxml; do
+    JAVAFX_PATH="$JAVAFX_PATH:$M2_REPO/$module/$JAVA_FX_VERSION/$module-$JAVA_FX_VERSION.jar"
+    JAVAFX_PATH="$JAVAFX_PATH:$M2_REPO/$module/$JAVA_FX_VERSION/$module-$JAVA_FX_VERSION-linux.jar"
+done
+JAVAFX_PATH=${JAVAFX_PATH:1}  # Remove the leading ':'
+JAVAFX_MODULES="javafx.controls,javafx.fxml,javafx.base,javafx.graphics"
+
+# Generate classpath for other dependencies
+mvn dependency:build-classpath -Dmdep.outputFile=cp.txt -q -DincludeScope=runtime -DexcludeGroupIds=org.openjfx
+CLASSPATH=$(cat cp.txt):target/FileVault-shaded.jar
+rm cp.txt
+
+# Run the application
+java \
+    --module-path "$JAVAFX_PATH" \
+    --add-modules "$JAVAFX_MODULES" \
+    --add-opens java.base/java.lang=javafx.base \
+    --add-opens java.base/java.nio=javafx.base \
+    -Dprism.order=sw \
+    -cp "$CLASSPATH" \
+    com.filevault.FileVaultApp
