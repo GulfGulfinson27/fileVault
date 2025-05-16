@@ -14,7 +14,6 @@ Bevor Sie auf die meisten Endpunkte zugreifen können, müssen Sie sich bei der 
 2. Bei erfolgreicher Authentifizierung erhalten Sie ein Token zurück.
 3. Dieses Token müssen Sie in allen nachfolgenden Anfragen im `Authorization`-Header mitschicken.
 
-Das Master-Passwort für die Authentifizierung lautet: `11111111` (Hinweis: In einer Produktionsumgebung sollte ein sicheres Passwort verwendet werden)
 
 ### Token-Verwaltung
 

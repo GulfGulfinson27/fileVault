@@ -12,7 +12,7 @@ Die folgenden Beispiele gehen davon aus, dass der FileVault API-Server unter `lo
 
 ```powershell
 $body = @{
-    password = "11111111"
+    password = "abcd"
 } | ConvertTo-Json
 
 $authResponse = Invoke-WebRequest -Uri "http://localhost:9090/api/auth" `

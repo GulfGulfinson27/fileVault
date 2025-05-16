@@ -17,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import com.filevault.model.EncryptedFile;
+import com.filevault.model.UserManager;
 import com.filevault.storage.DatabaseManager;
 import com.filevault.storage.FileStorage;
 import com.filevault.util.LoggingUtil;
@@ -33,6 +34,22 @@ public class ApiServer {
     
     // Liste von Listenern, die bei API-Änderungen informiert werden
     private static final List<Consumer<String>> changeListeners = new CopyOnWriteArrayList<>();
+
+    /**
+     * Hilfsklasse für JSON-Parsing
+     */
+    private static class JsonUtils {
+        public static String parseJson(String json, String key) {
+            // Simple JSON parsing logic (replace with a proper library like Jackson or Gson in production)
+            String searchKey = "\"" + key + "\":";
+            int startIndex = json.indexOf(searchKey) + searchKey.length();
+            int endIndex = json.indexOf(",", startIndex);
+            if (endIndex == -1) {
+                endIndex = json.indexOf("}", startIndex);
+            }
+            return json.substring(startIndex, endIndex).replaceAll("\"", "").trim();
+        }
+    }
 
     /**
      * Fügt einen Listener hinzu, der bei Änderungen über die API informiert wird
@@ -144,8 +161,6 @@ public class ApiServer {
      * Handler für Authentifizierungsanfragen.
      */
     static class AuthHandler implements HttpHandler {
-        private static final String MASTER_PASSWORD = "11111111";
-
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             LoggingUtil.logInfo("ApiServer", "Verarbeite Authentifizierungsanfrage...");
@@ -154,7 +169,11 @@ public class ApiServer {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes());
                 LoggingUtil.logInfo("ApiServer", "Anfrageinhalt: " + requestBody);
 
-                if (requestBody.contains(MASTER_PASSWORD)) {
+                // Extrahiere das Passwort aus dem JSON
+                String password = JsonUtils.parseJson(requestBody, "password");
+                
+                // Überprüfe das Passwort mit dem UserManager
+                if (UserManager.getInstance().authenticate(password)) {
                     String token = TokenManager.generateToken("user");
                     String response = String.format("{\"token\":\"%s\"}", token);
                     LoggingUtil.logInfo("ApiServer", "Token generiert: " + token);
@@ -297,9 +316,9 @@ public class ApiServer {
                 LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Erstellen eines Ordners: " + requestBody);
 
                 // Parse JSON to extract folder details
-                String folderName = parseJson(requestBody, "name");
+                String folderName = JsonUtils.parseJson(requestBody, "name");
                 int parentFolderId = requestBody.contains("parentFolderId")
-                        ? Integer.parseInt(parseJson(requestBody, "parentFolderId"))
+                        ? Integer.parseInt(JsonUtils.parseJson(requestBody, "parentFolderId"))
                         : 0; // Default to root folder
 
                 // Validate parentFolderId
@@ -349,8 +368,8 @@ public class ApiServer {
                 LoggingUtil.logInfo("ApiServer", "Empfangene Anfrage zum Aktualisieren eines Ordners: " + requestBody);
 
                 // Parse JSON to extract folder details
-                int folderId = Integer.parseInt(parseJson(requestBody, "id"));
-                String folderName = parseJson(requestBody, "name");
+                int folderId = Integer.parseInt(JsonUtils.parseJson(requestBody, "id"));
+                String folderName = JsonUtils.parseJson(requestBody, "name");
 
                 try (Connection conn = DatabaseManager.getConnection();
                      PreparedStatement stmt = conn.prepareStatement("UPDATE folders SET name = ? WHERE id = ?")) {
@@ -459,17 +478,6 @@ public class ApiServer {
                 LoggingUtil.logError("ApiServer", "Ungültige Ordner-ID: " + e.getMessage());
                 return "Ungültige Ordner-ID: " + e.getMessage();
             }
-        }
-
-        private String parseJson(String json, String key) {
-            // Simple JSON parsing logic (replace with a proper library like Jackson or Gson in production)
-            String searchKey = "\"" + key + "\":";
-            int startIndex = json.indexOf(searchKey) + searchKey.length();
-            int endIndex = json.indexOf(",", startIndex);
-            if (endIndex == -1) {
-                endIndex = json.indexOf("}", startIndex);
-            }
-            return json.substring(startIndex, endIndex).replaceAll("\"", "").trim();
         }
     }
 
