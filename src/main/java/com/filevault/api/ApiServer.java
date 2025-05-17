@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -102,8 +101,6 @@ public class ApiServer {
     public void start(int port) throws IOException {
         LoggingUtil.logInfo("ApiServer", "Starting API server on port " + port);
         try {
-            Logger logger = Logger.getLogger(ApiServer.class.getName());
-
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/api/auth", new AuthHandler());
             LoggingUtil.logInfo("ApiServer", "Kontext /api/auth registriert.");
@@ -231,8 +228,6 @@ public class ApiServer {
      * Handler für die Verarbeitung von Anfragen an /api/folders.
      */
     static class FoldersHandler implements HttpHandler {
-        private static final Logger logger = Logger.getLogger(FoldersHandler.class.getName());
-
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();
@@ -485,8 +480,6 @@ public class ApiServer {
      * Handler für Dateioperationen.
      */
     static class FileHandler implements HttpHandler {
-        private static final Logger logger = Logger.getLogger(FileHandler.class.getName());
-
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             String method = exchange.getRequestMethod();

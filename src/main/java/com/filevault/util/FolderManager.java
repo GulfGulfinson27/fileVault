@@ -13,9 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.filevault.model.VirtualFolder;
 import com.filevault.storage.DatabaseManager;
 
@@ -28,7 +25,6 @@ public class FolderManager {
     private static FolderManager instance;
     private final List<VirtualFolder> folders = new ArrayList<>();
     private VirtualFolder currentFolder = null;
-    private static final Logger logger = LoggerFactory.getLogger(FolderManager.class);
     
     private FolderManager() {
         // Privater Konstruktor für Singleton-Pattern
@@ -143,7 +139,7 @@ public class FolderManager {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Fehler beim Laden der Ordner aus der Datenbank", e);
+            LoggingUtil.logError("FolderManager", "Fehler beim Laden der Ordner aus der Datenbank: " + e.getMessage());
             throw new RuntimeException("Fehler beim Laden der Ordner", e);
         }
     }
