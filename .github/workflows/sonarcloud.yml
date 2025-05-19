@@ -41,34 +41,10 @@ jobs:
       - name: Build with Maven
         run: xvfb-run --auto-servernum mvn -B clean verify
       
-      # SonarCloud-Analyse mit direkter Konfiguration
+      # SonarCloud-Analyse mit SonarCloud Action (einfacher als direkter Scanner)
       - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          # Dependency-Baum für SonarCloud vorbereiten
-          mvn dependency:copy-dependencies
-          
-          # SonarCloud über SonarScanner direkt ausführen
-          SONAR_SCANNER_VERSION=4.7.0.2747
-          mkdir -p .sonar
-          curl -sSLo .sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION.zip
-          unzip -o .sonar/sonar-scanner.zip -d .sonar/
-          
-          # SonarCloud-Konfiguration
-          echo "sonar.projectKey=GulfGulfinson_fileVault" > sonar-project.properties
-          echo "sonar.organization=gulfgulfinson" >> sonar-project.properties
-          echo "sonar.sources=src/main/java" >> sonar-project.properties
-          echo "sonar.tests=src/test/java" >> sonar-project.properties
-          echo "sonar.java.binaries=target/classes" >> sonar-project.properties
-          echo "sonar.java.test.binaries=target/test-classes" >> sonar-project.properties
-          echo "sonar.java.libraries=target/dependency/*.jar" >> sonar-project.properties
-          echo "sonar.sourceEncoding=UTF-8" >> sonar-project.properties
-          echo "sonar.java.source=17" >> sonar-project.properties
-          echo "sonar.host.url=https://sonarcloud.io" >> sonar-project.properties
-          echo "sonar.scanner.force-deprecated-ci-on-auto-enabled=true" >> sonar-project.properties
-          
-          # SonarScanner ausführen
-          chmod +x .sonar/sonar-scanner-$SONAR_SCANNER_VERSION/bin/sonar-scanner
-          xvfb-run --auto-servernum .sonar/sonar-scanner-$SONAR_SCANNER_VERSION/bin/sonar-scanner 
+        # Die sonar-project.properties Datei im Wurzelverzeichnis wird automatisch verwendet 
