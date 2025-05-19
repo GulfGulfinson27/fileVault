@@ -32,7 +32,7 @@ public class FolderManagerRecursiveDeleteTest {
         
         // Log existing folders
         List<VirtualFolder> existingFolders = folderManager.getAllFolders();
-        System.out.println("Existing folders before test: " + existingFolders.size());
+        LoggingUtil.log("Existing folders before test: " + existingFolders.size());
     }
     
     @AfterEach
@@ -61,7 +61,7 @@ public class FolderManagerRecursiveDeleteTest {
         VirtualFolder deletedFolder = folderManager.getFolderByName(testPrefix + "TestRoot");
         assertNull(deletedFolder, "Der Root-Testordner sollte gelöscht worden sein");
         
-        System.out.println("Recursive deletion test completed successfully");
+        LoggingUtil.log("Recursive deletion test completed successfully");
     }
     
     @Test
@@ -96,7 +96,7 @@ public class FolderManagerRecursiveDeleteTest {
         // Bereinige den Test, indem der verbleibende Testordner gelöscht wird
         folderManager.deleteFolderRecursive(root);
         
-        System.out.println("Partial recursive deletion test completed successfully");
+        LoggingUtil.log("Partial recursive deletion test completed successfully");
     }
     
     @Test
@@ -114,6 +114,6 @@ public class FolderManagerRecursiveDeleteTest {
         // Bereinige den Test
         folderManager.deleteFolderRecursive(root);
         
-        System.out.println("Regular delete fail test completed successfully");
+        LoggingUtil.log("Regular delete fail test completed successfully");
     }
 } 
