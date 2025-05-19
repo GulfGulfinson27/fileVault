@@ -41,10 +41,12 @@ jobs:
       - name: Build with Maven
         run: xvfb-run --auto-servernum mvn -B clean verify
       
-      # SonarCloud-Analyse mit SonarCloud Action (einfacher als direkter Scanner)
+      # SonarCloud-Analyse mit der neueren SonarQube Action
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Die sonar-project.properties Datei im Wurzelverzeichnis wird automatisch verwendet 
+          SONAR_HOST_URL: https://sonarcloud.io
+      
+      # Die sonar-project.properties Datei im Wurzelverzeichnis wird automatisch verwendet 
