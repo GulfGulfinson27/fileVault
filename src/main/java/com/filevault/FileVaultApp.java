@@ -165,7 +165,9 @@ public class FileVaultApp extends Application {
     }
     
     /**
-     * Helper method to load and show the main view with animation
+     * Hilfsmethode zum Laden und Anzeigen der Hauptansicht mit Animation
+     * 
+     * @throws IOException Falls ein Fehler beim Laden der Hauptansicht auftritt
      */
     private static void loadAndShowMainView() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(FileVaultApp.class.getResource("main.fxml"));
@@ -370,6 +372,10 @@ public class FileVaultApp extends Application {
         }
     }
     
+    /**
+     * Wird aufgerufen, wenn die Anwendung beendet wird.
+     * Beendet den API-Server und führt Aufräumarbeiten durch.
+     */
     @Override
     public void stop() {
         LoggingUtil.logInfo("FileVaultApp", "Application stopping");

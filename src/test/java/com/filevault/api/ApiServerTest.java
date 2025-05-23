@@ -20,18 +20,36 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Testklasse für den ApiServer.
+ * Diese Klasse testet die grundlegende Funktionalität des API-Servers,
+ * einschließlich Start, Stop, Change-Listener und Authentifizierungs-Endpunkt.
+ */
 class ApiServerTest {
 
+    /** Die zu testende ApiServer-Instanz */
     private ApiServer apiServer;
+    
+    /** Der Port für den Test-Server */
     private final int TEST_PORT = 8765;
+    
+    /** ExecutorService für das Ausführen des Servers in einem separaten Thread */
     private ExecutorService executorService;
     
+    /**
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt eine neue ApiServer-Instanz und einen ExecutorService.
+     */
     @BeforeEach
     void setUp() {
         apiServer = new ApiServer();
         executorService = Executors.newSingleThreadExecutor();
     }
     
+    /**
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Stoppt den Server und beendet den ExecutorService.
+     */
     @AfterEach
     void tearDown() throws InterruptedException {
         if (apiServer != null) {
@@ -41,6 +59,10 @@ class ApiServerTest {
         executorService.awaitTermination(5, TimeUnit.SECONDS);
     }
     
+    /**
+     * Testet das Starten und Stoppen des Servers.
+     * Überprüft, ob der Server erfolgreich gestartet werden kann und auf Anfragen reagiert.
+     */
     @Test
     void testStartAndStop() throws IOException {
         // Start the server in a separate thread
@@ -77,6 +99,10 @@ class ApiServerTest {
         apiServer.stop();
     }
     
+    /**
+     * Testet das Hinzufügen und Entfernen von Change-Listenern.
+     * Überprüft, ob Listener korrekt registriert, benachrichtigt und entfernt werden können.
+     */
     @Test
     void testAddAndRemoveChangeListener() {
         // Use a CountDownLatch to verify that the listener was called
@@ -121,6 +147,10 @@ class ApiServerTest {
         }
     }
     
+    /**
+     * Testet den Authentifizierungs-Endpunkt.
+     * Überprüft, ob der Server auf POST-Anfragen an den Auth-Endpunkt reagiert.
+     */
     @Test
     void testAuthEndpoint() throws IOException {
         // Start the server
@@ -164,6 +194,10 @@ class ApiServerTest {
                 "Response code should be either 200 (success) or 401 (unauthorized)");
     }
     
+    /**
+     * Testet den Authentifizierungs-Endpunkt mit einer ungültigen HTTP-Methode.
+     * Überprüft, ob der Server GET-Anfragen an den Auth-Endpunkt mit einem 405-Fehler ablehnt.
+     */
     @Test
     void testAuthEndpointInvalidMethod() throws IOException {
         // Start the server

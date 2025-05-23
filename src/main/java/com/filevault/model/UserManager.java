@@ -16,8 +16,13 @@ import com.filevault.util.LoggingUtil;
  */
 public class UserManager {
 
+    /** Die einzige Instanz des UserManagers (Singleton-Pattern) */
     private static UserManager instance;
+    
+    /** Der aktuell authentifizierte Benutzer oder null, wenn niemand angemeldet ist */
     private String currentUser = null;
+    
+    /** Der Master-Schlüssel für die Verschlüsselung */
     private byte[] masterKey = null;
     
     private UserManager() {

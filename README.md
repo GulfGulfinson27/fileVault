@@ -1,15 +1,15 @@
 # FileVault
 
-FileVault ist eine moderne Java-Anwendung zur sicheren Dateiverschlüsselung und -verwaltung. Mit einer benutzerfreundlichen Oberfläche können Sie vertrauliche Dateien in virtuellen Ordnern organisieren und mit starker Verschlüsselung schützen.
+FileVault ist eine moderne Java-Anwendung zur sicheren Dateiverschlüsselung und -verwaltung. Mit einer benutzerfreundlichen Oberfläche können vertrauliche Dateien in virtuellen Ordnern organisiert werden und mit starker Verschlüsselung geschützt werden.
 
-Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: Datenstrukturen und Java-Klassenbibliothek" und durchlief mehrere Entwicklungsphasen von der grundlegenden Verschlüsselung über Datenbankintegration bis hin zum JavaFX-Interface.
+Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: Datenstrukturen und Java-Klassenbibliothek" und durchlief mehrere Entwicklungsphasen von der grundlegenden Verschlüsselung über Datenbankintegration bis hin zum JavaFX-Interface. ~Phillip Schneider
 
 🔗 **Live Demo & Dokumentation**: [https://GulfGulfinson.github.io/fileVault](https://GulfGulfinson.github.io/fileVault)
 
 ## 🔐 Hauptfunktionen
 
 - **Sichere Verschlüsselung** mit AES-256-GCM für maximalen Datenschutz
-- **Intuitive Dateiverwaltung** in virtuellen Ordnern mit Drag & Drop
+- **Intuitive Dateiverwaltung** in virtuellen Ordnern
 - **Cross-Platform Kompatibilität** für Windows, macOS und Linux
 - **Responsive UI** mit modernem JavaFX-Design und Dark Mode
 - **Passwort-basierte Authentifizierung** mit sicherer Schlüsselableitung
@@ -32,20 +32,19 @@ Das Projekt entstand im Rahmen des Kurses "Objektorientierte Programmierung II: 
 ## 💻 Installation
 
 ### Option 1: Release herunterladen (empfohlen)
-1. Laden Sie die [neueste Version](https://github.com/GulfGulfinson/fileVault/releases) herunter
-2. Entpacken Sie die ZIP-Datei
-3. Starten Sie die Anwendung:
+1. Lade die [neueste Version](https://github.com/GulfGulfinson/fileVault/releases) herunter
+2. Entpacke die ZIP-Datei
+3. Starte die Anwendung:
    ```
    ./start.sh    # Für Linux/Mac
    start.bat     # Für Windows
    ```
 
-> **Wichtig**: Die Anwendung benötigt JavaFX, das im Release-Paket im Ordner `lib/javafx-sdk-17.0.14` enthalten ist. Falls dieser Ordner fehlt, laden Sie das passende [JavaFX SDK 17.0.14](https://gluonhq.com/products/javafx/) herunter und entpacken Sie es in den `lib`-Ordner.
+> **Wichtig**: Die Anwendung benötigt JavaFX, das im Release-Paket im Ordner `lib/javafx-sdk-17.0.14` enthalten ist. Falls dieser Ordner fehlt, lade das passende [JavaFX SDK 17.0.14](https://gluonhq.com/products/javafx/) herunter und entpacke es in den `lib`-Ordner.
 
 ### Option 2: Aus dem Quellcode bauen
 1. Voraussetzungen:
    - Java 17+ (OpenJDK oder Oracle JDK)
-   - Maven 3.8+
 
 2. Repository klonen:
    ```bash
@@ -78,33 +77,17 @@ docker run -d -p 9090:9090 -v filevault-data:/root/.filevault --name filevault g
 ```
 
 #### Mit Docker Compose (empfohlen)
-1. Erstellen Sie eine `docker-compose.yml` Datei oder verwenden Sie die mitgelieferte:
-   ```yaml
-   version: '3.8'
-   
-   services:
-     filevault:
-       image: ghcr.io/gulfgulfinson/filevault:latest
-       container_name: filevault
-       ports:
-         - "9090:9090"
-       volumes:
-         - filevault-data:/root/.filevault
-       restart: unless-stopped
-   
-   volumes:
-     filevault-data:
-       name: filevault-data
-   ```
 
-2. Starten Sie FileVault mit Docker Compose:
+1. Starte FileVault mit Docker Compose:
    ```bash
    docker-compose up -d
    ```
 
-3. Zugriff auf die Anwendung:
+2. Zugriff auf die Anwendung:
    - Die FileVault-API ist unter http://localhost:9090 verfügbar
-   - Verwenden Sie einen REST-Client oder die Desktop-Anwendung, um mit der API zu interagieren
+   - Verwende einen REST-Client oder die Desktop-Anwendung, um mit der API zu interagieren
+
+## Wichtig: Da ein User angelegt werden muss, muss das Projekt dennoch einmal ausgefuehrt werden.
 
 #### GitHub Packages
 ```xml
@@ -125,11 +108,11 @@ docker run -d -p 9090:9090 -v filevault-data:/root/.filevault --name filevault g
 
 ## 🚀 Verwendung
 
-1. **Anmeldung**: Starten Sie die App und erstellen Sie ein sicheres Master-Passwort
-2. **Dateien importieren**: Ziehen Sie Dateien in die App oder nutzen Sie den Import-Dialog
-3. **Ordnerstruktur**: Erstellen Sie virtuelle Ordner zur Organisation
+1. **Anmeldung**: Starte die App und erstelle ein sicheres Master-Passwort
+2. **Dateien importieren**: Ziehe Dateien in die App oder nutze den Import-Dialog
+3. **Ordnerstruktur**: Erstelle virtuelle Ordner zur Organisation
 4. **Verschlüsselung**: Alle importierten Dateien werden automatisch verschlüsselt
-5. **Entschlüsselung**: Exportieren Sie Dateien, um sie im Originalformat zu nutzen
+5. **Entschlüsselung**: Exportiere Dateien, um sie im Originalformat zu nutzen
 
 ## 📂 Projektstruktur
 
@@ -151,11 +134,11 @@ src/main/java/com/filevault/
 
 ## 🤝 Beitragen
 
-Beiträge zum Projekt sind willkommen! Weitere Informationen finden Sie in der [CONTRIBUTING.md](docs/markdown/CONTRIBUTING.md).
+Beiträge zum Projekt sind willkommen! Weitere Informationen sind in der [CONTRIBUTING.md](docs/markdown/CONTRIBUTING.md).
 
 ## 📄 Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz. Details finden Sie in der [LICENSE](docs/markdown/LICENSE.md) Datei.
+Dieses Projekt steht unter der MIT-Lizenz. Details sind in der [LICENSE](docs/markdown/LICENSE.md) Datei.
 
 ---
 

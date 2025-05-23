@@ -25,13 +25,17 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 /**
- * Einfache API-Server-Klasse, die GET-Anfragen verarbeitet.
+ * Einfache API-Server-Klasse, die HTTP-Anfragen für die FileVault-Anwendung verarbeitet.
+ * Bietet Endpunkte für Authentifizierung, Ordner- und Dateiverwaltung sowie ein Web-Interface.
+ * Unterstützt GET, POST, PUT und DELETE Anfragen und verwendet einen einfachen Token-basierten
+ * Authentifizierungsmechanismus.
  */
 public class ApiServer {
 
+    /** Der HTTP-Server, der die API-Anfragen verarbeitet */
     private HttpServer server;
     
-    // Liste von Listenern, die bei API-Änderungen informiert werden
+    /** Liste von Listenern, die bei API-Änderungen informiert werden */
     private static final List<Consumer<String>> changeListeners = new CopyOnWriteArrayList<>();
 
     /**

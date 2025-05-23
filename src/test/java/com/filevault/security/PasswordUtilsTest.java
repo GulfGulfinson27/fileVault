@@ -10,10 +10,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * Unit tests for PasswordUtils class.
+ * Testklasse für die PasswordUtils-Klasse.
+ * Diese Klasse testet die kryptografischen Funktionen zur Passwortverarbeitung.
  */
 public class PasswordUtilsTest {
 
+    /**
+     * Testet die Generierung eines Schlüssels aus einem Passwort.
+     * Überprüft, ob ein Schlüssel mit der erwarteten Länge erzeugt wird.
+     */
     @Test
     void testGenerateKeyFromPassword() {
         // Test mit einfachem Passwort
@@ -24,6 +29,10 @@ public class PasswordUtilsTest {
         assertEquals(32, key.length); // 256 Bit = 32 Byte
     }
     
+    /**
+     * Testet die Konsistenz der Schlüsselgenerierung.
+     * Überprüft, ob dasselbe Passwort immer denselben Schlüssel erzeugt.
+     */
     @Test
     void testGenerateKeyFromPasswordConsistency() {
         // Test, ob die gleiche Eingabe den gleichen Schlüssel erzeugt
@@ -34,6 +43,10 @@ public class PasswordUtilsTest {
         assertArrayEquals(key1, key2, "Derselbe Passwort-Input sollte denselben Schlüssel erzeugen");
     }
     
+    /**
+     * Testet die Unterschiedlichkeit von Schlüsseln bei verschiedenen Passwörtern.
+     * Überprüft, ob unterschiedliche Passwörter unterschiedliche Schlüssel erzeugen.
+     */
     @Test
     void testGenerateKeyFromPasswordWithDifferentInputs() {
         // Test, ob unterschiedliche Eingaben unterschiedliche Schlüssel erzeugen
@@ -47,6 +60,10 @@ public class PasswordUtilsTest {
                 "Verschiedene Passwörter sollten verschiedene Schlüssel erzeugen");
     }
     
+    /**
+     * Testet die Schlüsselgenerierung mit einem benutzerdefinierten Salt.
+     * Überprüft, ob ein Schlüssel mit der erwarteten Länge erzeugt wird.
+     */
     @Test
     void testGenerateKeyFromPasswordWithCustomSalt() {
         // Test mit benutzerdefiniertem Salt
@@ -59,6 +76,10 @@ public class PasswordUtilsTest {
         assertEquals(32, key.length); // 256 Bit = 32 Byte
     }
     
+    /**
+     * Testet den Einfluss verschiedener Salts auf die Schlüsselgenerierung.
+     * Überprüft, ob dasselbe Passwort mit unterschiedlichen Salts unterschiedliche Schlüssel erzeugt.
+     */
     @Test
     void testSaltChangesOutput() {
         // Test, ob verschiedene Salts bei gleichem Passwort unterschiedliche Schlüssel erzeugen
@@ -73,6 +94,10 @@ public class PasswordUtilsTest {
                 "Derselbe Passwort mit unterschiedlichen Salts sollte unterschiedliche Schlüssel erzeugen");
     }
     
+    /**
+     * Testet die Generierung von zufälligen Salts.
+     * Überprüft, ob die generierten Salts die erwartete Länge haben und unterschiedlich sind.
+     */
     @Test
     void testGenerateSalt() {
         // Test der Salt-Generierung
@@ -89,6 +114,10 @@ public class PasswordUtilsTest {
                 "Zufällig generierte Salts sollten unterschiedlich sein");
     }
     
+    /**
+     * Testet die Stärke der generierten Schlüssel.
+     * Überprüft, ob die Bits im generierten Schlüssel gut verteilt sind.
+     */
     @Test
     void testPasswordStrength() {
         // Test der Schlüsselqualität - einfacher Test, der überprüft, ob die Bits gut verteilt sind

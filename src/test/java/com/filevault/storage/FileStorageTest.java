@@ -20,16 +20,32 @@ import com.filevault.model.EncryptedFile;
 import com.filevault.model.UserManager;
 import com.filevault.model.VirtualFolder;
 
+/**
+ * Testklasse für die FileStorage-Klasse.
+ * Diese Klasse testet die Funktionalität zum Importieren, Exportieren, Umbenennen und Löschen von Dateien.
+ */
 class FileStorageTest {
 
+    /** Temporäres Verzeichnis für Testdateien */
     @TempDir
     Path tempDir;
     
+    /** Die zu testende FileStorage-Instanz */
     private FileStorage fileStorage;
+    
+    /** Testordner für die Dateien */
     private VirtualFolder testFolder;
+    
+    /** Testdatei für den Import */
     private File testFile;
+    
+    /** Test-Masterschlüssel für die Verschlüsselung */
     private byte[] testMasterKey;
     
+    /**
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt temporäre Testdateien, initialisiert die Datenbank und erstellt einen Testordner.
+     */
     @BeforeEach
     void setUp() throws Exception {
         // Erzeuge temporäre Testdateien
@@ -62,7 +78,11 @@ class FileStorageTest {
         createTestFolder();
     }
     
-    // Hilfsmethode zum Erstellen eines Testordners direkt in der Datenbank
+    /**
+     * Hilfsmethode zum Erstellen eines Testordners direkt in der Datenbank.
+     * 
+     * @throws Exception Falls ein Fehler beim Erstellen des Ordners auftritt
+     */
     private void createTestFolder() throws Exception {
         testFolder = new VirtualFolder(1, "TestFolder", "Test-Ordner für die Tests", null);
         
@@ -78,6 +98,10 @@ class FileStorageTest {
         }
     }
     
+    /**
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Schließt Datenbankverbindungen und löscht die Testdatenbank.
+     */
     @AfterEach
     void tearDown() throws Exception {
         // Bereinige Datenbank und Dateien
@@ -85,13 +109,23 @@ class FileStorageTest {
         DatabaseManager.deleteTestDatabase();
     }
     
-    // Hilfsmethode zum Setzen des Masterschlüssels über Reflection
+    /**
+     * Hilfsmethode zum Setzen des Masterschlüssels über Reflection.
+     * 
+     * @param userManager Die UserManager-Instanz
+     * @param masterKey Der zu setzende Masterschlüssel
+     * @throws Exception Falls ein Fehler beim Setzen des Schlüssels auftritt
+     */
     private void setMasterKeyViaReflection(UserManager userManager, byte[] masterKey) throws Exception {
         Field masterKeyField = UserManager.class.getDeclaredField("masterKey");
         masterKeyField.setAccessible(true);
         masterKeyField.set(userManager, masterKey);
     }
     
+    /**
+     * Testet, dass FileStorage als Singleton implementiert ist.
+     * Überprüft, ob mehrere Aufrufe von getInstance() die gleiche Instanz zurückgeben.
+     */
     @Test
     void testSingletonInstance() {
         FileStorage instance1 = FileStorage.getInstance();
@@ -102,6 +136,10 @@ class FileStorageTest {
         assertEquals(instance1, instance2);
     }
     
+    /**
+     * Testet das Importieren und Abrufen einer Datei.
+     * Überprüft, ob eine importierte Datei korrekt in der Datenbank gespeichert und abgerufen werden kann.
+     */
     @Test
     void testImportAndGetFile() throws Exception {
         // Importiere eine Testdatei
@@ -122,6 +160,10 @@ class FileStorageTest {
         assertEquals(importedFile.getSizeBytes(), retrievedFile.getSizeBytes());
     }
     
+    /**
+     * Testet das Abrufen aller Dateien in einem Ordner.
+     * Überprüft, ob alle importierten Dateien in einem Ordner korrekt abgerufen werden können.
+     */
     @Test
     void testGetFilesInFolder() throws Exception {
         // Importiere einige Testdateien
@@ -143,6 +185,10 @@ class FileStorageTest {
         assertTrue(files.stream().anyMatch(f -> f.getId() == importedFile2.getId()));
     }
     
+    /**
+     * Testet das Umbenennen einer Datei.
+     * Überprüft, ob eine Datei erfolgreich umbenannt werden kann.
+     */
     @Test
     void testRenameFile() throws Exception {
         // Importiere eine Testdatei
@@ -159,6 +205,10 @@ class FileStorageTest {
         assertEquals(newName, retrievedFile.getOriginalName());
     }
     
+    /**
+     * Testet das Löschen einer Datei.
+     * Überprüft, ob eine Datei erfolgreich aus der Datenbank und dem Dateisystem gelöscht werden kann.
+     */
     @Test
     void testDeleteFile() throws Exception {
         // Importiere eine Testdatei
@@ -178,6 +228,10 @@ class FileStorageTest {
         assertFalse(encryptedFile.exists());
     }
     
+    /**
+     * Testet das Exportieren einer Datei.
+     * Überprüft, ob eine importierte Datei erfolgreich exportiert werden kann und der Inhalt korrekt ist.
+     */
     @Test
     void testExportFile() throws Exception {
         // Importiere eine Testdatei

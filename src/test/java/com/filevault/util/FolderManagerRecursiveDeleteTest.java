@@ -16,11 +16,16 @@ import com.filevault.storage.DatabaseManager;
 
 /**
  * Tests für die rekursive Löschfunktion des FolderManagers.
+ * Diese Klasse testet speziell das rekursive Löschen von Ordnerhierarchien.
  */
 public class FolderManagerRecursiveDeleteTest {
     
     private FolderManager folderManager;
     
+    /**
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt eine Testdatenbank und initialisiert den FolderManager.
+     */
     @BeforeEach
     public void setUp() throws SQLException {
         // Initialize the test database before tests
@@ -35,12 +40,20 @@ public class FolderManagerRecursiveDeleteTest {
         LoggingUtil.log("Existing folders before test: " + existingFolders.size());
     }
     
+    /**
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Löscht die Testdatenbank.
+     */
     @AfterEach
     public void tearDown() {
         // Clean up the test database after each test
         DatabaseManager.deleteTestDatabase();
     }
     
+    /**
+     * Testet das rekursive Löschen einer kompletten Ordnerstruktur.
+     * Überprüft, ob alle Ordner in der Hierarchie gelöscht werden.
+     */
     @Test
     public void testRecursiveFolderDeletion() {
         // Erstelle eine isolierte Ordnerstruktur zum Testen
@@ -64,6 +77,10 @@ public class FolderManagerRecursiveDeleteTest {
         LoggingUtil.log("Recursive deletion test completed successfully");
     }
     
+    /**
+     * Testet das teilweise rekursive Löschen einer Ordnerstruktur.
+     * Überprüft, ob nur der angegebene Teilbaum gelöscht wird und andere Zweige intakt bleiben.
+     */
     @Test
     public void testPartialRecursiveFolderDeletion() {
         // Erstelle eine komplexere isolierte Ordnerstruktur
@@ -99,6 +116,10 @@ public class FolderManagerRecursiveDeleteTest {
         LoggingUtil.log("Partial recursive deletion test completed successfully");
     }
     
+    /**
+     * Testet, dass die normale Löschfunktion bei nicht leeren Ordnern fehlschlägt.
+     * Überprüft, ob eine IllegalStateException geworfen wird.
+     */
     @Test
     public void testRegularDeleteFailsOnNonEmptyFolder() {
         // Erstelle einen isolierten Ordner mit Unterordnern

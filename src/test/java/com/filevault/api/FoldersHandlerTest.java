@@ -17,31 +17,48 @@ import com.filevault.storage.DatabaseManager;
 import com.filevault.util.FolderManager;
 
 /**
- * Tests for the FoldersHandler functionality using real HTTP requests.
- * These tests focus on verifying that the API endpoints respond with the correct status codes.
+ * Testklasse für die FoldersHandler-Funktionalität mit echten HTTP-Anfragen.
+ * Diese Tests konzentrieren sich darauf, zu überprüfen, ob die API-Endpunkte 
+ * mit den korrekten Statuscodes antworten.
  */
 class FoldersHandlerTest {
 
+    /** Die zu testende ApiServer-Instanz */
     private ApiServer apiServer;
-    private final int TEST_PORT = 8767; // Different port from other tests
+    
+    /** Der Port für den Test-Server (unterschiedlich zu anderen Tests) */
+    private final int TEST_PORT = 8767;
+    
+    /** ExecutorService für das Ausführen des Servers in einem separaten Thread */
     private ExecutorService executorService;
+    
+    /** Ein gültiges Token für Testzwecke */
     private String validToken;
 
+    /**
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt eine Test-Datenbank, eine ApiServer-Instanz und generiert ein gültiges Token.
+     */
     @BeforeEach
     void setUp() throws Exception {
-        // Initialize the test database
+        // Initialisiere die Test-Datenbank
         DatabaseManager.initDatabase(true);
         
         apiServer = new ApiServer();
         executorService = Executors.newSingleThreadExecutor();
         
-        // Generate a valid token for testing
+        // Generiere ein gültiges Token für Tests
         validToken = ApiServer.TokenManager.generateToken("testuser");
         
-        // Initialize the folder manager
+        // Initialisiere den FolderManager
         FolderManager.getInstance().initialize();
     }
 
+    /**
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Stoppt den Server, beendet den ExecutorService, invalidiert das Testtoken 
+     * und löscht die Test-Datenbank.
+     */
     @AfterEach
     void tearDown() throws InterruptedException {
         if (apiServer != null) {
@@ -50,14 +67,18 @@ class FoldersHandlerTest {
         executorService.shutdown();
         executorService.awaitTermination(5, TimeUnit.SECONDS);
         
-        // Clean up the token
+        // Bereinige das Token
         ApiServer.TokenManager.invalidateToken(validToken);
         
-        // Clean up the database
+        // Bereinige die Datenbank
         DatabaseManager.closeConnections();
         DatabaseManager.deleteTestDatabase();
     }
 
+    /**
+     * Testet das Auflisten von Ordnern über den API-Endpunkt.
+     * Überprüft, ob der Server mit dem korrekten Statuscode antwortet.
+     */
     @Test
     void testListFolders() throws IOException {
         // Start the server
@@ -76,6 +97,10 @@ class FoldersHandlerTest {
         assertEquals(200, responseCode, "Should get 200 OK when listing folders");
     }
     
+    /**
+     * Testet den Ordner-Endpunkt mit einem ungültigen Token.
+     * Überprüft, ob der Zugriff mit einem ungültigen Token verweigert wird.
+     */
     @Test
     void testFolderEndpointWithInvalidToken() throws IOException {
         // Start the server
@@ -94,6 +119,10 @@ class FoldersHandlerTest {
         assertEquals(401, responseCode, "Should get 401 Unauthorized with invalid token");
     }
     
+    /**
+     * Testet den Ordner-Endpunkt ohne Token.
+     * Überprüft, ob der Zugriff ohne Token verweigert wird.
+     */
     @Test
     void testFolderEndpointWithNoToken() throws IOException {
         // Start the server
@@ -112,7 +141,7 @@ class FoldersHandlerTest {
     }
     
     /**
-     * Helper method to start the server and wait for it to be ready
+     * Hilfsmethode zum Starten des Servers und Warten, bis er bereit ist.
      */
     private void startServer() {
         executorService.submit(() -> {

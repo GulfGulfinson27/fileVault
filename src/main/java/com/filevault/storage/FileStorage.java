@@ -479,8 +479,8 @@ public class FileStorage {
     }
 
     /**
-     * Lädt die Dateidaten aus der Datenbank neu.
-     * Wird verwendet, um externe Änderungen zu erkennen (z.B. über die API).
+     * Lädt die Dateiliste aus der Datenbank neu.
+     * Diese Methode wird aufgerufen, wenn die Dateiliste aktualisiert werden muss.
      */
     public void reloadFromDatabase() {
         LoggingUtil.logInfo("FileStorage", "Reloading files from database");

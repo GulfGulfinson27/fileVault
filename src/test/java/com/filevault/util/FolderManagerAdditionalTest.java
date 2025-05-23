@@ -19,13 +19,18 @@ import com.filevault.model.VirtualFolder;
 import com.filevault.storage.DatabaseManager;
 
 /**
- * Additional tests for FolderManager to improve code coverage.
+ * Zusätzliche Tests für den FolderManager zur Verbesserung der Codeabdeckung.
+ * Diese Klasse ergänzt die Haupttestklasse mit weiteren Testfällen.
  */
 public class FolderManagerAdditionalTest {
     
     private FolderManager folderManager;
     private Path testDataDir;
     
+    /**
+     * Initialisiert die Testumgebung vor jedem Test.
+     * Erstellt eine Testdatenbank und ein Testdatenverzeichnis.
+     */
     @BeforeEach
     void setUp() throws Exception {
         // Initialize test database
@@ -40,6 +45,10 @@ public class FolderManagerAdditionalTest {
         folderManager.initialize();
     }
     
+    /**
+     * Bereinigt die Testumgebung nach jedem Test.
+     * Schließt Datenbankverbindungen und löscht Testdateien.
+     */
     @AfterEach
     void tearDown() throws Exception {
         // Close database connections
@@ -58,29 +67,32 @@ public class FolderManagerAdditionalTest {
     }
     
     /**
-     * Test the createDataDirectory method by checking if the directory exists.
+     * Testet die createDataDirectory-Methode, indem überprüft wird, ob das Verzeichnis existiert.
+     * Die Methode wird während der Initialisierung aufgerufen.
      */
     @Test
     void testCreateDataDirectory() {
         // The createDataDirectory method is called during initialize()
         // We just need to verify the directory exists
         Path dataDir = Paths.get(System.getProperty("user.home"), ".filevault", "data");
-        assertTrue(Files.exists(dataDir), "Data directory should exist after initialization");
+        assertTrue(Files.exists(dataDir), "Datenverzeichnis sollte nach der Initialisierung existieren");
     }
     
     /**
-     * Test the getDataDirectoryPath method.
+     * Testet die getDataDirectoryPath-Methode.
+     * Überprüft, ob der zurückgegebene Pfad korrekt ist.
      */
     @Test
     void testGetDataDirectoryPath() {
         String dataPath = folderManager.getDataDirectoryPath();
-        assertNotNull(dataPath, "Data directory path should not be null");
-        assertTrue(dataPath.contains(".filevault"), "Data directory path should contain .filevault");
-        assertTrue(dataPath.contains("data"), "Data directory path should contain data subdirectory");
+        assertNotNull(dataPath, "Datenverzeichnispfad sollte nicht null sein");
+        assertTrue(dataPath.contains(".filevault"), "Datenverzeichnispfad sollte .filevault enthalten");
+        assertTrue(dataPath.contains("data"), "Datenverzeichnispfad sollte das Unterverzeichnis data enthalten");
     }
     
     /**
-     * Test the reloadFromDatabase method.
+     * Testet die reloadFromDatabase-Methode.
+     * Überprüft, ob Änderungen in der Datenbank korrekt geladen werden.
      */
     @Test
     void testReloadFromDatabase() {
@@ -102,7 +114,7 @@ public class FolderManagerAdditionalTest {
             stmt.executeUpdate();
             conn.close();
         } catch (Exception e) {
-            fail("Failed to create external folder: " + e.getMessage());
+            fail("Fehler beim Erstellen des externen Ordners: " + e.getMessage());
         }
         
         // Reload from database
@@ -110,16 +122,17 @@ public class FolderManagerAdditionalTest {
         
         // Check that the new folder was loaded
         int newCount = folderManager.getAllFolders().size();
-        assertEquals(initialCount + 1, newCount, "Should have one more folder after reload");
+        assertEquals(initialCount + 1, newCount, "Nach dem Neuladen sollte ein zusätzlicher Ordner vorhanden sein");
         
         // Verify the folder exists by name
         VirtualFolder externalFolder = folderManager.getFolderByName("ExternalFolder");
-        assertNotNull(externalFolder, "Should find the externally created folder");
+        assertNotNull(externalFolder, "Der extern erstellte Ordner sollte gefunden werden");
         assertEquals("Created externally", externalFolder.getDescription());
     }
     
     /**
-     * Test the getFolderByName method.
+     * Testet die getFolderByName-Methode.
+     * Überprüft, ob Ordner korrekt nach Namen gefunden werden können.
      */
     @Test
     void testGetFolderByName() {
@@ -129,16 +142,17 @@ public class FolderManagerAdditionalTest {
         
         // Try to find it by name
         VirtualFolder found = folderManager.getFolderByName(uniqueName);
-        assertNotNull(found, "Should find folder by name");
-        assertEquals(uniqueName, found.getName(), "Found folder should have the correct name");
+        assertNotNull(found, "Ordner sollte anhand des Namens gefunden werden");
+        assertEquals(uniqueName, found.getName(), "Der gefundene Ordner sollte den korrekten Namen haben");
         
         // Try to find a non-existent folder
         VirtualFolder notFound = folderManager.getFolderByName("NonExistentFolder");
-        assertNull(notFound, "Should return null for non-existent folder name");
+        assertNull(notFound, "Bei nicht existierendem Ordnernamen sollte null zurückgegeben werden");
     }
     
     /**
-     * Test the getSubfolders method.
+     * Testet die getSubfolders-Methode.
+     * Überprüft, ob Unterordner korrekt zurückgegeben werden.
      */
     @Test
     void testGetSubfolders() {
@@ -154,7 +168,7 @@ public class FolderManagerAdditionalTest {
         List<VirtualFolder> subfolders = folderManager.getSubfolders(root.getId());
         
         // Verify
-        assertEquals(3, subfolders.size(), "Should have 3 subfolders");
+        assertEquals(3, subfolders.size(), "Es sollten 3 Unterordner vorhanden sein");
         
         // Verify names
         boolean foundChild1 = false;
@@ -167,6 +181,6 @@ public class FolderManagerAdditionalTest {
             if ("SubChild3".equals(subfolder.getName())) foundChild3 = true;
         }
         
-        assertTrue(foundChild1 && foundChild2 && foundChild3, "All children should be found");
+        assertTrue(foundChild1 && foundChild2 && foundChild3, "Alle Unterordner sollten gefunden werden");
     }
 } 
