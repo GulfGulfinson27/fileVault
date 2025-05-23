@@ -25,7 +25,7 @@ public class EncryptionService {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     
     /** Länge des Initialisierungsvektors in Bytes (96 Bits) */
-    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_IV_LENGTH = 96;
     
     /** Länge des Authentifizierungs-Tags in Bits (16 Bytes) */
     private static final int GCM_TAG_LENGTH = 128;
